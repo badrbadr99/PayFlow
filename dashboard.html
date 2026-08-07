@@ -3,115 +3,333 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - الداشبورد</title>
-    <!-- استخدام Tailwind CSS للتنسيق السريع -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>PayFlow - لوحة التحكم الرئيسية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
+        body { background: #0b0f19; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
+        .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
+        .table-row-hover:hover { background: rgba(51, 65, 85, 0.4); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between">
+<body class="p-4 md:p-8 max-w-6xl mx-auto space-y-6 min-h-screen flex flex-col justify-between relative">
 
-    <!-- المحتوى الرئيسي -->
-    <div class="max-w-4xl mx-auto p-4 w-full">
-        <!-- الترحيب ومعلومات الحساب -->
-        <header class="bg-white shadow-sm rounded-2xl p-6 mb-6 flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-bold text-gray-800">مرحباً بك، بدر</h1>
-                <p class="text-sm text-gray-500">إدارة حسابك ومعاملاتك المالية بكل سهولة</p>
-            </div>
-            <!-- زر توثيق الهوية -->
-            <div>
-                <a href="#verify" class="flex items-center gap-2 bg-amber-50 text-amber-700 border border-amber-200 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-amber-100 transition">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    توثيق الهوية
-                </a>
-            </div>
-        </header>
-
-        <!-- تنبيه توثيق الهوية (إذا لم يتم التوثيق) -->
-        <div id="verify" class="bg-blue-50 border-r-4 border-blue-500 p-4 rounded-xl mb-6 flex items-center justify-between">
+    <div class="space-y-6">
+        <!-- شريط الترحيب والروابط السريعة -->
+        <div class="flex flex-col md:flex-row justify-between items-center glass-card p-6 gap-4">
             <div class="flex items-center gap-3">
-                <i class="fa-solid fa-id-card text-blue-500 text-xl"></i>
+                <div class="bg-emerald-500/20 text-emerald-400 p-3.5 rounded-2xl border border-emerald-500/30 text-xl">
+                    <i class="fa-solid fa-user-circle"></i>
+                </div>
                 <div>
-                    <h3 class="font-bold text-blue-900">حالة الحساب: غير موثق</h3>
-                    <p class="text-sm text-blue-700">قم برفع مستندات توثيق الهوية لرفع حدود السحب والإيداع.</p>
+                    <h1 class="text-xl font-black text-white" id="userNameHeader">مرحباً بك</h1>
+                    <p class="text-xs text-slate-400" id="userEmailHeader">جاري تحميل بيانات الحساب...</p>
                 </div>
             </div>
-            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">توثيق الآن</button>
+            <div class="flex items-center gap-3 flex-wrap">
+                <div id="adminLinkContainer"></div>
+                <button onclick="logout()" class="bg-red-500/10 text-red-400 border border-red-500/20 px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-red-500/20 transition flex items-center gap-2">
+                    <i class="fa-solid fa-power-off"></i> خروج
+                </button>
+            </div>
         </div>
 
-        <!-- أزرار العمليات الرئيسية (السحب، الإيداع، التحويل) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <!-- الإيداع -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition text-center cursor-pointer">
-                <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+        <!-- الأرصدة الحالية -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="glass-card p-6 space-y-2 border-l-4 border-l-emerald-500">
+                <span class="text-xs text-slate-400 font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-coins text-emerald-400"></i> رصيد USDT المتاح
+                </span>
+                <div class="text-3xl font-black text-emerald-400 font-mono" id="balanceUsdtDisplay">0.00 USDT</div>
+            </div>
+            <div class="glass-card p-6 space-y-2 border-l-4 border-l-amber-500">
+                <span class="text-xs text-slate-400 font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-money-bill-wave text-amber-400"></i> رصيد YER المتاح
+                </span>
+                <div class="text-3xl font-black text-amber-400 font-mono" id="balanceYerDisplay">0.00 YER</div>
+            </div>
+        </div>
+
+        <!-- قسم توثيق الهوية (KYC) -->
+        <div class="glass-card p-5 flex flex-col md:flex-row justify-between items-center gap-4 border-l-4 border-l-blue-500">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-500/20 text-blue-400 p-3 rounded-xl border border-blue-500/30">
+                    <i class="fa-solid fa-id-card text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm text-white">توثيق الهوية (KYC)</h3>
+                    <p class="text-xs text-slate-400" id="kycStatusText">حالة الحساب: قيد المراجعة أو غير موثق</p>
+                </div>
+            </div>
+            <button onclick="openKycModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition">
+                توثيق الحساب الآن
+            </button>
+        </div>
+
+        <!-- أزرار العمليات الرئيسية (الإيداع، السحب، التحويل) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a href="deposit.html" class="glass-card p-5 hover:border-emerald-500/50 transition text-center group block">
+                <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-lg border border-emerald-500/20 group-hover:scale-110 transition">
                     <i class="fa-solid fa-arrow-down-long"></i>
                 </div>
-                <h3 class="font-bold text-gray-800 mb-1">إيداع</h3>
-                <p class="text-xs text-gray-500">إضافة أموال إلى محفظتك</p>
-            </div>
+                <h3 class="font-bold text-sm text-white mb-1">إيداع رصيد</h3>
+                <p class="text-[11px] text-slate-400">إضافة أموال لحسابك باليمني أو USDT</p>
+            </a>
 
-            <!-- السحب -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition text-center cursor-pointer">
-                <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+            <button onclick="openWithdrawModal()" class="glass-card p-5 hover:border-rose-500/50 transition text-center group">
+                <div class="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-lg border border-rose-500/20 group-hover:scale-110 transition">
                     <i class="fa-solid fa-arrow-up-long"></i>
                 </div>
-                <h3 class="font-bold text-gray-800 mb-1">سحب</h3>
-                <p class="text-xs text-gray-500">سحب أرباحك ورصيدك</p>
-            </div>
+                <h3 class="font-bold text-sm text-white mb-1">سحب أرباح</h3>
+                <p class="text-[11px] text-slate-400">سحب رصيدك المتاح للخارج</p>
+            </button>
 
-            <!-- تحويل إلى محفظة أخرى -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition text-center cursor-pointer">
-                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+            <button onclick="openTransferModal()" class="glass-card p-5 hover:border-indigo-500/50 transition text-center group">
+                <div class="w-12 h-12 bg-indigo-500/10 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-lg border border-indigo-500/20 group-hover:scale-110 transition">
                     <i class="fa-solid fa-right-left"></i>
                 </div>
-                <h3 class="font-bold text-gray-800 mb-1">تحويل إلى محفظة أخرى</h3>
-                <p class="text-xs text-gray-500">تحويل سريع لمستخدم آخر</p>
-            </div>
+                <h3 class="font-bold text-sm text-white mb-1">تحويل إلى محفظة أخرى</h3>
+                <p class="text-[11px] text-slate-400">تحويل سريع عبر المعرف لمستخدم آخر</p>
+            </button>
         </div>
 
-        <!-- قسم العمليات الأخيرة -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 class="font-bold text-gray-800 mb-4">آخر المعاملات</h3>
+        <!-- سجل العمليات الخاصة بي (مع نظام 10 عمليات + عرض المزيد) -->
+        <div class="glass-card p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-history text-emerald-400"></i> سجل العمليات والمعاملات الخاصة بي
+                </h3>
+                <span class="text-xs text-slate-400 font-mono" id="totalTxCount">العدد الإجمالي: 0</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-xs">
+                    <thead class="bg-slate-900 text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="p-3">رقم العملية</th>
+                            <th class="p-3">نوع العملية</th>
+                            <th class="p-3">المبلغ</th>
+                            <th class="p-3 font-mono">رقم الإيصال / TxID</th>
+                            <th class="p-3">التاريخ والوقت</th>
+                            <th class="p-3 text-center">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTransactionsBody" class="divide-y divide-slate-800">
+                        <tr><td colspan="6" class="p-6 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- زر عرض المزيد -->
+            <div class="text-center pt-2" id="loadMoreContainer" style="display: none;">
+                <button onclick="loadMoreTransactions()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-6 py-2.5 rounded-xl text-xs font-bold transition">
+                    <i class="fa-solid fa-chevron-down"></i> عرض المزيد من العمليات (10 عمليات أخرى)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة منبثقة لتوثيق الهوية KYC -->
+    <div id="kycModal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-card max-w-md w-full p-6 space-y-4 relative">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-sm text-blue-400"><i class="fa-solid fa-id-card"></i> تقديم طلب توثيق الهوية</h3>
+                <button onclick="closeKycModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
             <div class="space-y-3">
-                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
-                            <i class="fa-solid fa-plus"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-sm text-gray-800">عملية إيداع</h4>
-                            <span class="text-xs text-gray-400">منذ ساعتين</span>
-                        </div>
-                    </div>
-                    <span class="font-bold text-emerald-600">+ $150.00</span>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">نوع المستند</label>
+                    <select id="kycDocType" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white">
+                        <option value="بطاقة شخصية">بطاقة شخصية</option>
+                        <option value="جواز سفر">جواز سفر</option>
+                        <option value="رخصة قيادة">رخصة قيادة</option>
+                    </select>
                 </div>
-                
-                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center">
-                            <i class="fa-solid fa-minus"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-sm text-gray-800">عملية سحب</h4>
-                            <span class="text-xs text-gray-400">أمس</span>
-                        </div>
-                    </div>
-                    <span class="font-bold text-rose-600">- $50.00</span>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">رقم المستند</label>
+                    <input type="text" id="kycDocNum" placeholder="أدخل رقم الهوية أو الجواز..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white font-mono">
                 </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeKycModal()" class="bg-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs">إلغاء</button>
+                <button onclick="submitKyc()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold">إرسال الطلب</button>
             </div>
         </div>
     </div>
 
     <!-- زر خدمة العملاء (واتساب) العائم -->
     <div class="fixed bottom-6 left-6 z-50 flex flex-col items-center">
-        <a href="https://wa.me/967774837354" target="_blank" class="w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center shadow-lg transition transform hover:scale-105">
+        <a href="https://wa.me/967774837354" target="_blank" class="w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30 transition transform hover:scale-105">
             <i class="fa-brands fa-whatsapp text-3xl"></i>
         </a>
-        <span class="bg-gray-900 text-white text-[11px] px-2 py-0.5 rounded-md mt-1 shadow-md">خدمة عملاء</span>
+        <span class="bg-slate-900 border border-slate-800 text-emerald-400 font-bold text-[11px] px-2.5 py-1 rounded-lg mt-1 shadow-md">خدمة عملاء</span>
     </div>
 
+    <footer class="text-center text-xs text-slate-500 pt-4 border-t border-slate-800">
+        PayFlow Dashboard &copy; 2026 - نظام المستخدم المالي
+    </footer>
+
+    <script>
+        const SUPABASE_URL = 'https://dnitbzmtbedrgfkmxszp.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_5MpSpsrOXjHCSRNTllJO8g_twaTzmbf';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = JSON.parse(sessionStorage.getItem('pf_user') || '{}');
+        if (!currentUser || !currentUser.user_id) {
+            alert('❌ يرجى تسجيل الدخول أولاً!');
+            window.location.href = 'login.html';
+        }
+
+        let allUserTransactions = [];
+        let displayedCount = 10; // نعرض 10 عمليات في البداية
+
+        async function loadDashboardData() {
+            try {
+                // 1. جلب بيانات المستخدم المحدثة
+                const { data: userData, error: userErr } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('user_id', currentUser.user_id)
+                    .single();
+
+                if (!userErr && userData) {
+                    currentUser = userData;
+                    sessionStorage.setItem('pf_user', JSON.stringify(currentUser));
+                    
+                    document.getElementById('userNameHeader').innerText = `مرحباً، ${userData.full_name || 'مستخدم PayFlow'}`;
+                    document.getElementById('userEmailHeader').innerText = userData.email || '';
+                    document.getElementById('balanceUsdtDisplay').innerText = `${parseFloat(userData.balance_usdt || userData.balance || 0).toFixed(2)} USDT`;
+                    document.getElementById('balanceYerDisplay').innerText = `${parseFloat(userData.balance_yer || 0).toFixed(2)} YER`;
+
+                    const kycStatus = userData.kyc_status || 'PENDING';
+                    document.getElementById('kycStatusText').innerText = kycStatus === 'APPROVED' ? 'حالة الحساب: موثق بنجاح ✅' : 'حالة الحساب: غير موثق / بانتظار المراجعة';
+
+                    if (String(userData.role || '').toUpperCase() === 'ADMIN') {
+                        document.getElementById('adminLinkContainer').innerHTML = `
+                            <a href="admin.html" class="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                                <i class="fa-solid fa-user-shield"></i> لوحة الأدمن
+                            </a>
+                        `;
+                    }
+                }
+
+                // 2. جلب عمليات الإيداع الخاصة بالمستخدم
+                const { data: depData, error: depErr } = await supabaseClient
+                    .from('deposit_requests')
+                    .select('*')
+                    .eq('user_id', currentUser.user_id)
+                    .order('created_at', { ascending: false });
+
+                if (!depErr) {
+                    allUserTransactions = depData || [];
+                    document.getElementById('totalTxCount').innerText = `العدد الإجمالي: ${allUserTransactions.length}`;
+                    renderTransactions();
+                }
+
+            } catch (e) {
+                console.error("Dashboard load error:", e);
+            }
+        }
+
+        function renderTransactions() {
+            const tbody = document.getElementById('myTransactionsBody');
+            tbody.innerHTML = '';
+
+            if (allUserTransactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-500">لا توجد عمليات سابقة حتى الآن</td></tr>';
+                document.getElementById('loadMoreContainer').style.display = 'none';
+                return;
+            }
+
+            const sliceData = allUserTransactions.slice(0, displayedCount);
+
+            sliceData.forEach(tx => {
+                const txId = tx.deposit_id;
+                const method = tx.payment_method || tx.deposit_method || 'إيداع USDT';
+                const amount = parseFloat(tx.net_usdt || tx.amount_usdt || tx.gross_usdt || 0);
+                const reference = tx.tx_id || tx.proof_ref || '-';
+                const dateStr = tx.created_at ? new Date(tx.created_at).toLocaleString('en-US') : '-';
+                const status = String(tx.status || 'PENDING').toUpperCase();
+
+                let statusBadge = status === 'APPROVED' ? '<span class="bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full text-[10px] font-bold">مقبول ومكتمل</span>' :
+                                  status === 'REJECTED' ? '<span class="bg-red-500/20 text-red-400 px-2.5 py-1 rounded-full text-[10px] font-bold">مرفوض</span>' :
+                                  '<span class="bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full text-[10px] font-bold">قيد المراجعة</span>';
+
+                let tr = document.createElement('tr');
+                tr.className = 'table-row-hover transition';
+                tr.innerHTML = `
+                    <td class="p-3 font-mono">#${txId}</td>
+                    <td class="p-3 font-bold text-slate-200">${method}</td>
+                    <td class="p-3 font-mono text-emerald-400 font-bold">${amount.toFixed(2)} USDT</td>
+                    <td class="p-3 font-mono text-slate-300">${reference}</td>
+                    <td class="p-3 font-mono text-slate-400 text-[11px]">${dateStr}</td>
+                    <td class="p-3 text-center">${statusBadge}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            if (displayedCount < allUserTransactions.length) {
+                document.getElementById('loadMoreContainer').style.display = 'block';
+            } else {
+                document.getElementById('loadMoreContainer').style.display = 'none';
+            }
+        }
+
+        function loadMoreTransactions() {
+            displayedCount += 10;
+            renderTransactions();
+        }
+
+        function openKycModal() {
+            document.getElementById('kycModal').classList.remove('hidden');
+        }
+
+        function closeKycModal() {
+            document.getElementById('kycModal').classList.add('hidden');
+        }
+
+        async function submitKyc() {
+            const document_type = document.getElementById('kycDocType').value;
+            const document_number = document.getElementById('kycDocNum').value.trim();
+
+            if (!document_number) {
+                alert('⚠️ يرجى إدخال رقم المستند');
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient.from('kyc_requests').insert([{
+                    user_id: currentUser.user_id,
+                    document_type,
+                    document_number,
+                    status: 'PENDING'
+                }]);
+
+                if (error) throw error;
+
+                alert('✅ تم إرسال طلب توثيق الهوية بنجاح وسيتم مراجعته قريباً!');
+                closeKycModal();
+                loadDashboardData();
+            } catch (e) {
+                alert(`❌ حدث خطأ: ${e.message}`);
+            }
+        }
+
+        function openWithdrawModal() {
+            alert('خاصية السحب متاحة قريباً أو عبر التواصل مع خدمة العملاء عبر الواتساب.');
+        }
+
+        function openTransferModal() {
+            alert('خاصية التحويل بين المحافظ قريباً.');
+        }
+
+        function logout() {
+            sessionStorage.removeItem('pf_user');
+            window.location.href = 'login.html';
+        }
+
+        loadDashboardData();
+    </script>
 </body>
 </html>
