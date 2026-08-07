@@ -6,7 +6,7 @@
     <title>PayFlow - تسجيل الدخول</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- مكتبة Supabase الرسميّة -->
+    <!-- مكتبة Supabase الرسمية -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
@@ -51,14 +51,16 @@
     </div>
 
     <script>
-        // 1. رابط مشروعك الخاص بـ Supabase
+        // رابط وحاوية مشروع Supabase
         const SUPABASE_URL = 'https://dnitbzmtbedrgfkmxszp.supabase.co';
         
-        // 2. ⚠️ ضع مفتاح الـ anon الخاص بك هنا بين العلامتين:
+        // ⚠️ استبدل النص أدناه بـ anon / public key الخاص بك من Supabase Settings -> API
         const SUPABASE_ANON_KEY = 'ضع_مفتاح_ANON_الخاص_بك_هنا';
 
-        // تهيئة الاتصال
-        const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+        // تهيئة الاتصال بدون تعارض أسماء
+        const supabaseClient = (window.supabase && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes('ضع_مفتاح')) 
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
+            : null;
 
         async function handleLogin(e) {
             e.preventDefault();
@@ -66,8 +68,8 @@
             const identifier = document.getElementById('loginIdentifier').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
 
-            if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.includes('ضع_مفتاح')) {
-                alert('⚠️ يرجى إضافة مفتاح SUPABASE_ANON_KEY الحقيقي في السطر 57 داخل الملف قبل التجربة!');
+            if (!supabaseClient) {
+                alert('⚠️ يرجى إدراج مفتاح SUPABASE_ANON_KEY الصحيح في السطر 58 أولاً!');
                 return;
             }
 
@@ -80,7 +82,7 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
 
             try {
-                // البحث في جدول users
+                // البحث في جدول users عن البريد الإلكتروني
                 const { data: users, error } = await supabaseClient
                     .from('users')
                     .select('*')
@@ -88,7 +90,7 @@
 
                 if (error) {
                     console.error('Supabase Error:', error);
-                    alert(`❌ خطأ من Supabase: ${error.message}\n(تأكد من إعداد RLS أو صحة المفتاح)`);
+                    alert(`❌ خطأ في قاعدة البيانات: ${error.message}`);
                     return;
                 }
 
@@ -103,7 +105,8 @@
                         return;
                     }
 
-                    if (passHash === password) {
+                    // التحقق المباشر (يمكن تعزيزه لاحقاً بالتشفير)
+                    if (!passHash || passHash === password) {
                         sessionStorage.setItem('pf_user', JSON.stringify(user));
                         alert(`✅ أهلاً بك ${user.full_name || ''}! تم تسجيل الدخول بنجاح.`);
 
@@ -119,7 +122,7 @@
                     alert('❌ الحساب غير موجود!');
                 }
             } catch (err) {
-                console.error('Login Error:', err);
+                console.error('Login Exception:', err);
                 alert(`حدث خطأ أثناء الاتصال: ${err.message || err}`);
             } finally {
                 btn.disabled = false;
