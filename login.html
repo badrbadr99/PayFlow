@@ -6,7 +6,7 @@
     <title>PayFlow - تسجيل الدخول</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- إضافة مكتبة Supabase JS -->
+    <!-- مكتبة Supabase الرسميّة -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
@@ -51,17 +51,25 @@
     </div>
 
     <script>
-        // إعدادات الاتصال بقاعدة بيانات Supabase
+        // 1. رابط مشروعك الخاص بـ Supabase
         const SUPABASE_URL = 'https://dnitbzmtbedrgfkmxszp.supabase.co';
-        const SUPABASE_ANON_KEY = 'استبدل_هذا_النص_بـ_ANON_KEY_الخاص_بمشروعك';
         
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // 2. ⚠️ ضع مفتاح الـ anon الخاص بك هنا بين العلامتين:
+        const SUPABASE_ANON_KEY = 'ضع_مفتاح_ANON_الخاص_بك_هنا';
+
+        // تهيئة الاتصال
+        const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
         async function handleLogin(e) {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const identifier = document.getElementById('loginIdentifier').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
+
+            if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.includes('ضع_مفتاح')) {
+                alert('⚠️ يرجى إضافة مفتاح SUPABASE_ANON_KEY الحقيقي في السطر 57 داخل الملف قبل التجربة!');
+                return;
+            }
 
             if (!identifier || !password) {
                 alert('يرجى كتابة البريد الإلكتروني وكلمة المرور!');
@@ -72,15 +80,15 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
 
             try {
-                // الاستعلام عن المستخدم من جدول users في Supabase
-                const { data: users, error } = await supabase
+                // البحث في جدول users
+                const { data: users, error } = await supabaseClient
                     .from('users')
                     .select('*')
                     .ilike('email', identifier.toLowerCase());
 
                 if (error) {
                     console.error('Supabase Error:', error);
-                    alert('❌ حدث خطأ في الاتصال بقاعدة البيانات.');
+                    alert(`❌ خطأ من Supabase: ${error.message}\n(تأكد من إعداد RLS أو صحة المفتاح)`);
                     return;
                 }
 
@@ -112,7 +120,7 @@
                 }
             } catch (err) {
                 console.error('Login Error:', err);
-                alert('حدث خطأ أثناء الاتصال بالخادم.');
+                alert(`حدث خطأ أثناء الاتصال: ${err.message || err}`);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول';
