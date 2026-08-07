@@ -6,126 +6,100 @@
     <title>PayFlow - تسجيل الدخول</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- مكتبة Supabase الرسمية -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
         .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
-        .input-field { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 12px; width: 100%; transition: border-color 0.2s; }
+        .input-field { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 12px; width: 100%; }
         .input-field:focus { outline: none; border-color: #10b981; }
-        .btn-emerald { background: #10b981; color: white; font-weight: bold; padding: 14px; border-radius: 12px; width: 100%; transition: opacity 0.2s; font-size: 16px; }
+        .btn-emerald { background: #10b981; color: white; font-weight: bold; padding: 14px; border-radius: 12px; width: 100%; transition: opacity 0.2s; }
         .btn-emerald:hover { opacity: 0.9; }
-        .btn-emerald:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body class="p-4 min-h-screen flex items-center justify-center">
 
     <div class="glass-card w-full max-w-md p-6 md:p-8 space-y-6 shadow-2xl">
-        
         <div class="text-center space-y-2">
             <h1 class="text-3xl font-extrabold text-emerald-400">PayFlow</h1>
-            <p class="text-slate-400 text-sm">أدخل بيانات الحساب لتسجيل الدخول</p>
+            <p class="text-slate-400 text-sm">تسجيل الدخول إلى حسابك</p>
         </div>
 
-        <form onsubmit="handleLogin(event)" class="space-y-5">
-            
+        <form onsubmit="handleLogin(event)" class="space-y-4">
             <div>
-                <label class="block text-sm font-bold text-slate-300 mb-2">البريد الإلكتروني</label>
-                <input type="text" id="loginIdentifier" required class="input-field text-left font-mono" placeholder="example@email.com" dir="ltr">
+                <label class="block text-sm font-bold text-slate-300 mb-1.5">البريد الإلكتروني</label>
+                <input type="email" id="loginEmail" required class="input-field text-left font-mono" placeholder="example@email.com" dir="ltr">
             </div>
 
             <div>
-                <label class="block text-sm font-bold text-slate-300 mb-2">كلمة المرور</label>
+                <label class="block text-sm font-bold text-slate-300 mb-1.5">كلمة المرور</label>
                 <input type="password" id="loginPassword" required class="input-field text-left font-mono" placeholder="••••••••" dir="ltr">
             </div>
 
-            <button type="submit" id="submitBtn" class="btn-emerald flex items-center justify-center gap-2">
-                <i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول
+            <button type="submit" id="submitBtn" class="btn-emerald flex items-center justify-center gap-2 mt-2">
+                <i class="fa-solid fa-right-to-bracket"></i> دخول
             </button>
         </form>
 
         <div class="text-center text-xs text-slate-400 border-t border-slate-800 pt-4">
-            ليس لديك حساب؟ <a href="register.html" class="text-emerald-400 font-bold hover:underline">أنشئ حساب جديد</a>
+            ليس لديك حساب؟ <a href="register.html" class="text-emerald-400 font-bold hover:underline">إنشاء حساب جديد</a>
         </div>
-
     </div>
 
     <script>
-        // رابط مشروع Supabase والمفتاح
         const SUPABASE_URL = 'https://dnitbzmtbedrgfkmxszp.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_5MpSpsrOXjHCSRNTllJO8g_twaTzmbf';
-
-        // تهيئة الاتصال
-        const supabaseClient = (window.supabase && SUPABASE_ANON_KEY) 
-            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
-            : null;
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function handleLogin(e) {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
-            const identifier = document.getElementById('loginIdentifier').value.trim();
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
             const password = document.getElementById('loginPassword').value.trim();
-
-            if (!supabaseClient) {
-                alert('⚠️ تعذر الاتصال بمكتبة Supabase!');
-                return;
-            }
-
-            if (!identifier || !password) {
-                alert('يرجى كتابة البريد الإلكتروني وكلمة المرور!');
-                return;
-            }
 
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
 
             try {
-                // الاستعلام عن بيانات الحساب
                 const { data: users, error } = await supabaseClient
                     .from('users')
                     .select('*')
-                    .ilike('email', identifier.toLowerCase());
+                    .ilike('email', email);
 
-                if (error) {
-                    console.error('Supabase Error:', error);
-                    alert(`❌ خطأ في قاعدة البيانات: ${error.message}`);
+                if (error) throw error;
+
+                if (!users || users.length === 0) {
+                    alert('❌ البريد الإلكتروني غير مسجل!');
                     return;
                 }
 
-                if (users && users.length > 0) {
-                    const user = users[0];
-                    const passHash = user.password_hash || user.password;
-                    const role = String(user.role || 'USER').toUpperCase();
-                    const isActive = user.is_active;
+                const user = users[0];
+                const dbPass = user.password_hash || user.PASSWORD_HASH;
 
-                    // التحقق من تجميد الحساب
-                    if (isActive === 0 || isActive === false) {
-                        alert('🔒 حسابك مجمد حالياً! يرجى التواصل مع الدعم الفني.');
-                        return;
-                    }
-
-                    // التحقق الصارم: يجب ألا تكون كلمة المرور فارغة وأن تطابق المدخل
-                    if (passHash && passHash === password) {
-                        sessionStorage.setItem('pf_user', JSON.stringify(user));
-                        alert(`✅ أهلاً بك ${user.full_name || ''}! تم تسجيل الدخول بنجاح.`);
-
-                        if (role === 'ADMIN' || identifier.toUpperCase() === 'ADMIN') {
-                            window.location.href = 'admin.html';
-                        } else {
-                            window.location.href = 'dashboard.html';
-                        }
-                    } else {
-                        alert('❌ كلمة المرور غير صحيحة!');
-                    }
-                } else {
-                    alert('❌ الحساب غير موجود!');
+                if (dbPass !== password) {
+                    alert('❌ كلمة المرور غير صحيحة!');
+                    return;
                 }
+
+                const isActive = user.is_active !== undefined ? user.is_active : user.IS_ACTIVE;
+                if (isActive === 0 || isActive === false) {
+                    alert('❌ هذا الحساب مجمد أو محظور من قبل الإدارة.');
+                    return;
+                }
+
+                sessionStorage.setItem('pf_user', JSON.stringify(user));
+
+                const role = String(user.role || user.ROLE || 'USER').toUpperCase();
+                if (role === 'ADMIN') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
+
             } catch (err) {
-                console.error('Login Exception:', err);
-                alert(`حدث خطأ أثناء الاتصال: ${err.message || err}`);
+                alert(`❌ حدث خطأ أثناء تسجيل الدخول: ${err.message}`);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول';
+                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> دخول';
             }
         }
     </script>

@@ -3,166 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PayFlow - تحويل أموال داخلي</title>
+    <title>PayFlow - إنشاء حساب جديد</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
         .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
-        .input-field { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 12px; width: 100%; }
-        .input-field:focus { outline: none; border-color: #a855f7; }
-        .btn-purple { background: #a855f7; color: white; font-weight: bold; padding: 14px; border-radius: 12px; width: 100%; transition: opacity 0.2s; font-size: 16px; }
-        .btn-purple:hover { opacity: 0.9; }
-        .btn-purple:disabled { opacity: 0.5; cursor: not-allowed; }
+        .input-field { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 12px; width: 100%; transition: border-color 0.2s; }
+        .input-field:focus { outline: none; border-color: #10b981; }
+        .btn-emerald { background: #10b981; color: white; font-weight: bold; padding: 14px; border-radius: 12px; width: 100%; transition: opacity 0.2s; font-size: 16px; }
+        .btn-emerald:hover { opacity: 0.9; }
+        .btn-emerald:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
-<body class="p-4 max-w-xl mx-auto min-h-screen flex flex-col justify-center space-y-6">
+<body class="p-4 min-h-screen flex items-center justify-center">
 
-    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-        <h1 class="text-2xl font-bold text-purple-400 flex items-center gap-2">
-            <i class="fa-solid fa-paper-plane"></i> تحويل أموال داخلي
-        </h1>
-        <a href="dashboard.html" class="text-xs text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1">
-            <i class="fa-solid fa-arrow-right"></i> رجوع
-        </a>
-    </div>
-
-    <div class="glass-card p-6 md:p-8 space-y-5 shadow-2xl">
-        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
-            <span class="text-slate-400">رصيدك المتاح حالياً:</span>
-            <b id="userBalanceText" class="text-lg text-emerald-400 font-mono">0.00 USDT</b>
+    <div class="glass-card w-full max-w-md p-6 md:p-8 space-y-6 shadow-2xl">
+        
+        <div class="text-center space-y-2">
+            <h1 class="text-3xl font-extrabold text-emerald-400">PayFlow</h1>
+            <p class="text-slate-400 text-sm">أنشئ حساب جديد للبدء في المنصة</p>
         </div>
 
-        <form onsubmit="handleTransfer(event)" class="space-y-5">
+        <form onsubmit="handleRegister(event)" class="space-y-4">
             <div>
-                <label class="block text-sm font-bold text-slate-200 mb-2">البريد الإلكتروني للمستلم</label>
-                <input type="email" id="receiverEmail" required class="input-field text-left font-mono" placeholder="user@example.com" dir="ltr">
+                <label class="block text-sm font-bold text-slate-300 mb-1.5">الاسم الكامل</label>
+                <input type="text" id="regName" required class="input-field" placeholder="الاسم الثلاثي">
             </div>
 
             <div>
-                <label class="block text-sm font-bold text-slate-200 mb-2">المبلغ المراد تحويله (USDT)</label>
-                <input type="number" step="0.01" min="1" id="transferAmount" required class="input-field text-left font-mono text-lg text-emerald-400" placeholder="0.00" dir="ltr">
+                <label class="block text-sm font-bold text-slate-300 mb-1.5">رقم الهاتف</label>
+                <input type="text" id="regPhone" required class="input-field text-left font-mono" placeholder="77xxxxxxx" dir="ltr">
             </div>
 
-            <button type="submit" id="submitBtn" class="btn-purple flex items-center justify-center gap-2">
-                <i class="fa-solid fa-bolt"></i> إرسال الفوري
+            <div>
+                <label class="block text-sm font-bold text-slate-300 mb-1.5">البريد الإلكتروني</label>
+                <input type="email" id="regEmail" required class="input-field text-left font-mono" placeholder="example@email.com" dir="ltr">
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-300 mb-1.5">كلمة المرور</label>
+                <input type="password" id="regPassword" required class="input-field text-left font-mono" placeholder="••••••••" dir="ltr">
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-emerald flex items-center justify-center gap-2 mt-2">
+                <i class="fa-solid fa-user-plus"></i> تسجيل حساب جديد
             </button>
         </form>
+
+        <div class="text-center text-xs text-slate-400 border-t border-slate-800 pt-4">
+            لديك حساب بالفعل؟ <a href="login.html" class="text-emerald-400 font-bold hover:underline">تسجيل الدخول</a>
+        </div>
+
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8081/ords/buysell_user';
-        let currentUser = JSON.parse(sessionStorage.getItem('pf_user'));
+        const SUPABASE_URL = 'https://dnitbzmtbedrgfkmxszp.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_5MpSpsrOXjHCSRNTllJO8g_twaTzmbf';
 
-        if (!currentUser) window.location.href = 'login.html';
+        const supabaseClient = (window.supabase && SUPABASE_ANON_KEY) 
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
+            : null;
 
-        async function fetchSenderLatestData() {
-            const userId = currentUser.id || currentUser.ID;
-            try {
-                const res = await fetch(`${API_BASE}/users/${userId}?_t=${new Date().getTime()}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    currentUser = data;
-                    sessionStorage.setItem('pf_user', JSON.stringify(data));
-                    const bal = parseFloat(data.balance !== undefined ? data.balance : (data.BALANCE || 0));
-                    document.getElementById('userBalanceText').innerText = `${bal.toFixed(2)} USDT`;
-                }
-            } catch (e) {}
-        }
-
-        async function handleTransfer(e) {
+        async function handleRegister(e) {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
-            const targetEmail = document.getElementById('receiverEmail').value.trim().toLowerCase();
-            const amount = parseFloat(document.getElementById('transferAmount').value);
+            const name = document.getElementById('regName').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const email = document.getElementById('regEmail').value.trim().toLowerCase();
+            const password = document.getElementById('regPassword').value.trim();
 
-            const senderId = currentUser.id || currentUser.ID;
-            const senderEmail = String(currentUser.email || currentUser.EMAIL || '').trim().toLowerCase();
-            const senderBalance = parseFloat(currentUser.balance !== undefined ? currentUser.balance : (currentUser.BALANCE || 0));
-
-            if (targetEmail === senderEmail) {
-                alert('❌ لا يمكنك تحويل الأموال إلى نفسك!');
-                return;
-            }
-
-            if (amount > senderBalance) {
-                alert(`❌ رصيدك الحالي (${senderBalance.toFixed(2)} USDT) غير كافٍ!`);
+            if (!supabaseClient) {
+                alert('⚠️ تعذر الاتصال بمكتبة Supabase!');
                 return;
             }
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحويل...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إنشاء الحساب...';
 
             try {
-                const usersRes = await fetch(`${API_BASE}/users/?_t=${new Date().getTime()}`);
-                if (!usersRes.ok) return alert('❌ تعذر الاتصال بالسيرفر.');
+                const { data: existing } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .ilike('email', email);
 
-                const usersData = await usersRes.json();
-                const allUsers = usersData.items || [];
+                if (existing && existing.length > 0) {
+                    alert('❌ هذا البريد الإلكتروني مسجل مسبقاً!');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> تسجيل حساب جديد';
+                    return;
+                }
 
-                const receiver = allUsers.find(u => String(u.email !== undefined ? u.email : (u.EMAIL || '')).trim().toLowerCase() === targetEmail);
+                const { error } = await supabaseClient
+                    .from('users')
+                    .insert([{
+                        full_name: name,
+                        phone_number: phone,
+                        email: email,
+                        password_hash: password,
+                        role: 'USER',
+                        kyc_status: 'PENDING',
+                        balance: 0.00,
+                        is_active: 1
+                    }]);
 
-                if (!receiver) return alert('❌ لم يتم العثور على مستلم بهذا البريد!');
+                if (error) {
+                    alert(`❌ فشل إنشاء الحساب: ${error.message}`);
+                    return;
+                }
 
-                const receiverId = receiver.id || receiver.ID;
-                const receiverCurrentBal = parseFloat(receiver.balance !== undefined ? receiver.balance : (receiver.BALANCE || 0));
-
-                // 1. خصم من المرسل
-                await fetch(`${API_BASE}/users/${senderId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        "id": parseInt(senderId),
-                        "full_name": currentUser.full_name || currentUser.FULL_NAME,
-                        "phone_number": currentUser.phone_number || currentUser.PHONE_NUMBER,
-                        "email": currentUser.email || currentUser.EMAIL,
-                        "password_hash": currentUser.password_hash || currentUser.PASSWORD_HASH,
-                        "role": currentUser.role || currentUser.ROLE || "USER",
-                        "kyc_status": currentUser.kyc_status || currentUser.KYC_STATUS || "PENDING",
-                        "is_active": currentUser.is_active !== undefined ? currentUser.is_active : currentUser.IS_ACTIVE,
-                        "balance": senderBalance - amount
-                    })
-                });
-
-                // 2. إضافة للمستلم
-                await fetch(`${API_BASE}/users/${receiverId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        "id": parseInt(receiverId),
-                        "full_name": receiver.full_name || receiver.FULL_NAME,
-                        "phone_number": receiver.phone_number || receiver.PHONE_NUMBER,
-                        "email": receiver.email || receiver.EMAIL,
-                        "password_hash": receiver.password_hash || receiver.PASSWORD_HASH,
-                        "role": receiver.role || receiver.ROLE || "USER",
-                        "kyc_status": receiver.kyc_status || receiver.KYC_STATUS || "PENDING",
-                        "is_active": receiver.is_active !== undefined ? receiver.is_active : receiver.IS_ACTIVE,
-                        "balance": receiverCurrentBal + amount
-                    })
-                });
-
-                // 3. تسجيل عملية التحويل في الجدول الرئيسي للتحويلات الداخلية
-                await fetch(`${API_BASE}/internal_transfers/`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        "sender_id": parseInt(senderId),
-                        "receiver_id": parseInt(receiverId),
-                        "amount_usdt": amount
-                    })
-                });
-
-                alert(`✅ تم تحويل ${amount.toFixed(2)} USDT بنجاح!`);
-                window.location.href = 'dashboard.html';
+                alert('✅ تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن.');
+                window.location.href = 'login.html';
 
             } catch (err) {
-                alert('حدث خطأ أثناء تنفيذ عملية التحويل.');
+                alert(`حدث خطأ أثناء الاتصال: ${err.message || err}`);
             } finally {
                 btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> تسجيل حساب جديد';
             }
         }
-
-        fetchSenderLatestData();
     </script>
 </body>
 </html>

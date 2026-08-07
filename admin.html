@@ -3,898 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PayFlow - لوحة الأدمن الشاملة</title>
+    <title>PayFlow - لوحة تحكم المشرف (Admin)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
-        .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; }
-        .input-field { background: #0f172a; border: 1px solid #334155; color: white; padding: 10px; border-radius: 8px; width: 100%; }
-        .tab-btn { padding: 10px 16px; font-weight: bold; font-size: 14px; border-radius: 10px; transition: 0.2s; }
-        .tab-active { background: #10b981; color: white; }
-        .tab-inactive { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+        .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
     </style>
 </head>
-<body class="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
+<body class="p-4 md:p-8 max-w-6xl mx-auto space-y-6 min-h-screen flex flex-col justify-between">
 
-    <!-- Header -->
-    <div class="flex justify-between items-center border-b border-slate-800 pb-4">
-        <h1 class="text-2xl font-bold text-red-500"><i class="fa-solid fa-user-shield"></i> لوحة تحكم الأدمن الشاملة</h1>
-        <button onclick="sessionStorage.clear(); window.location.href='login.html';" class="text-xs bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg border border-slate-700 text-slate-300">خروج</button>
-    </div>
-
-    <!-- Navigation Tabs -->
-    <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-4">
-        <button onclick="switchTab('search')" id="tabSearch" class="tab-btn tab-active"><i class="fa-solid fa-magnifying-glass"></i> البحث بالمرجع أو الإيميل</button>
-        <button onclick="switchTab('deposits')" id="tabDeposits" class="tab-btn tab-inactive"><i class="fa-solid fa-money-bill-transfer"></i> طلبات الإيداع والسحب</button>
-        <button onclick="switchTab('kyc')" id="tabKyc" class="tab-btn tab-inactive"><i class="fa-solid fa-id-card"></i> طلبات التوثيق</button>
-        <button onclick="switchTab('rates')" id="tabRates" class="tab-btn tab-inactive"><i class="fa-solid fa-chart-line"></i> أسعار الصرف (شراء / بيع)</button>
-        <button onclick="switchTab('users')" id="tabUsers" class="tab-btn tab-inactive"><i class="fa-solid fa-users"></i> الحسابات وتجميدها</button>
-        <button onclick="switchTab('wallets')" id="tabWallets" class="tab-btn tab-inactive"><i class="fa-solid fa-wallet"></i> إضافة/إدارة المحافظ</button>
-    </div>
-
-    <!-- 0. تبويب البحث الشامل -->
-    <div id="secSearch" class="glass-card p-6 space-y-6">
-        <h2 class="font-bold text-lg text-emerald-400"><i class="fa-solid fa-magnifying-glass"></i> الاستعلام السريع برقم المرجع أو إيميل العميل</h2>
-        <div class="flex gap-3">
-            <input type="text" id="searchInput" placeholder="أدخل البريد أو الرقم المرجعي (مثلاً: DEP-1 أو WTH-1 أو TRN-1)" class="input-field text-left font-mono" dir="ltr">
-            <button onclick="performAdminSearch()" class="bg-emerald-600 hover:bg-emerald-500 font-bold px-6 rounded-lg text-white text-sm whitespace-nowrap">بحث</button>
-        </div>
-
-        <div id="searchResultsContainer" class="hidden space-y-6">
-            <div id="userKycCard" class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 space-y-3"></div>
-            <div id="userOpsCard" class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 space-y-3"></div>
-        </div>
-    </div>
-
-    <!-- 1. تبويب الإيداعات والسحوبات -->
-    <div id="secDeposits" class="glass-card p-6 space-y-4 hidden">
-        <div class="flex justify-between items-center">
-            <h2 class="font-bold text-lg text-blue-400"><i class="fa-solid fa-money-bill-transfer"></i> مراجعة كافة طلبات الإيداع والسحب</h2>
-            <button onclick="loadDeposits()" class="text-xs bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded-lg font-bold text-white"><i class="fa-solid fa-rotate"></i> تحديث القائمة</button>
-        </div>
-        <div id="depositsContainer" class="space-y-3">جاري التحميل...</div>
-    </div>
-
-    <!-- 2. تبويب طلبات التوثيق -->
-    <div id="secKyc" class="glass-card p-6 space-y-4 hidden">
-        <div class="flex justify-between items-center">
-            <h2 class="font-bold text-lg text-amber-400"><i class="fa-solid fa-id-card"></i> طلبات التوثيق والتحقق من الهويات</h2>
-            <button onclick="loadKycRequests()" class="text-xs bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded-lg font-bold text-white"><i class="fa-solid fa-rotate"></i> تحديث</button>
-        </div>
-        <div id="kycContainer" class="space-y-3">جاري التحميل...</div>
-    </div>
-
-    <!-- 3. تبويب أسعار الصرف -->
-    <div id="secRates" class="glass-card p-6 space-y-6 hidden">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-            <h2 class="font-bold text-lg text-emerald-400"><i class="fa-solid fa-calculator"></i> إدارة أسعار الصرف الرسمية (USDT / YER)</h2>
-            <button onclick="loadRates()" class="text-xs bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-lg font-bold text-white"><i class="fa-solid fa-rotate"></i> تحديث الأسعار</button>
-        </div>
-
-        <form onsubmit="updateRates(event)" class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
-            <div>
-                <label class="block text-sm text-slate-400 mb-1">سعر الشراء / الإيداع (BUY_RATE)</label>
-                <div class="flex items-center gap-2">
-                    <input type="number" step="0.01" id="buyRateInput" required class="input-field text-emerald-400 font-bold text-lg" placeholder="مثلاً: 560">
-                    <span class="text-xs text-slate-400">YER</span>
-                </div>
+    <div class="space-y-6">
+        <div class="flex justify-between items-center glass-card p-4 md:p-6">
+            <h1 class="text-xl md:text-2xl font-bold text-red-400 flex items-center gap-2">
+                <i class="fa-solid fa-shield-dog"></i> لوحة تحكم المشرف (Admin)
+            </h1>
+            <div class="flex items-center gap-3">
+                <a href="dashboard.html" class="text-xs bg-slate-800 text-slate-300 hover:text-white px-3 py-2 rounded-xl border border-slate-700 transition">لوحة المستخدم</a>
+                <button onclick="logout()" class="bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-2 rounded-xl text-xs font-bold hover:bg-red-500/20 transition">خروج</button>
             </div>
-
-            <div>
-                <label class="block text-sm text-slate-400 mb-1">سعر البيع / السحب (SELL_RATE)</label>
-                <div class="flex items-center gap-2">
-                    <input type="number" step="0.01" id="sellRateInput" required class="input-field text-amber-400 font-bold text-lg" placeholder="مثلاً: 570">
-                    <span class="text-xs text-slate-400">YER</span>
-                </div>
-            </div>
-
-            <div class="flex items-end">
-                <button type="submit" id="rateBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition">
-                    <i class="fa-solid fa-floppy-disk"></i> حفظ الأسعار الجديدة
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <!-- 4. تبويب الحسابات وتجميدها -->
-    <div id="secUsers" class="glass-card p-6 space-y-4 hidden">
-        <div class="flex justify-between items-center">
-            <h2 class="font-bold text-lg text-emerald-400"><i class="fa-solid fa-users"></i> جميع العملاء المسجلين والتحكم بالحسابات</h2>
-            <button onclick="loadUsers()" class="text-xs bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-lg font-bold text-white"><i class="fa-solid fa-rotate"></i> تحديث</button>
         </div>
-        <div id="usersContainer" class="space-y-3">جاري التحميل...</div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="glass-card p-5 space-y-2">
+                <span class="text-xs text-slate-400 font-bold">إجمالي المستخدمين</span>
+                <div class="text-3xl font-black text-emerald-400 font-mono" id="totalUsersCount">0</div>
+            </div>
+            <div class="glass-card p-5 space-y-2">
+                <span class="text-xs text-slate-400 font-bold">طلبات الإيداع المعلقة</span>
+                <div class="text-3xl font-black text-amber-400 font-mono" id="pendingDepositsCount">0</div>
+            </div>
+            <div class="glass-card p-5 space-y-2">
+                <span class="text-xs text-slate-400 font-bold">طلبات السحب المعلقة</span>
+                <div class="text-3xl font-black text-blue-400 font-mono" id="pendingWithdrawsCount">0</div>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 space-y-4">
+            <h2 class="text-lg font-bold text-slate-200 flex items-center gap-2">
+                <i class="fa-solid fa-users"></i> إدارة المستخدمين وحظرهم/تنشيطهم
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-xs">
+                    <thead class="bg-slate-900 text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="p-3">المعرف</th>
+                            <th class="p-3">الاسم</th>
+                            <th class="p-3">البريد الإلكتروني</th>
+                            <th class="p-3">الرصيد</th>
+                            <th class="p-3">الحالة</th>
+                            <th class="p-3">الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody" class="divide-y divide-slate-800">
+                        <tr><td colspan="6" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <!-- 5. تبويب المحافظ -->
-    <div id="secWallets" class="glass-card p-6 space-y-6 hidden">
-        <div>
-            <h2 class="font-bold text-lg text-purple-400 mb-2"><i class="fa-solid fa-plus-circle"></i> إضافة محفظة تحويل جديدة</h2>
-            <form onsubmit="addPaymentMethod(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <input type="text" id="mName" placeholder="اسم المحفظة" required class="input-field">
-                <input type="text" id="mAccount" placeholder="رقم الحساب" required class="input-field">
-                <input type="text" id="mHolder" placeholder="اسم صاحب الحساب" required class="input-field">
-                <button type="submit" class="bg-purple-600 hover:bg-purple-500 font-bold rounded-lg text-sm text-white">إضافة</button>
-            </form>
-        </div>
-        <hr class="border-slate-800">
-        <div id="walletsContainer" class="space-y-3">جاري التحميل...</div>
-    </div>
+    <footer class="text-center text-xs text-slate-500 pt-4 border-t border-slate-800">
+        Admin Panel &copy; 2026
+    </footer>
 
     <script>
         const API_BASE = 'http://localhost:8081/ords/buysell_user';
-        const adminUser = JSON.parse(sessionStorage.getItem('pf_user'));
+        let currentUser = JSON.parse(sessionStorage.getItem('pf_user'));
 
-        if (!adminUser || (adminUser.role !== 'ADMIN' && adminUser.ROLE !== 'ADMIN' && String(adminUser.email || adminUser.EMAIL).toUpperCase() !== 'ADMIN')) {
-            alert('غير مصرح لك بالوصول!');
+        if (!currentUser || String(currentUser.role || currentUser.ROLE || '').toUpperCase() !== 'ADMIN') {
+            alert('❌ غير مصرح لك بالدخول إلى هذه الصفحة!');
+            window.location.href = 'dashboard.html';
+        }
+
+        async function loadAdminData() {
+            try {
+                const res = await fetch(`${API_BASE}/users/?_t=${new Date().getTime()}`);
+                if (!res.ok) throw new Error('فشل جلب المستخدمين');
+                const data = await res.json();
+                const users = data.items || [];
+
+                document.getElementById('totalUsersCount').innerText = users.length;
+
+                let tbody = document.getElementById('usersTableBody');
+                tbody.innerHTML = '';
+
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500">لا يوجد مستخدمون</td></tr>';
+                    return;
+                }
+
+                users.forEach(u => {
+                    const id = u.id || u.ID;
+                    const name = u.full_name || u.FULL_NAME || '-';
+                    const email = u.email || u.EMAIL || '-';
+                    const bal = parseFloat(u.balance !== undefined ? u.balance : (u.BALANCE || 0));
+                    const active = u.is_active !== undefined ? u.is_active : u.IS_ACTIVE;
+
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-3 font-mono">#${id}</td>
+                        <td class="p-3 font-bold text-slate-200">${name}</td>
+                        <td class="p-3 font-mono text-slate-300">${email}</td>
+                        <td class="p-3 font-mono text-emerald-400">${bal.toFixed(2)} USDT</td>
+                        <td class="p-3"><span class="px-2 py-1 rounded-full text-[10px] font-bold ${active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">${active ? 'نشط' : 'مجمد'}</span></td>
+                        <td class="p-3">
+                            <button onclick="toggleUserStatus(${id}, ${active})" class="px-3 py-1.5 rounded-lg text-xs font-bold ${active ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20' : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'} transition">
+                                ${active ? 'تجميد' : 'تنشيط'}
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function toggleUserStatus(userId, currentActive) {
+            try {
+                const res = await fetch(`${API_BASE}/users/${userId}`);
+                if (!res.ok) throw new Error('فشل جلب بيانات المستخدم');
+                const u = await res.json();
+
+                const newActive = (currentActive === 1 || currentActive === true) ? 0 : 1;
+
+                await fetch(`${API_BASE}/users/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        "id": parseInt(userId),
+                        "full_name": u.full_name || u.FULL_NAME,
+                        "phone_number": u.phone_number || u.PHONE_NUMBER,
+                        "email": u.email || u.EMAIL,
+                        "password_hash": u.password_hash || u.PASSWORD_HASH,
+                        "role": u.role || u.ROLE || "USER",
+                        "kyc_status": u.kyc_status || u.KYC_STATUS || "PENDING",
+                        "is_active": newActive,
+                        "balance": parseFloat(u.balance !== undefined ? u.balance : (u.BALANCE || 0))
+                    })
+                });
+
+                loadAdminData();
+            } catch (e) {
+                alert(`خطأ: ${e.message}`);
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('pf_user');
             window.location.href = 'login.html';
         }
 
-        function switchTab(t) {
-            ['Search', 'Users', 'Kyc', 'Deposits', 'Wallets', 'Rates'].forEach(s => {
-                document.getElementById('sec' + s).classList.add('hidden');
-                document.getElementById('tab' + s).className = 'tab-btn tab-inactive';
-            });
-            const cap = t.charAt(0).toUpperCase() + t.slice(1);
-            document.getElementById('sec' + cap).classList.remove('hidden');
-            document.getElementById('tab' + cap).className = 'tab-btn tab-active';
-
-            if (t === 'kyc') loadKycRequests();
-            if (t === 'deposits') loadDeposits();
-            if (t === 'users') loadUsers();
-            if (t === 'wallets') loadWallets();
-            if (t === 'rates') loadRates();
-        }
-
-        // --- 1. إدارة طلبات التوثيق ---
-        async function loadKycRequests() {
-            const container = document.getElementById('kycContainer');
-            container.innerHTML = '<p class="text-slate-400 py-4 text-center">جاري تحميل طلبات التوثيق...</p>';
-            const nocache = `?_t=${new Date().getTime()}`;
-
-            try {
-                let items = [];
-                const resView = await fetch(`${API_BASE}/v_admin_full_kyc/${nocache}`);
-                if (resView.ok) {
-                    const dataView = await resView.json();
-                    items = dataView.items || [];
-                }
-
-                if (items.length === 0) {
-                    const resDirect = await fetch(`${API_BASE}/kyc_requests/${nocache}`);
-                    if (resDirect.ok) {
-                        const dataDirect = await resDirect.json();
-                        items = dataDirect.items || [];
-                    }
-                }
-
-                if (items.length === 0) {
-                    container.innerHTML = '<p class="text-slate-400 text-center py-4">لا توجد طلبات توثيق حالياً</p>';
-                    return;
-                }
-
-                container.innerHTML = items.map(k => {
-                    const kid = k.id || k.ID;
-                    const uid = k.user_id || k.USER_ID;
-                    const uname = k.user_name || k.USER_NAME || `عميل (ID: ${uid})`;
-                    const ktype = k.kyc_type || k.KYC_TYPE || 'غير محدد';
-                    const knum = k.kyc_number || k.KYC_NUMBER || 'غ/م';
-                    const front = k.front_image || k.FRONT_IMAGE || '';
-                    const back = k.back_image || k.BACK_IMAGE || '';
-                    const st = String(k.status || k.STATUS || 'PENDING').toUpperCase();
-
-                    const isVerified = (st === 'VERIFIED' || st === 'APPROVED');
-                    const rawJson = encodeURIComponent(JSON.stringify(k));
-
-                    return `
-                        <div class="bg-slate-900/80 p-4 rounded-xl border border-amber-900/40 space-y-3 text-xs">
-                            <div class="flex justify-between items-center font-bold text-amber-400 text-sm">
-                                <span><i class="fa-solid fa-id-card"></i> طلب توثيق #${kid} - العميل: ${uname} (ID: ${uid})</span>
-                                <span class="text-slate-300">النوع: ${ktype} | الرقم: ${knum}</span>
-                            </div>
-
-                            <div class="flex flex-wrap justify-between items-center bg-slate-950 p-2.5 rounded-lg border border-slate-800 gap-2">
-                                <div class="flex gap-4">
-                                    ${front ? `<button onclick="viewProofModal('${front}')" class="text-blue-400 underline font-bold hover:text-blue-300"><i class="fa-solid fa-eye"></i> معاينة الوجه الأمامي</button>` : '<span class="text-slate-500">لا يوجد وجه أمامي</span>'}
-                                    ${back ? `<button onclick="viewProofModal('${back}')" class="text-blue-400 underline font-bold hover:text-blue-300"><i class="fa-solid fa-eye"></i> معاينة الوجه الخلفي</button>` : '<span class="text-slate-500">لا يوجد وجه خلفي</span>'}
-                                </div>
-                                <div class="text-slate-400">الحالة: <b class="${isVerified ? 'text-emerald-400' : 'text-amber-400'}">${isVerified ? '✅ موثق' : '⏳ قيد المراجعة'}</b></div>
-                            </div>
-
-                            <div class="flex justify-end gap-2 pt-1">
-                                ${!isVerified ? `
-                                    <button id="btnKyc_${kid}" onclick="approveKyc('${rawJson}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-1">
-                                        <i class="fa-solid fa-check-circle"></i> قبول وتوثيق الحساب
-                                    </button>
-                                ` : `
-                                    <span class="text-emerald-400 font-bold px-4 py-2 bg-emerald-500/20 rounded-lg border border-emerald-500/30 flex items-center gap-1">
-                                        <i class="fa-solid fa-user-check"></i> الحساب موثق رسميًا
-                                    </span>
-                                `}
-                                <button onclick="deleteKyc(${kid})" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-lg font-bold">حذف</button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-            } catch (e) {
-                console.error('Error loading KYC:', e);
-                container.innerHTML = '<p class="text-red-400 text-center py-2">خطأ في تحميل طلبات التوثيق</p>';
-            }
-        }
-
-        async function approveKyc(rawJson) {
-            const k = JSON.parse(decodeURIComponent(rawJson));
-            const kid = k.id || k.ID;
-            const uid = k.user_id || k.USER_ID;
-
-            const btn = document.getElementById(`btnKyc_${kid}`);
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التوثيق...';
-            }
-
-            try {
-                const payloadKyc = {
-                    "id": parseInt(kid),
-                    "user_id": parseInt(uid),
-                    "kyc_type": k.kyc_type || k.KYC_TYPE,
-                    "kyc_number": k.kyc_number || k.KYC_NUMBER,
-                    "front_image": k.front_image || k.FRONT_IMAGE,
-                    "back_image": k.back_image || k.BACK_IMAGE,
-                    "status": "APPROVED"
-                };
-
-                await fetch(`${API_BASE}/kyc_requests/${kid}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payloadKyc)
-                });
-
-                const uRes = await fetch(`${API_BASE}/users/${uid}`);
-                if (uRes.ok) {
-                    const userData = await uRes.json();
-                    await fetch(`${API_BASE}/users/${uid}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            "id": parseInt(uid),
-                            "full_name": userData.full_name || userData.FULL_NAME,
-                            "phone_number": userData.phone_number || userData.PHONE_NUMBER,
-                            "email": userData.email || userData.EMAIL,
-                            "password_hash": userData.password_hash || userData.PASSWORD_HASH,
-                            "role": userData.role || userData.ROLE || "USER",
-                            "kyc_status": "VERIFIED",
-                            "is_active": userData.is_active !== undefined ? userData.is_active : userData.IS_ACTIVE,
-                            "balance": parseFloat(userData.balance || userData.BALANCE || 0)
-                        })
-                    });
-                }
-
-                alert(`✅ تم توثيق حساب العميل بنجاح!`);
-            } catch (e) {
-                console.error('KYC Approve Error:', e);
-            } finally {
-                loadKycRequests();
-                loadUsers();
-            }
-        }
-
-        async function deleteKyc(id) {
-            if (!confirm('تأكيد حذف طلب التوثيق؟')) return;
-            try {
-                await fetch(`${API_BASE}/kyc_requests/${id}`, { method: 'DELETE' });
-                alert('✅ تم الحذف');
-                loadKycRequests();
-            } catch(e) {}
-        }
-
-        // --- 2. البحث الشامل بالمرجع والإيميل ---
-        async function performAdminSearch() {
-            const term = document.getElementById('searchInput').value.trim();
-            if(!term) return alert('أدخل البريد أو الرقم المرجعي للبحث!');
-
-            const container = document.getElementById('searchResultsContainer');
-            const kycBox = document.getElementById('userKycCard');
-            const opsBox = document.getElementById('userOpsCard');
-            
-            container.classList.remove('hidden');
-            kycBox.innerHTML = '<p class="text-slate-400 py-2 text-center text-xs">جاري البحث...</p>';
-            opsBox.innerHTML = '';
-
-            const nocache = `?_t=${new Date().getTime()}`;
-
-            try {
-                const [uRes, depRes, withRes, kycRes, trfRes] = await Promise.all([
-                    fetch(`${API_BASE}/users/${nocache}`),
-                    fetch(`${API_BASE}/deposits/${nocache}`),
-                    fetch(`${API_BASE}/withdraw_requests/${nocache}`),
-                    fetch(`${API_BASE}/kyc_requests/${nocache}`),
-                    fetch(`${API_BASE}/internal_transfers/${nocache}`)
-                ]);
-
-                const users = uRes.ok ? (await uRes.json()).items || [] : [];
-                const deps = depRes.ok ? (await depRes.json()).items || [] : [];
-                const withs = withRes.ok ? (await withRes.json()).items || [] : [];
-                const kycs = kycRes.ok ? (await kycRes.json()).items || [] : [];
-                const trfs = trfRes.ok ? (await trfRes.json()).items || [] : [];
-
-                let targetUser = null;
-                let matchedOpHtml = '';
-                const upperTerm = term.toUpperCase();
-                const numId = parseInt(term.replace(/[^0-9]/g, ''));
-
-                if(term.includes('@')) {
-                    targetUser = users.find(u => String(u.email || u.EMAIL).toLowerCase() === term.toLowerCase());
-                    if (targetUser) {
-                        const uid = targetUser.id || targetUser.ID;
-                        
-                        const userDeps = deps.filter(d => (d.user_id || d.USER_ID) == uid).map(d => ({
-                            ref: `DEP-${d.request_id || d.REQUEST_ID}`, type: 'إيداع بنكي', usdt: `+${parseFloat(d.net_usdt || d.NET_USDT || 0).toFixed(2)} USDT`, status: d.status || d.STATUS, color: 'text-emerald-400'
-                        }));
-                        
-                        const userWiths = withs.filter(w => (w.user_id || w.USER_ID) == uid).map(w => ({
-                            ref: `WTH-${w.id || w.ID}`, type: 'سحب أموال', usdt: `-${parseFloat(w.amount_usdt || w.AMOUNT_USDT || 0).toFixed(2)} USDT`, status: w.status || w.STATUS, color: 'text-blue-400'
-                        }));
-
-                        const userTrfs = [];
-                        trfs.forEach(t => {
-                            const sId = t.sender_id || t.SENDER_ID;
-                            const rId = t.receiver_id || t.RECEIVER_ID;
-                            const amt = parseFloat(t.amount_usdt || t.AMOUNT_USDT || 0);
-                            const tid = t.id || t.ID;
-
-                            if (sId == uid) {
-                                userTrfs.push({ ref: `TRN-${tid}`, type: 'تحويل داخلي (صادر)', usdt: `-${amt.toFixed(2)} USDT`, status: 'COMPLETED', color: 'text-purple-400' });
-                            } else if (rId == uid) {
-                                userTrfs.push({ ref: `TRN-${tid}`, type: 'تحويل داخلي (وارد)', usdt: `+${amt.toFixed(2)} USDT`, status: 'COMPLETED', color: 'text-emerald-400' });
-                            }
-                        });
-
-                        const allOps = [...userDeps, ...userWiths, ...userTrfs];
-                        opsBox.innerHTML = `
-                            <b class="text-emerald-400 text-sm block border-b border-slate-800 pb-2"><i class="fa-solid fa-list"></i> جميع عمليات العميل (${allOps.length})</b>
-                            ${allOps.length > 0 ? allOps.map(op => `
-                                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
-                                    <div><b class="text-white">${op.type}</b> - <span class="font-mono text-purple-400">${op.ref}</span></div>
-                                    <div class="text-left"><b class="font-mono ${op.color} text-sm">${op.usdt}</b><div class="text-[10px] text-slate-400">${op.status}</div></div>
-                                </div>
-                            `).join('') : '<p class="text-slate-500 text-xs">لا توجد عمليات لهذا العميل.</p>'}
-                        `;
-                    }
-                } else if(upperTerm.startsWith('DEP-')) {
-                    const foundDep = deps.find(d => (d.request_id || d.REQUEST_ID) == numId);
-                    if(foundDep) {
-                        targetUser = users.find(u => (u.id || u.ID) == (foundDep.user_id || foundDep.USER_ID));
-                        const amt = parseFloat(foundDep.net_usdt || foundDep.NET_USDT || 0).toFixed(2);
-                        const st = foundDep.status || foundDep.STATUS || 'PENDING';
-                        matchedOpHtml = `
-                            <div class="bg-slate-950 p-4 rounded-xl border border-emerald-500/30 space-y-2 text-xs">
-                                <div class="text-emerald-400 font-bold text-sm"><i class="fa-solid fa-arrow-down-left"></i> تفاصيل عملية الإيداع (DEP-${numId})</div>
-                                <div>المبلغ: <b class="text-emerald-300 font-mono">+${amt} USDT</b> | الحالة: <b>${st}</b></div>
-                            </div>
-                        `;
-                    }
-                } else if(upperTerm.startsWith('WTH-')) {
-                    const foundWith = withs.find(w => (w.id || w.ID) == numId);
-                    if(foundWith) {
-                        targetUser = users.find(u => (u.id || u.ID) == (foundWith.user_id || foundWith.USER_ID));
-                        const amt = parseFloat(foundWith.amount_usdt || foundWith.AMOUNT_USDT || 0).toFixed(2);
-                        const st = foundWith.status || foundWith.STATUS || 'PENDING';
-                        matchedOpHtml = `
-                            <div class="bg-slate-950 p-4 rounded-xl border border-blue-500/30 space-y-2 text-xs">
-                                <div class="text-blue-400 font-bold text-sm"><i class="fa-solid fa-arrow-up-right"></i> تفاصيل عملية السحب (WTH-${numId})</div>
-                                <div>المبلغ: <b class="text-blue-300 font-mono">-${amt} USDT</b> | الحالة: <b>${st}</b></div>
-                            </div>
-                        `;
-                    }
-                } else if(upperTerm.startsWith('TRN-')) {
-                    const foundTrf = trfs.find(t => (t.id || t.ID) == numId);
-                    if(foundTrf) {
-                        const sId = foundTrf.sender_id || foundTrf.SENDER_ID;
-                        const rId = foundTrf.receiver_id || foundTrf.RECEIVER_ID;
-                        const senderUser = users.find(u => (u.id || u.ID) == sId) || {};
-                        const receiverUser = users.find(u => (u.id || u.ID) == rId) || {};
-                        const amt = parseFloat(foundTrf.amount_usdt || foundTrf.AMOUNT_USDT || 0).toFixed(2);
-
-                        matchedOpHtml = `
-                            <div class="bg-slate-950 p-4 rounded-xl border border-purple-500/30 space-y-3 text-xs">
-                                <div class="text-purple-400 font-bold text-sm border-b border-slate-800 pb-2">
-                                    <i class="fa-solid fa-money-bill-transfer"></i> تفاصيل التحويل الداخلي (TRN-${numId})
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-800">
-                                        <span class="text-slate-400 block mb-1">المرسل (صادر):</span>
-                                        <b class="text-white text-sm">${senderUser.full_name || senderUser.FULL_NAME || 'غير معروف'}</b>
-                                        <span class="block text-slate-400 font-mono">${senderUser.email || senderUser.EMAIL || ''}</span>
-                                    </div>
-                                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-800">
-                                        <span class="text-slate-400 block mb-1">المستلم (وارد):</span>
-                                        <b class="text-white text-sm">${receiverUser.full_name || receiverUser.FULL_NAME || 'غير معروف'}</b>
-                                        <span class="block text-slate-400 font-mono">${receiverUser.email || receiverUser.EMAIL || ''}</span>
-                                    </div>
-                                </div>
-                                <div class="text-center pt-1 text-emerald-400 font-bold text-sm">
-                                    المبلغ المحول: ${amt} USDT
-                                </div>
-                            </div>
-                        `;
-                        targetUser = senderUser;
-                    }
-                }
-
-                if(!targetUser) {
-                    kycBox.innerHTML = '<p class="text-red-400 text-center py-2 text-xs">لم يتم العثور على أية نتائج مطابقة لهذا البحث!</p>';
-                    opsBox.innerHTML = '';
-                    return;
-                }
-
-                const uid = targetUser.id || targetUser.ID;
-                const userKyc = kycs.find(k => (k.user_id || k.USER_ID) == uid);
-
-                kycBox.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                        <b class="text-amber-400 text-sm"><i class="fa-solid fa-id-card"></i> بيانات صاحب الحساب: ${targetUser.full_name || targetUser.FULL_NAME} (${targetUser.email || targetUser.EMAIL})</b>
-                        <span class="text-xs bg-slate-800 px-3 py-1 rounded text-slate-300">ID: ${uid}</span>
-                    </div>
-                    ${userKyc ? `
-                        <div class="text-xs space-y-2 text-slate-300">
-                            <div>نوع الوثيقة: <b>${userKyc.kyc_type || userKyc.KYC_TYPE}</b> | رقم الوثيقة: <b>${userKyc.kyc_number || userKyc.KYC_NUMBER}</b></div>
-                            <div class="flex gap-4 pt-2">
-                                ${userKyc.front_image || userKyc.FRONT_IMAGE ? `<button onclick="viewProofModal('${userKyc.front_image || userKyc.FRONT_IMAGE}')" class="text-blue-400 underline font-bold"><i class="fa-solid fa-eye"></i> معاينة الصورة الأمامية</button>` : ''}
-                                ${userKyc.back_image || userKyc.BACK_IMAGE ? `<button onclick="viewProofModal('${userKyc.back_image || userKyc.BACK_IMAGE}')" class="text-blue-400 underline font-bold"><i class="fa-solid fa-eye"></i> معاينة الصورة الخلفية</button>` : ''}
-                            </div>
-                        </div>
-                    ` : '<p class="text-slate-500 text-xs">هذا العميل لم يقم برفع وثائق توثيق حتى الآن.</p>'}
-                `;
-
-                if (matchedOpHtml) {
-                    opsBox.innerHTML = matchedOpHtml;
-                }
-
-            } catch(e) {
-                console.error(e);
-                kycBox.innerHTML = '<p class="text-red-400 text-center py-2 text-xs">حدث خطأ أثناء البحث!</p>';
-            }
-        }
-
-        // --- 3. إدارة الإيداعات والسحوبات معاً ---
-        async function loadDeposits() {
-            const container = document.getElementById('depositsContainer');
-            container.innerHTML = '<p class="text-slate-400 py-4 text-center">جاري تحميل طلبات الإيداع والسحب...</p>';
-            const nocache = `?_t=${new Date().getTime()}`;
-
-            try {
-                const [depRes, withRes, usersRes] = await Promise.all([
-                    fetch(`${API_BASE}/deposits/${nocache}`).catch(() => null),
-                    fetch(`${API_BASE}/withdraw_requests/${nocache}`).catch(() => null),
-                    fetch(`${API_BASE}/users/${nocache}`).catch(() => null)
-                ]);
-
-                let htmlContent = '';
-                const users = usersRes && usersRes.ok ? (await usersRes.json()).items || [] : [];
-
-                // 1. طلبات الإيداع
-                if (depRes && depRes.ok) {
-                    const depData = await depRes.json();
-                    const depItems = depData.items || [];
-
-                    depItems.forEach(d => {
-                        const reqId = d.request_id || d.REQUEST_ID;
-                        const uid = d.user_id || d.USER_ID;
-                        const user = users.find(u => String(u.id || u.ID) === String(uid)) || {};
-                        const uname = user.full_name || user.FULL_NAME || `عميل #${uid}`;
-                        const net = d.net_usdt !== undefined ? d.net_usdt : d.NET_USDT;
-                        const proof = d.transaction_proof || d.TRANSACTION_PROOF || '';
-                        const st = String(d.status || d.STATUS || 'PENDING').trim().toUpperCase();
-                        
-                        const isApproved = (st === 'APPROVED' || st === 'COMPLETED');
-                        const isImage = proof.startsWith('http') || proof.startsWith('data:image');
-                        const rawJson = encodeURIComponent(JSON.stringify(d));
-
-                        htmlContent += `
-                            <div class="bg-slate-900/80 p-4 rounded-xl border border-emerald-900/50 text-xs space-y-3">
-                                <div class="flex justify-between items-center font-bold text-sm text-emerald-400">
-                                    <span><i class="fa-solid fa-arrow-down-left"></i> طلب إيداع #DEP-${reqId} - العميل: ${uname}</span>
-                                    <span class="text-lg text-emerald-300">+${parseFloat(net || 0).toFixed(2)} USDT</span>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-slate-400">نوع العملية:</span>
-                                        <b class="text-emerald-400">إيداع بنكي مباشر</b>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-slate-400">الإثبات:</span>
-                                        ${isImage ? `<button onclick="viewProofModal('${proof}')" class="text-blue-400 underline font-bold hover:text-blue-300">معاينة السند</button>` : `<b class="text-amber-400">${proof || 'لا يوجد'}</b>`}
-                                    </div>
-                                </div>
-                                <div class="flex justify-between items-center pt-1">
-                                    <div>الحالة: <b class="${isApproved ? 'text-emerald-400' : 'text-amber-400'}">${st}</b></div>
-                                    <div class="flex gap-2">
-                                        ${!isApproved ? `<button id="btnDep_${reqId}" onclick="approveDep('${rawJson}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-bold">موافقة وإضافة الرصيد</button>` : `<span class="text-emerald-400 font-bold px-4 py-2 bg-emerald-500/20 rounded-lg border border-emerald-500/30">تم الاعتماد وإضافة الرصيد</span>`}
-                                        <button onclick="deleteDep(${reqId})" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-lg font-bold">حذف</button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-
-                // 2. طلبات السحب
-                if (withRes && withRes.ok) {
-                    const withData = await withRes.json();
-                    const withItems = withData.items || [];
-
-                    withItems.forEach(w => {
-                        const reqId = w.id || w.ID;
-                        const uid = w.user_id || w.USER_ID;
-                        const user = users.find(u => String(u.id || u.ID) === String(uid)) || {};
-                        const uname = user.full_name || user.FULL_NAME || `عميل #${uid}`;
-                        const amount = parseFloat(w.amount_usdt || w.AMOUNT_USDT || 0);
-                        const method = w.withdraw_method || w.WITHDRAW_METHOD || 'USDT';
-                        const address = w.destination_address || w.DESTINATION_ADDRESS || '---';
-                        const st = String(w.status || w.STATUS || 'PENDING').trim().toUpperCase();
-
-                        const isApproved = (st === 'APPROVED' || st === 'COMPLETED');
-
-                        htmlContent += `
-                            <div class="bg-slate-900/80 p-4 rounded-xl border border-blue-900/50 text-xs space-y-3">
-                                <div class="flex justify-between items-center font-bold text-sm text-blue-400">
-                                    <span><i class="fa-solid fa-arrow-up-right"></i> طلب سحب #WTH-${reqId} - العميل: ${uname} (ID: ${uid})</span>
-                                    <span class="text-lg text-blue-300">-${amount.toFixed(2)} USDT</span>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-slate-400">طريقة السحب:</span>
-                                        <b class="text-purple-400">${method}</b>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-slate-400">الوجهة / الحساب:</span>
-                                        <b class="text-white font-mono">${address}</b>
-                                    </div>
-                                </div>
-                                <div class="flex justify-between items-center pt-1">
-                                    <div>الحالة: <b class="${isApproved ? 'text-emerald-400' : 'text-amber-400'}">${st}</b></div>
-                                    <div class="flex gap-2">
-                                        ${!isApproved ? `<button onclick="approveWithdraw(${reqId})" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-bold">موافقة على السحب</button>` : `<span class="text-emerald-400 font-bold px-4 py-2 bg-emerald-500/20 rounded-lg border border-emerald-500/30">تمت الموافقة</span>`}
-                                        <button onclick="deleteWithdraw(${reqId})" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-lg font-bold">حذف</button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-
-                container.innerHTML = htmlContent || '<p class="text-slate-400 text-center py-4">لا توجد طلبات إيداع أو سحب حالياً</p>';
-
-            } catch (e) {
-                console.error("Load Deposits Error:", e);
-                container.innerHTML = '<p class="text-red-400 text-center py-4">خطأ في الاتصال بالخادم</p>';
-            }
-        }
-
-        function viewProofModal(imgSrc) {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50';
-            modal.onclick = () => modal.remove();
-            modal.innerHTML = `
-                <div class="max-w-2xl w-full bg-slate-900 p-4 rounded-2xl border border-slate-700 space-y-4" onclick="event.stopPropagation()">
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                        <h3 class="font-bold text-emerald-400"><i class="fa-solid fa-eye"></i> معاينة الصورة/الوثيقة المرفقة</h3>
-                        <button onclick="this.closest('.fixed').remove()" class="text-slate-400 hover:text-white font-bold bg-slate-800 px-3 py-1 rounded-lg">إغلاق X</button>
-                    </div>
-                    <div class="flex justify-center bg-slate-950 p-2 rounded-xl">
-                        <img src="${imgSrc}" class="max-h-[75vh] w-auto object-contain rounded-lg border border-slate-800" alt="المعاينة">
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        async function approveDep(rawJson) {
-            const d = JSON.parse(decodeURIComponent(rawJson));
-            const reqId = d.request_id || d.REQUEST_ID;
-            const uid = d.user_id || d.USER_ID;
-            const amountToAdd = parseFloat(d.net_usdt !== undefined ? d.net_usdt : (d.NET_USDT || 0));
-
-            const btn = document.getElementById(`btnDep_${reqId}`);
-            if (btn) {
-                if (btn.disabled) return;
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
-            }
-
-            try {
-                const uRes = await fetch(`${API_BASE}/users/${uid}?_t=${new Date().getTime()}`);
-                if (!uRes.ok) return;
-                const userData = await uRes.json();
-                const currentBal = parseFloat(userData.balance || userData.BALANCE || 0);
-                const calculatedNewBal = currentBal + amountToAdd;
-
-                const payloadDeposit = {
-                    "request_id": parseInt(reqId),
-                    "user_id": parseInt(uid),
-                    "local_payment_method_id": d.local_payment_method_id || d.LOCAL_PAYMENT_METHOD_ID,
-                    "amount_local": d.amount_local || d.AMOUNT_LOCAL,
-                    "amount_usdt": d.amount_usdt || d.AMOUNT_USDT,
-                    "net_usdt": amountToAdd,
-                    "transaction_proof": d.transaction_proof || d.TRANSACTION_PROOF,
-                    "status": "APPROVED",
-                    "approved_by": adminUser.id || adminUser.ID || 1
-                };
-
-                await fetch(`${API_BASE}/deposits/${reqId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payloadDeposit)
-                });
-
-                await fetch(`${API_BASE}/users/${uid}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        "id": parseInt(uid),
-                        "full_name": userData.full_name || userData.FULL_NAME,
-                        "phone_number": userData.phone_number || userData.PHONE_NUMBER,
-                        "email": userData.email || userData.EMAIL,
-                        "password_hash": userData.password_hash || userData.PASSWORD_HASH,
-                        "role": userData.role || userData.ROLE || "USER",
-                        "kyc_status": userData.kyc_status || userData.KYC_STATUS || "PENDING",
-                        "is_active": (userData.is_active !== undefined ? userData.is_active : userData.IS_ACTIVE),
-                        "balance": calculatedNewBal
-                    })
-                });
-
-                alert(`✅ تم اعتماد الطلب #${reqId} والرصيد الجديد للعميل: ${calculatedNewBal.toFixed(2)} USDT`);
-            } catch (e) {
-                console.error('Approve Error:', e);
-            } finally {
-                loadDeposits();
-                loadUsers();
-            }
-        }
-
-        async function deleteDep(id) {
-            if (!confirm('تأكيد الحذف؟')) return;
-            try {
-                await fetch(`${API_BASE}/deposits/${id}`, { method: 'DELETE' });
-                alert('✅ تم الحذف بنجاح');
-                loadDeposits();
-            } catch(e) {}
-        }
-
-        // تم تحديث هذه الدالة لتطابق مفاتيح الأعمدة بالحروف الكبيرة المعتمدة في قاعدة البيانات
-        async function approveWithdraw(requestId) {
-            if (!confirm('هل أنت متأكد من الموافقة على طلب السحب؟')) return;
-            try {
-                const getRes = await fetch(`${API_BASE}/withdraw_requests/${requestId}`);
-                if (!getRes.ok) throw new Error('فشل جلب تفاصيل طلب السحب');
-                const reqData = await getRes.json();
-                
-                const uid = reqData.USER_ID || reqData.user_id;
-                const method = reqData.WITHDRAW_METHOD || reqData.withdraw_method;
-                const address = reqData.DESTINATION_ADDRESS || reqData.destination_address;
-                const amtUsdt = reqData.AMOUNT_USDT || reqData.amount_usdt;
-                const amtLocal = reqData.AMOUNT_LOCAL || reqData.amount_local || 0;
-
-                const res = await fetch(`${API_BASE}/withdraw_requests/${requestId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        "ID": parseInt(requestId),
-                        "USER_ID": parseInt(uid),
-                        "WITHDRAW_METHOD": method,
-                        "DESTINATION_ADDRESS": address,
-                        "AMOUNT_USDT": parseFloat(amtUsdt),
-                        "AMOUNT_LOCAL": parseFloat(amtLocal),
-                        "STATUS": "COMPLETED"
-                    })
-                });
-
-                if (res.ok) {
-                    alert('✅ تم قبول طلب السحب بنجاح!');
-                    loadDeposits();
-                } else {
-                    const errText = await res.text();
-                    console.error('ORDS Server Error:', errText);
-                    alert('❌ فشل قبول طلب السحب من الخادم.');
-                }
-            } catch (err) {
-                console.error('Catch Error:', err);
-                alert('❌ حدث خطأ أثناء الاتصال بالخادم.');
-            }
-        }
-
-        async function deleteWithdraw(requestId) {
-            if (!confirm('تأكيد حذف طلب السحب؟')) return;
-            try {
-                await fetch(`${API_BASE}/withdraw_requests/${requestId}`, { method: 'DELETE' });
-                alert('✅ تم حذف طلب السحب بنجاح');
-                loadDeposits();
-            } catch (e) {}
-        }
-
-        // --- 4. أسعار الصرف ---
-        async function loadRates() {
-            try {
-                const res = await fetch(`${API_BASE}/exchange_rates/`);
-                if (res.ok) {
-                    const data = await res.json();
-                    const items = data.items || [];
-                    if (items.length > 0) {
-                        const r = items[0];
-                        document.getElementById('buyRateInput').value = r.buy_rate || r.BUY_RATE || 560;
-                        document.getElementById('sellRateInput').value = r.sell_rate || r.SELL_RATE || 570;
-                    }
-                }
-            } catch (e) {}
-        }
-
-        async function updateRates(e) {
-            e.preventDefault();
-            const btn = document.getElementById('rateBtn');
-            const buyVal = parseFloat(document.getElementById('buyRateInput').value);
-            const sellVal = parseFloat(document.getElementById('sellRateInput').value);
-            btn.disabled = true;
-
-            try {
-                const getRes = await fetch(`${API_BASE}/exchange_rates/`);
-                let targetId = 1;
-                if (getRes.ok) {
-                    const gData = await getRes.json();
-                    if (gData.items && gData.items.length > 0) {
-                        targetId = gData.items[0].id || gData.items[0].ID || 1;
-                    }
-                }
-
-                await fetch(`${API_BASE}/exchange_rates/${targetId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        "id": targetId,
-                        "buy_rate": buyVal,
-                        "sell_rate": sellVal,
-                        "rate_usdt_to_yer": buyVal
-                    })
-                });
-                alert('✅ تم تحديث أسعار الصرف بنجاح!');
-                loadRates();
-            } catch (err) {}
-            finally { btn.disabled = false; }
-        }
-
-        // --- 5. إدارة الحسابات وتجميدها ---
-        async function loadUsers() {
-            const container = document.getElementById('usersContainer');
-            try {
-                const res = await fetch(`${API_BASE}/v_admin_all_users/`);
-                if (res.ok) {
-                    const data = await res.json();
-                    const items = data.items || [];
-                    if (items.length === 0) {
-                        container.innerHTML = '<p class="text-slate-400 text-center py-4">لا يوجد عملاء</p>';
-                        return;
-                    }
-                    container.innerHTML = items.map(u => {
-                        const uid = u.id || u.ID;
-                        const name = u.full_name || u.FULL_NAME || 'عميل';
-                        const email = u.email || u.EMAIL || 'غ/م';
-                        const bal = u.balance !== undefined ? u.balance : (u.BALANCE || 0);
-                        const kycSt = String(u.kyc_status || u.KYC_STATUS || 'PENDING').toUpperCase();
-                        const isVerified = (kycSt === 'VERIFIED' || kycSt === 'APPROVED');
-                        const active = (u.is_active !== undefined ? u.is_active : u.IS_ACTIVE);
-                        const isFrozen = parseInt(active) === 0;
-
-                        return `
-                            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
-                                <div>
-                                    <span class="font-bold text-emerald-400 text-sm">${name}</span> (ID: ${uid}) | <span class="text-slate-400">${email}</span>
-                                    <div class="mt-1 text-slate-400">
-                                        الرصيد: <b class="text-white">${parseFloat(bal).toFixed(2)} USDT</b> | 
-                                        التوثيق: <b class="${isVerified ? 'text-emerald-400' : 'text-amber-400'}">${isVerified ? '✅ موثق' : '⏳ غير موثق'}</b> | 
-                                        الحالة: <b class="${isFrozen ? 'text-red-400' : 'text-emerald-400'}">${isFrozen ? '🔒 مجمد' : '✅ نشط'}</b>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <button onclick="toggleUserStatus(${uid}, ${isFrozen ? 1 : 0})" class="${isFrozen ? 'bg-emerald-600' : 'bg-red-600'} text-white font-bold px-3 py-1.5 rounded-lg">
-                                        ${isFrozen ? 'إلغاء التجميد' : 'تجميد الحساب'}
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-                }
-            } catch (e) {}
-        }
-
-        async function toggleUserStatus(userId, newStatus) {
-            try {
-                const uRes = await fetch(`${API_BASE}/users/${userId}`);
-                if (uRes.ok) {
-                    const userData = await uRes.json();
-                    await fetch(`${API_BASE}/users/${userId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            "id": userId,
-                            "full_name": userData.full_name || userData.FULL_NAME,
-                            "phone_number": userData.phone_number || userData.PHONE_NUMBER,
-                            "email": userData.email || userData.EMAIL,
-                            "password_hash": userData.password_hash || userData.PASSWORD_HASH,
-                            "role": userData.role || userData.ROLE || "USER",
-                            "kyc_status": userData.kyc_status || userData.KYC_STATUS || "PENDING",
-                            "balance": parseFloat(userData.balance || userData.BALANCE || 0),
-                            "is_active": newStatus
-                        })
-                    });
-                    alert('✅ تم تغيير حالة الحساب بنجاح!');
-                    loadUsers();
-                }
-            } catch (e) {}
-        }
-
-        // --- 6. إدارة المحافظ ---
-        async function loadWallets() {
-            const container = document.getElementById('walletsContainer');
-            try {
-                const res = await fetch(`${API_BASE}/payment_methods/`);
-                if (res.ok) {
-                    const data = await res.json();
-                    const items = data.items || [];
-                    container.innerHTML = items.map(m => {
-                        const mid = m.id || m.ID;
-                        const name = m.method_name || m.METHOD_NAME || '';
-                        const acc = m.account_number || m.ACCOUNT_NUMBER || '';
-                        const holder = m.account_holder_name || m.ACCOUNT_HOLDER_NAME || '';
-
-                        return `
-                            <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
-                                <div>
-                                    <b class="text-purple-400 text-sm">${name}</b> - الرقم: <span class="text-white font-mono">${acc}</span>
-                                    ${holder ? `<span class="text-slate-400 block mt-0.5">صاحب الحساب: ${holder}</span>` : ''}
-                                </div>
-                                <button onclick="deleteWallet(${mid})" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-lg font-bold">حذف</button>
-                            </div>
-                        `;
-                    }).join('');
-                }
-            } catch(e) {}
-        }
-
-        async function deleteWallet(walletId) {
-            if (!confirm('تأكيد حذف المحفظة؟')) return;
-            try {
-                await fetch(`${API_BASE}/payment_methods/${walletId}`, { method: 'DELETE' });
-                alert('✅ تم الحذف بنجاح');
-                loadWallets();
-            } catch (e) {}
-        }
-
-        async function addPaymentMethod(e) {
-            e.preventDefault();
-            const payload = {
-                "method_name": document.getElementById('mName').value,
-                "account_number": document.getElementById('mAccount').value,
-                "account_holder_name": document.getElementById('mHolder').value,
-                "is_active": 1
-            };
-            try {
-                const res = await fetch(`${API_BASE}/payment_methods/`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (res.ok) {
-                    alert('✅ تم إضافة المحفظة بنجاح');
-                    document.getElementById('mName').value = '';
-                    document.getElementById('mAccount').value = '';
-                    document.getElementById('mHolder').value = '';
-                    loadWallets();
-                }
-            } catch(e) {}
-        }
-
-        loadKycRequests();
+        loadAdminData();
     </script>
 </body>
 </html>

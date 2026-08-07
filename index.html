@@ -3,131 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PayFlow - تسجيل الدخول</title>
+    <title>PayFlow - منصة الدفع والتحويلات الرقمية</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- مكتبة Supabase الرسمية -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
         .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
-        .input-field { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 12px; width: 100%; transition: border-color 0.2s; }
-        .input-field:focus { outline: none; border-color: #10b981; }
-        .btn-emerald { background: #10b981; color: white; font-weight: bold; padding: 14px; border-radius: 12px; width: 100%; transition: opacity 0.2s; font-size: 16px; }
-        .btn-emerald:hover { opacity: 0.9; }
-        .btn-emerald:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
-<body class="p-4 min-h-screen flex items-center justify-center">
-
-    <div class="glass-card w-full max-w-md p-6 md:p-8 space-y-6 shadow-2xl">
-        
-        <div class="text-center space-y-2">
-            <h1 class="text-3xl font-extrabold text-emerald-400">PayFlow</h1>
-            <p class="text-slate-400 text-sm">أدخل بيانات الحساب لتسجيل الدخول</p>
+<body class="min-h-screen flex flex-col justify-between p-6">
+    <header class="max-w-6xl mx-auto w-full flex justify-between items-center py-4 border-b border-slate-800">
+        <h1 class="text-2xl font-extrabold text-emerald-400">PayFlow</h1>
+        <div class="space-x-3 space-x-reverse">
+            <a href="login.html" class="px-4 py-2 text-sm font-bold text-slate-300 hover:text-white transition">تسجيل الدخول</a>
+            <a href="register.html" class="px-4 py-2 text-sm font-bold bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition">إنشاء حساب</a>
         </div>
+    </header>
 
-        <form onsubmit="handleLogin(event)" class="space-y-5">
-            
-            <div>
-                <label class="block text-sm font-bold text-slate-300 mb-2">البريد الإلكتروني</label>
-                <input type="text" id="loginIdentifier" required class="input-field text-left font-mono" placeholder="example@email.com" dir="ltr">
-            </div>
-
-            <div>
-                <label class="block text-sm font-bold text-slate-300 mb-2">كلمة المرور</label>
-                <input type="password" id="loginPassword" required class="input-field text-left font-mono" placeholder="••••••••" dir="ltr">
-            </div>
-
-            <button type="submit" id="submitBtn" class="btn-emerald flex items-center justify-center gap-2">
+    <main class="max-w-4xl mx-auto text-center space-y-8 my-auto py-12">
+        <div class="space-y-4">
+            <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs px-3 py-1.5 rounded-full font-bold">منصة المدفوعات والتحويلات الرقمية الآمنة</span>
+            <h2 class="text-4xl md:text-6xl font-black tracking-tight">أرسل واستقبل الأموال بكل سهولة وأمان</h2>
+            <p class="text-slate-400 text-lg max-w-2xl mx-auto">إدارة أموالك، تحويلات فورية، شحن رصيد، وتوثيق الحسابات بأعلى معايير الحماية والأمان.</p>
+        </div>
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="register.html" class="px-8 py-4 bg-emerald-500 text-white font-bold rounded-xl hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 transition flex items-center gap-2">
+                <i class="fa-solid fa-rocket"></i> ابدأ الآن مجاناً
+            </a>
+            <a href="login.html" class="px-8 py-4 bg-slate-800 border border-slate-700 text-slate-200 font-bold rounded-xl hover:bg-slate-700 transition flex items-center gap-2">
                 <i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول
-            </button>
-        </form>
-
-        <div class="text-center text-xs text-slate-400 border-t border-slate-800 pt-4">
-            ليس لديك حساب؟ <a href="register.html" class="text-emerald-400 font-bold hover:underline">أنشئ حساب جديد</a>
+            </a>
         </div>
+    </main>
 
-    </div>
-
-    <script>
-        // رابط مشروع Supabase والمفتاح
-        const SUPABASE_URL = 'https://dnitbzmtbedrgfkmxszp.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_5MpSpsrOXjHCSRNTllJO8g_twaTzmbf';
-
-        // تهيئة الاتصال
-        const supabaseClient = (window.supabase && SUPABASE_ANON_KEY) 
-            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
-            : null;
-
-        async function handleLogin(e) {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const identifier = document.getElementById('loginIdentifier').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-
-            if (!supabaseClient) {
-                alert('⚠️ تعذر الاتصال بمكتبة Supabase!');
-                return;
-            }
-
-            if (!identifier || !password) {
-                alert('يرجى كتابة البريد الإلكتروني وكلمة المرور!');
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
-
-            try {
-                // الاستعلام عن بيانات الحساب
-                const { data: users, error } = await supabaseClient
-                    .from('users')
-                    .select('*')
-                    .ilike('email', identifier.toLowerCase());
-
-                if (error) {
-                    console.error('Supabase Error:', error);
-                    alert(`❌ خطأ في قاعدة البيانات: ${error.message}`);
-                    return;
-                }
-
-                if (users && users.length > 0) {
-                    const user = users[0];
-                    const passHash = user.password_hash || user.password;
-                    const role = String(user.role || 'USER').toUpperCase();
-                    const isActive = user.is_active;
-
-                    // التحقق من تجميد الحساب
-                    if (isActive === 0 || isActive === false) {
-                        alert('🔒 حسابك مجمد حالياً! يرجى التواصل مع الدعم الفني.');
-                        return;
-                    }
-
-                    // التحقق الصارم: يجب ألا تكون كلمة المرور فارغة وأن تطابق المدخل
-                    if (passHash && passHash === password) {
-                        sessionStorage.setItem('pf_user', JSON.stringify(user));
-                        alert(`✅ أهلاً بك ${user.full_name || ''}! تم تسجيل الدخول بنجاح.`);
-
-                        if (role === 'ADMIN' || identifier.toUpperCase() === 'ADMIN') {
-                            window.location.href = 'admin.html';
-                        } else {
-                            window.location.href = 'dashboard.html';
-                        }
-                    } else {
-                        alert('❌ كلمة المرور غير صحيحة!');
-                    }
-                } else {
-                    alert('❌ الحساب غير موجود!');
-                }
-            } catch (err) {
-                console.error('Login Exception:', err);
-                alert(`حدث خطأ أثناء الاتصال: ${err.message || err}`);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول';
-            }
-        }
-    </script>
+    <footer class="max-w-6xl mx-auto w-full text-center text-xs text-slate-500 border-t border-slate-800 pt-4">
+        جميع الحقوق محفوظة &copy; PayFlow 2026
+    </footer>
 </body>
 </html>

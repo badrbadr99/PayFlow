@@ -9,188 +9,116 @@
     <style>
         body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
         .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
-        .btn-action { background: #1e293b; border: 1px solid #334155; padding: 18px; border-radius: 16px; text-align: center; font-weight: bold; transition: 0.2s; }
-        .btn-action:hover { background: #334155; border-color: #10b981; }
     </style>
 </head>
-<body class="p-4 md:p-6 max-w-4xl mx-auto space-y-6">
+<body class="p-4 md:p-8 max-w-4xl mx-auto space-y-6 min-h-screen flex flex-col justify-between">
 
-    <!-- Header -->
-    <div class="glass-card p-4 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <h1 class="text-2xl font-extrabold text-emerald-400">PayFlow</h1>
-            <span class="bg-emerald-500/10 text-emerald-400 text-xs px-2.5 py-1 rounded-full font-bold border border-emerald-500/20">منصة الدفع الرقمي</span>
-        </div>
-        <button onclick="sessionStorage.clear(); window.location.href='login.html';" class="text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg border border-red-500/20 font-bold transition">خروج</button>
-    </div>
-
-    <!-- Balance Card -->
-    <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 rounded-2xl shadow-xl flex justify-between items-center relative overflow-hidden">
-        <div>
-            <div class="text-xs text-emerald-100 mb-1">مرحباً، <span id="userName">...</span></div>
-            <div class="text-3xl font-extrabold text-white font-mono"><span id="userBalance">0.00</span> USDT</div>
-        </div>
-        <div>
-            <span id="kycBadge" class="bg-slate-900/60 text-white text-xs px-3.5 py-2 rounded-xl border border-white/20 font-bold flex items-center gap-1.5">
-                <i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...
-            </span>
-        </div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <a href="deposit.html" class="btn-action text-emerald-400"><i class="fa-solid fa-arrow-down-left mb-2 text-xl block"></i> إيداع بنكي مباشر</a>
-        <a href="withdraw.html" class="btn-action text-blue-400"><i class="fa-solid fa-arrow-up-right mb-2 text-xl block"></i> سحب أموال</a>
-        <a href="transfer.html" class="btn-action text-purple-400"><i class="fa-solid fa-paper-plane mb-2 text-xl block"></i> تحويل داخلي</a>
-        <a href="kyc.html" class="btn-action text-amber-400"><i class="fa-solid fa-id-card mb-2 text-xl block"></i> توثيق الهوية</a>
-    </div>
-
-    <!-- Transactions List -->
-    <div class="glass-card p-6 space-y-4">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-            <h2 class="font-bold text-lg text-slate-200 flex items-center gap-2">
-                <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> سجل العمليات (إيداع / سحب / تحويل)
-            </h2>
-            <span id="txCountBadge" class="text-xs text-slate-400 font-mono">0 عملية</span>
-        </div>
-
-        <div id="txContainer" class="space-y-3">
-            <p class="text-slate-400 text-center py-4 text-xs">جاري تحميل العمليات...</p>
-        </div>
-
-        <div class="text-center pt-2">
-            <button id="loadMoreBtn" onclick="renderMoreTransactions()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-6 py-2.5 rounded-xl border border-slate-700 font-bold transition">
-                عرض المزيد من العمليات <i class="fa-solid fa-chevron-down mr-1"></i>
+    <div class="space-y-6">
+        <!-- Header -->
+        <div class="flex justify-between items-center glass-card p-4 md:p-6">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-emerald-400" id="userName">مرحباً، ...</h1>
+                <p class="text-xs text-slate-400" id="userEmail">...</p>
+            </div>
+            <button onclick="logout()" class="bg-red-500/10 text-red-400 border border-red-500/20 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-500/20 transition flex items-center gap-1">
+                <i class="fa-solid fa-right-from-bracket"></i> خروج
             </button>
         </div>
+
+        <!-- Balance Card -->
+        <div class="glass-card p-6 md:p-8 bg-gradient-to-br from-slate-900 to-emerald-950/40 border-emerald-500/30 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">الرصيد المتاح</span>
+                <div class="text-4xl md:text-5xl font-black text-emerald-400 font-mono mt-1" id="userBalance">0.00 USDT</div>
+            </div>
+            <div class="flex flex-wrap gap-3 w-full md:w-auto">
+                <a href="deposit.html" class="flex-1 md:flex-none px-5 py-3 bg-emerald-500 text-white font-bold rounded-xl text-center hover:bg-emerald-600 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-wallet"></i> إيداع
+                </a>
+                <a href="withdraw.html" class="flex-1 md:flex-none px-5 py-3 bg-blue-600 text-white font-bold rounded-xl text-center hover:bg-blue-700 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrow-up-right"></i> سحب
+                </a>
+                <a href="transfer.html" class="flex-1 md:flex-none px-5 py-3 bg-purple-600 text-white font-bold rounded-xl text-center hover:bg-purple-700 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> تحويل
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <a href="kyc.html" class="glass-card p-5 hover:border-emerald-500 transition flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-id-card"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm">توثيق الحساب (KYC)</h3>
+                        <p class="text-xs text-slate-400" id="kycStatusText">الحالة: قيد المراجعة</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-left text-slate-500 text-sm"></i>
+            </a>
+            <div class="glass-card p-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm">أمان الحساب</h3>
+                        <p class="text-xs text-slate-400">الحساب محمي وآمن</p>
+                    </div>
+                </div>
+                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-bold">نشط</span>
+            </div>
+        </div>
     </div>
+
+    <footer class="text-center text-xs text-slate-500 pt-4 border-t border-slate-800">
+        PayFlow Dashboard &copy; 2026
+    </footer>
 
     <script>
         const API_BASE = 'http://localhost:8081/ords/buysell_user';
-        let userSession = JSON.parse(sessionStorage.getItem('pf_user'));
-        if (!userSession) window.location.href = 'login.html';
+        let currentUser = JSON.parse(sessionStorage.getItem('pf_user'));
 
-        let allUserTransactions = [];
-        let visibleCount = 10;
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
 
-        async function initDashboard() {
-            const uid = userSession.id || userSession.ID;
+        function loadUserData() {
+            const name = currentUser.full_name || currentUser.FULL_NAME || 'مستخدم PayFlow';
+            const email = currentUser.email || currentUser.EMAIL || '';
+            const balance = parseFloat(currentUser.balance !== undefined ? currentUser.balance : (currentUser.BALANCE || 0));
+            const kyc = currentUser.kyc_status || currentUser.KYC_STATUS || 'PENDING';
+
+            document.getElementById('userName').innerText = `مرحباً، ${name}`;
+            document.getElementById('userEmail').innerText = email;
+            document.getElementById('userBalance').innerText = `${balance.toFixed(2)} USDT`;
+
+            const kycMap = { 'PENDING': 'قيد المراجعة', 'APPROVED': 'موثق', 'REJECTED': 'مرفوض' };
+            document.getElementById('kycStatusText').innerText = `الحالة: ${kycMap[kyc] || kyc}`;
+        }
+
+        async function fetchLatestData() {
+            const userId = currentUser.id || currentUser.ID;
             try {
-                const uRes = await fetch(`${API_BASE}/users/${uid}?_t=${new Date().getTime()}`);
-                if (uRes.ok) {
-                    userSession = await uRes.json();
-                    sessionStorage.setItem('pf_user', JSON.stringify(userSession));
+                const res = await fetch(`${API_BASE}/users/${userId}?_t=${new Date().getTime()}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    currentUser = data;
+                    sessionStorage.setItem('pf_user', JSON.stringify(data));
+                    loadUserData();
                 }
-            } catch(e) {}
-
-            document.getElementById('userName').innerText = userSession.full_name || userSession.FULL_NAME || 'العميل';
-            document.getElementById('userBalance').innerText = parseFloat(userSession.balance !== undefined ? userSession.balance : (userSession.BALANCE || 0)).toFixed(2);
-            
-            const kycSt = String(userSession.kyc_status || userSession.KYC_STATUS || 'PENDING').toUpperCase();
-            const badge = document.getElementById('kycBadge');
-            if (kycSt === 'VERIFIED' || kycSt === 'APPROVED') {
-                badge.className = "bg-emerald-500/90 text-white text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 shadow";
-                badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> حساب موثق بالكامل';
-            } else {
-                badge.className = "bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5";
-                badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> غير موثق';
-            }
-            loadTransactions();
+            } catch (e) {}
         }
 
-        async function loadTransactions() {
-            const uid = String(userSession.id || userSession.ID);
-            const nocache = `?_t=${new Date().getTime()}`;
-
-            try {
-                const depRes = await fetch(`${API_BASE}/deposits/${nocache}`).catch(e => null);
-                const withRes = await fetch(`${API_BASE}/withdraw_requests/${nocache}`).catch(e => null);
-                
-                let trfItems = [];
-                try {
-                    const trfRes = await fetch(`${API_BASE}/internal_transfers/${nocache}`);
-                    if (trfRes.ok) {
-                        const trfJson = await trfRes.json();
-                        trfItems = trfJson.items || [];
-                    }
-                } catch (err) {}
-
-                let list = [];
-
-                if (depRes && depRes.ok) {
-                    const depData = await depRes.json();
-                    (depData.items || []).forEach(d => {
-                        if (String(d.user_id !== undefined ? d.user_id : (d.USER_ID || '')) === uid) {
-                            list.push({ ref: `DEP-${d.request_id || d.REQUEST_ID}`, type: 'إيداع بنكي', amount: `+${parseFloat(d.net_usdt || d.NET_USDT || 0).toFixed(2)} USDT`, status: 'مكتملة', date: d.created_at || 'الآن', colorClass: 'text-emerald-400' });
-                        }
-                    });
-                }
-
-                if (withRes && withRes.ok) {
-                    const withData = await withRes.json();
-                    (withData.items || []).forEach(w => {
-                        if (String(w.user_id !== undefined ? w.user_id : (w.USER_ID || '')) === uid) {
-                            list.push({ ref: `WTH-${w.id || w.ID || w.request_id || w.REQUEST_ID}`, type: 'سحب أموال', amount: `-${parseFloat(w.amount_usdt || w.AMOUNT_USDT || 0).toFixed(2)} USDT`, status: 'مكتملة', date: w.created_at || 'الآن', colorClass: 'text-blue-400' });
-                        }
-                    });
-                }
-
-                trfItems.forEach(t => {
-                    const sId = String(t.sender_id !== undefined ? t.sender_id : (t.SENDER_ID || ''));
-                    const rId = String(t.receiver_id !== undefined ? t.receiver_id : (t.RECEIVER_ID || ''));
-                    const amt = parseFloat(t.amount_usdt !== undefined ? t.amount_usdt : (t.AMOUNT_USDT || 0));
-                    const tid = t.id !== undefined ? t.id : (t.ID || '');
-
-                    if (sId === uid) {
-                        list.push({ ref: `TRN-${tid}`, type: 'تحويل داخلي (صادر)', amount: `-${amt.toFixed(2)} USDT`, status: 'مكتملة', date: t.created_at || 'الآن', colorClass: 'text-purple-400' });
-                    } else if (rId === uid) {
-                        list.push({ ref: `TRN-${tid}`, type: 'تحويل داخلي (وارد)', amount: `+${amt.toFixed(2)} USDT`, status: 'مكتملة', date: t.created_at || 'الآن', colorClass: 'text-emerald-400' });
-                    }
-                });
-
-                allUserTransactions = list.reverse();
-                document.getElementById('txCountBadge').innerText = `${allUserTransactions.length} عملية`;
-                visibleCount = 10;
-                renderTransactions();
-
-            } catch (e) {
-                document.getElementById('txContainer').innerHTML = '<p class="text-red-400 text-center py-4 text-xs">تعذر تحميل السجل.</p>';
-            }
+        function logout() {
+            sessionStorage.removeItem('pf_user');
+            window.location.href = 'login.html';
         }
 
-        function renderTransactions() {
-            const container = document.getElementById('txContainer');
-            const loadBtn = document.getElementById('loadMoreBtn');
-            const slice = allUserTransactions.slice(0, visibleCount);
-
-            if (allUserTransactions.length === 0) {
-                container.innerHTML = '<p class="text-slate-400 text-center py-4 text-xs">لا توجد عمليات سابقة</p>';
-                loadBtn.classList.add('hidden');
-                return;
-            }
-
-            container.innerHTML = slice.map(t => `
-                <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
-                    <div>
-                        <b class="text-white text-sm">${t.type}</b>
-                        <span class="block text-[10px] text-slate-500 font-mono">المرجع: ${t.ref} | ${t.date}</span>
-                    </div>
-                    <div class="text-left">
-                        <b class="text-base font-mono ${t.colorClass}">${t.amount}</b>
-                        <div class="text-[10px] text-emerald-400 font-bold">${t.status}</div>
-                    </div>
-                </div>
-            `).join('');
-
-            loadBtn.classList.toggle('hidden', visibleCount >= allUserTransactions.length);
-        }
-
-        function renderMoreTransactions() {
-            visibleCount += 10;
-            renderTransactions();
-        }
-
-        initDashboard();
+        loadUserData();
+        fetchLatestData();
     </script>
 </body>
 </html>
