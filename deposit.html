@@ -69,7 +69,6 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_5MpSpsrOXjHCSRNTllJO8g_twaTzmbf';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // التحقق من تسجيل الدخول وجلب بيانات المستخدم بمرونة تامة
         let currentUser = JSON.parse(sessionStorage.getItem('pf_user') || '{}');
         const userId = currentUser.id || currentUser.ID || currentUser.user_id;
 
@@ -97,13 +96,6 @@
             const txId = document.getElementById('txId').value.trim();
             const fileInput = document.getElementById('proofFile');
 
-            const activeUserId = currentUser.id || currentUser.ID || currentUser.user_id;
-            if (!activeUserId) {
-                alert('❌ خطأ: لم يتم التعرف على حسابك، يرجى تسجيل الدخول من جديد.');
-                window.location.href = 'login.html';
-                return;
-            }
-
             if (!fileInput.files || !fileInput.files[0]) {
                 alert('❌ يرجى إرفاق صورة إثبات التحويل أولاً!');
                 return;
@@ -115,10 +107,10 @@
             try {
                 const file = fileInput.files[0];
                 const fileExt = file.name.split('.').pop();
-                const fileName = `${activeUserId}_${Date.now()}.${fileExt}`;
+                const fileName = `${userId}_${Date.now()}.${fileExt}`;
 
                 // 1. رفع الصورة إلى Supabase Storage
-                const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                const { error: uploadError } = await supabaseClient.storage
                     .from('deposit-proofs')
                     .upload(fileName, file);
 
@@ -131,12 +123,12 @@
 
                 const proofUrl = publicUrlData.publicUrl;
 
-                // 3. إرسال الطلب مع معرف المستخدم ورابط الصورة إلى قاعدة البيانات
+                // 3. إرسال الطلب مع الاعتماد على اسم العمود الصحيح payment_method
                 const { error: dbError } = await supabaseClient
                     .from('deposit_requests')
                     .insert([{
-                        user_id: parseInt(activeUserId),
-                        deposit_method: method,
+                        user_id: parseInt(userId),
+                        payment_method: method, // تم التصحيح هنا ليتطابق مع جدول قاعدة البيانات
                         amount_usdt: amount,
                         tx_id: txId,
                         proof_image: proofUrl,
