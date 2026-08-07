@@ -123,15 +123,21 @@
 
                 const proofUrl = publicUrlData.publicUrl;
 
-                // 3. إرسال الطلب مع الاعتماد على اسم العمود الصحيح payment_method
+                // 3. إرسال البيانات متوافقة تماماً مع كافة الأعمدة الإلزامية في جدول قاعدة البيانات
                 const { error: dbError } = await supabaseClient
                     .from('deposit_requests')
                     .insert([{
                         user_id: parseInt(userId),
-                        payment_method: method, // تم التصحيح هنا ليتطابق مع جدول قاعدة البيانات
+                        payment_method: method,
+                        deposit_method: method,
+                        amount_yer: amount * 530, // قيمة افتراضية متوافقة مع عمود الـ YER الإلزامي
+                        exchange_rate: 530,       // سعر الصرف الإلزامي
+                        gross_usdt: amount,
+                        net_usdt: amount,
                         amount_usdt: amount,
                         tx_id: txId,
                         proof_image: proofUrl,
+                        proof_ref: proofUrl,
                         status: 'PENDING'
                     }]);
 
