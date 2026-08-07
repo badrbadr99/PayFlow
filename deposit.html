@@ -6,6 +6,7 @@
     <title>PayFlow - إيداع أموال</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
         .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
@@ -48,6 +49,15 @@
                 <input type="text" id="txId" required class="input-field text-left font-mono" placeholder="أدخل رقم العملية أو المعرف" dir="ltr">
             </div>
 
+            <div>
+                <label class="block text-sm font-bold text-slate-200 mb-2">إرفاق إثبات التحويل (صورة الإيصال)</label>
+                <label class="cursor-pointer bg-slate-900 border border-slate-700 hover:border-emerald-500 rounded-xl p-4 text-center text-sm text-slate-300 flex items-center justify-center gap-2 transition block">
+                    <i class="fa-solid fa-cloud-arrow-up text-emerald-400 text-lg"></i>
+                    <span id="fileNameDisplay">اختر صورة الإيصال من الهاتف أو الكمبيوتر...</span>
+                    <input type="file" id="proofFile" accept="image/*" required class="hidden" onchange="updateFileName(this)">
+                </label>
+            </div>
+
             <button type="submit" id="submitBtn" class="btn-emerald flex items-center justify-center gap-2">
                 <i class="fa-solid fa-check"></i> تأكيد طلب الإيداع
             </button>
@@ -55,10 +65,23 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8081/ords/buysell_user';
-        let currentUser = JSON.parse(sessionStorage.getItem('pf_user'));
+        const SUPABASE_URL = 'https://dnitbzmtbedrgfkmxszp.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_5MpSpsrOXjHCSRNTllJO8g_twaTzmbf';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        let currentUser = JSON.parse(sessionStorage.getItem('pf_user'));
         if (!currentUser) window.location.href = 'login.html';
+
+        function updateFileName(input) {
+            const display = document.getElementById('fileNameDisplay');
+            if (input.files && input.files[0]) {
+                display.innerText = input.files[0].name;
+                display.classList.add('text-emerald-400', 'font-bold');
+            } else {
+                display.innerText = 'اختر صورة الإيصال من الهاتف أو الكمبيوتر...';
+                display.classList.remove('text-emerald-400', 'font-bold');
+            }
+        }
 
         async function submitDeposit(e) {
             e.preventDefault();
@@ -66,32 +89,55 @@
             const method = document.getElementById('depositMethod').value;
             const amount = parseFloat(document.getElementById('depositAmount').value);
             const txId = document.getElementById('txId').value.trim();
+            const fileInput = document.getElementById('proofFile');
             const userId = currentUser.id || currentUser.ID;
 
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('❌ يرجى إرفاق صورة إثبات التحويل أولاً!');
+                return;
+            }
+
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إرسال الطلب...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري رفع الصورة وإرسال الطلب...';
 
             try {
-                const res = await fetch(`${API_BASE}/deposit_requests/`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        "user_id": parseInt(userId),
-                        "deposit_method": method,
-                        "amount_usdt": amount,
-                        "tx_id": txId,
-                        "status": "PENDING"
-                    })
-                });
+                const file = fileInput.files[0];
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${userId}_${Date.now()}.${fileExt}`;
 
-                if (res.ok) {
-                    alert('✅ تم إرسال طلب الإيداع بنجاح وسيتم مراجعته وإضافة الرصيد قريباً!');
-                    window.location.href = 'dashboard.html';
-                } else {
-                    throw new Error('فشل إرسال طلب الإيداع للخادم');
-                }
+                // 1. رفع الصورة إلى Supabase Storage
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    .from('deposit-proofs')
+                    .upload(fileName, file);
+
+                if (uploadError) throw uploadError;
+
+                // 2. الحصول على الرابط العام للصورة المرفوعة
+                const { data: publicUrlData } = supabaseClient.storage
+                    .from('deposit-proofs')
+                    .getPublicUrl(fileName);
+
+                const proofUrl = publicUrlData.publicUrl;
+
+                // 3. حفظ بيانات الطلب ورابط الصورة في قاعدة البيانات
+                const { error: dbError } = await supabaseClient
+                    .from('deposit_requests')
+                    .insert([{
+                        user_id: parseInt(userId),
+                        deposit_method: method,
+                        amount_usdt: amount,
+                        tx_id: txId,
+                        proof_image: proofUrl, // تخزين الرابط الحقيقي للصورة
+                        status: 'PENDING'
+                    }]);
+
+                if (dbError) throw dbError;
+
+                alert('✅ تم رفع الإثبات وإرسال طلب الإيداع بنجاح!');
+                window.location.href = 'dashboard.html';
+
             } catch (err) {
-                alert(`❌ حدث خطأ: ${err.message || err}`);
+                alert(`❌ حدث خطأ أثناء الرفع: ${err.message || err}`);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> تأكيد طلب الإيداع';
