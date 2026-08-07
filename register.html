@@ -1,128 +1,35 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PayFlow - إنشاء حساب جديد</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
-        .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
-        .input-field { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 12px; width: 100%; transition: border-color 0.2s; }
-        .input-field:focus { outline: none; border-color: #10b981; }
-        .btn-emerald { background: #10b981; color: white; font-weight: bold; padding: 14px; border-radius: 12px; width: 100%; transition: opacity 0.2s; font-size: 16px; }
-        .btn-emerald:hover { opacity: 0.9; }
-        .btn-emerald:disabled { opacity: 0.5; cursor: not-allowed; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>إنشاء حساب | PayFlow</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="assets/config.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <script src="assets/auth.js" defer></script>
 </head>
-<body class="p-4 min-h-screen flex items-center justify-center">
-
-    <div class="glass-card w-full max-w-md p-6 md:p-8 space-y-6 shadow-2xl">
-        
-        <div class="text-center space-y-2">
-            <h1 class="text-3xl font-extrabold text-emerald-400">PayFlow</h1>
-            <p class="text-slate-400 text-sm">أنشئ حساب جديد للبدء في المنصة</p>
-        </div>
-
-        <form onsubmit="handleRegister(event)" class="space-y-4">
-            <div>
-                <label class="block text-sm font-bold text-slate-300 mb-1.5">الاسم الكامل</label>
-                <input type="text" id="regName" required class="input-field" placeholder="الاسم الثلاثي">
-            </div>
-
-            <div>
-                <label class="block text-sm font-bold text-slate-300 mb-1.5">رقم الهاتف</label>
-                <input type="text" id="regPhone" required class="input-field text-left font-mono" placeholder="77xxxxxxx" dir="ltr">
-            </div>
-
-            <div>
-                <label class="block text-sm font-bold text-slate-300 mb-1.5">البريد الإلكتروني</label>
-                <input type="email" id="regEmail" required class="input-field text-left font-mono" placeholder="example@email.com" dir="ltr">
-            </div>
-
-            <div>
-                <label class="block text-sm font-bold text-slate-300 mb-1.5">كلمة المرور</label>
-                <input type="password" id="regPassword" required class="input-field text-left font-mono" placeholder="••••••••" dir="ltr">
-            </div>
-
-            <button type="submit" id="submitBtn" class="btn-emerald flex items-center justify-center gap-2 mt-2">
-                <i class="fa-solid fa-user-plus"></i> تسجيل حساب جديد
-            </button>
+<body data-page="register">
+  <main class="auth-page">
+    <section class="auth-panel">
+      <div class="auth-box">
+        <a class="brand" href="index.html"><span class="brand-mark">P</span><span>PayFlow</span></a>
+        <h1>أنشئ حسابك</h1>
+        <p>ابدأ بتسجيل بياناتك الأساسية. يمكنك توثيق الهوية من داخل حسابك لاحقًا.</p>
+        <form id="registerForm" novalidate>
+          <div class="field"><label for="regName">الاسم الكامل</label><input class="input" id="regName" type="text" autocomplete="name" placeholder="الاسم الثلاثي" minlength="3" required></div>
+          <div class="field"><label for="regPhone">رقم الهاتف</label><input class="input ltr" id="regPhone" type="tel" autocomplete="tel" placeholder="+967 7XX XXX XXX" required></div>
+          <div class="field"><label for="regEmail">البريد الإلكتروني</label><input class="input ltr" id="regEmail" type="email" autocomplete="email" placeholder="name@example.com" required></div>
+          <div class="field"><label for="regPassword">كلمة المرور</label><input class="input ltr" id="regPassword" type="password" autocomplete="new-password" placeholder="8 أحرف على الأقل" minlength="8" required><div class="field-hint">استخدم مزيجًا من الحروف والأرقام لحماية حسابك.</div></div>
+          <label style="display:flex;align-items:flex-start;gap:9px;color:var(--muted);font-size:11px;line-height:1.7;margin-bottom:17px"><input type="checkbox" id="terms" required style="margin-top:4px"> أوافق على شروط الاستخدام وسياسة الخصوصية، وأقر بصحة البيانات المدخلة.</label>
+          <button class="btn btn-primary btn-block" id="registerButton" type="submit"><i class="fa-solid fa-user-plus"></i> إنشاء الحساب</button>
         </form>
-
-        <div class="text-center text-xs text-slate-400 border-t border-slate-800 pt-4">
-            لديك حساب بالفعل؟ <a href="login.html" class="text-emerald-400 font-bold hover:underline">تسجيل الدخول</a>
-        </div>
-
-    </div>
-
-    <script>
-        const SUPABASE_URL = 'https://dnitbzmtbedrgfkmxszp.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_5MpSpsrOXjHCSRNTllJO8g_twaTzmbf';
-
-        const supabaseClient = (window.supabase && SUPABASE_ANON_KEY) 
-            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
-            : null;
-
-        async function handleRegister(e) {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const name = document.getElementById('regName').value.trim();
-            const phone = document.getElementById('regPhone').value.trim();
-            const email = document.getElementById('regEmail').value.trim().toLowerCase();
-            const password = document.getElementById('regPassword').value.trim();
-
-            if (!supabaseClient) {
-                alert('⚠️ تعذر الاتصال بمكتبة Supabase!');
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إنشاء الحساب...';
-
-            try {
-                const { data: existing } = await supabaseClient
-                    .from('users')
-                    .select('*')
-                    .ilike('email', email);
-
-                if (existing && existing.length > 0) {
-                    alert('❌ هذا البريد الإلكتروني مسجل مسبقاً!');
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> تسجيل حساب جديد';
-                    return;
-                }
-
-                const { error } = await supabaseClient
-                    .from('users')
-                    .insert([{
-                        full_name: name,
-                        phone_number: phone,
-                        email: email,
-                        password_hash: password,
-                        role: 'USER',
-                        kyc_status: 'PENDING',
-                        balance: 0.00,
-                        is_active: 1
-                    }]);
-
-                if (error) {
-                    alert(`❌ فشل إنشاء الحساب: ${error.message}`);
-                    return;
-                }
-
-                alert('✅ تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن.');
-                window.location.href = 'login.html';
-
-            } catch (err) {
-                alert(`حدث خطأ أثناء الاتصال: ${err.message || err}`);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> تسجيل حساب جديد';
-            }
-        }
-    </script>
+        <div class="auth-alt">لديك حساب بالفعل؟ <a href="login.html">سجّل الدخول</a></div>
+      </div>
+    </section>
+    <aside class="auth-visual"><div class="auth-message"><span class="eyebrow">ابدأ خلال دقائق</span><h2>بوابتك اليومية إلى <span>USDT.</span></h2><p>رصيد واضح، أسعار محدثة، طلبات موثقة، وإشعارات تصل إليك عند كل تغيير.</p><div class="auth-points"><div class="auth-point"><i class="fa-solid fa-mobile-screen"></i> متوافق مع الجوال</div><div class="auth-point"><i class="fa-solid fa-headset"></i> دعم سريع</div></div></div></aside>
+  </main>
 </body>
 </html>

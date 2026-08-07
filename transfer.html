@@ -1,186 +1,33 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PayFlow - تحويل أموال داخلي</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
-        .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
-        .input-field { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 12px; width: 100%; transition: border-color 0.2s; }
-        .input-field:focus { outline: none; border-color: #a855f7; }
-        .btn-purple { background: #a855f7; color: white; font-weight: bold; padding: 14px; border-radius: 12px; width: 100%; transition: opacity 0.2s; font-size: 16px; }
-        .btn-purple:hover { opacity: 0.9; }
-        .btn-purple:disabled { opacity: 0.5; cursor: not-allowed; }
-    </style>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تحويل داخلي | PayFlow</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="stylesheet" href="assets/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script><script src="assets/config.js" defer></script><script src="assets/app.js" defer></script><script src="assets/transfer.js" defer></script>
 </head>
-<body class="p-4 max-w-xl mx-auto min-h-screen flex flex-col justify-center space-y-6">
-
-    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-        <h1 class="text-2xl font-bold text-purple-400 flex items-center gap-2">
-            <i class="fa-solid fa-paper-plane"></i> تحويل أموال داخلي فوري
-        </h1>
-        <a href="dashboard.html" class="text-xs text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1 transition">
-            <i class="fa-solid fa-arrow-right"></i> رجوع
-        </a>
-    </div>
-
-    <div class="glass-card p-6 md:p-8 space-y-5 shadow-2xl">
-        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
-            <span class="text-slate-400">رصيدك المتاح حالياً:</span>
-            <b id="userBalanceText" class="text-lg text-emerald-400 font-mono">0.00 USDT</b>
-        </div>
-
-        <form onsubmit="handleTransfer(event)" class="space-y-5">
-            <div>
-                <label class="block text-sm font-bold text-slate-200 mb-2">البريد الإلكتروني للمستلم</label>
-                <input type="email" id="receiverEmail" required class="input-field text-left font-mono" placeholder="user@example.com" dir="ltr">
-            </div>
-
-            <div>
-                <label class="block text-sm font-bold text-slate-200 mb-2">المبلغ المراد تحويله (USDT)</label>
-                <input type="number" step="0.01" min="1" id="transferAmount" required class="input-field text-left font-mono text-lg text-emerald-400" placeholder="0.00" dir="ltr">
-            </div>
-
-            <button type="submit" id="submitBtn" class="btn-purple flex items-center justify-center gap-2">
-                <i class="fa-solid fa-bolt"></i> إرسال التحويل الفوري
-            </button>
-        </form>
-    </div>
-
-    <script>
-        const API_BASE = 'http://localhost:8081/ords/buysell_user';
-        let currentUser = JSON.parse(sessionStorage.getItem('pf_user'));
-
-        if (!currentUser) window.location.href = 'login.html';
-
-        async function fetchSenderLatestData() {
-            const userId = currentUser.id || currentUser.ID;
-            try {
-                const res = await fetch(`${API_BASE}/users/${userId}?_t=${new Date().getTime()}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    currentUser = data;
-                    sessionStorage.setItem('pf_user', JSON.stringify(data));
-                    const bal = parseFloat(data.balance !== undefined ? data.balance : (data.BALANCE || 0));
-                    document.getElementById('userBalanceText').innerText = `${bal.toFixed(2)} USDT`;
-                }
-            } catch (e) {}
-        }
-
-        async function handleTransfer(e) {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const targetEmail = document.getElementById('receiverEmail').value.trim().toLowerCase();
-            const amount = parseFloat(document.getElementById('transferAmount').value);
-
-            const senderId = currentUser.id || currentUser.ID;
-            const senderEmail = String(currentUser.email || currentUser.EMAIL || '').trim().toLowerCase();
-            const senderBalance = parseFloat(currentUser.balance !== undefined ? currentUser.balance : (currentUser.BALANCE || 0));
-
-            if (targetEmail === senderEmail) {
-                alert('❌ لا يمكنك تحويل الأموال إلى نفسك!');
-                return;
-            }
-
-            if (amount > senderBalance) {
-                alert(`❌ رصيدك الحالي (${senderBalance.toFixed(2)} USDT) لا يكفي لإتمام هذا التحويل[cite: 6]!`);
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تنفيذ التحويل...';
-
-            try {
-                const usersRes = await fetch(`${API_BASE}/users/?_t=${new Date().getTime()}`);
-                if (!usersRes.ok) throw new Error('فشل الاتصال بقاعدة بيانات المستخدمين');
-                
-                const usersData = await usersRes.json();
-                const users = usersData.items || [];
-                const receiver = users.find(u => String(u.email || u.EMAIL || '').trim().toLowerCase() === targetEmail);
-
-                if (!receiver) {
-                    alert('❌ البريد الإلكتروني للمستلم غير موجود في النظام!');
-                    return;
-                }
-
-                const receiverId = receiver.id || receiver.ID;
-                if (senderId === receiverId) {
-                    alert('❌ لا يمكنك التحويل لنفس الحساب!');
-                    return;
-                }
-
-                const receiverActive = receiver.is_active !== undefined ? receiver.is_active : receiver.IS_ACTIVE;
-                if (receiverActive === 0 || receiverActive === false) {
-                    alert('❌ حساب المستلم مجمد ولا يمكن استلام أموال عليه حالياً.');
-                    return;
-                }
-
-                const receiverBalance = parseFloat(receiver.balance !== undefined ? receiver.balance : (receiver.BALANCE || 0));
-                const newSenderBal = senderBalance - amount;
-                const newReceiverBal = receiverBalance + amount;
-
-                // خصم المبلغ من المرسل
-                await fetch(`${API_BASE}/users/${senderId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        "id": parseInt(senderId),
-                        "full_name": currentUser.full_name || currentUser.FULL_NAME,
-                        "phone_number": currentUser.phone_number || currentUser.PHONE_NUMBER,
-                        "email": senderEmail,
-                        "password_hash": currentUser.password_hash || currentUser.PASSWORD_HASH,
-                        "role": currentUser.role || currentUser.ROLE || "USER",
-                        "kyc_status": currentUser.kyc_status || currentUser.KYC_STATUS || "PENDING",
-                        "is_active": currentUser.is_active !== undefined ? currentUser.is_active : currentUser.IS_ACTIVE,
-                        "balance": newSenderBal
-                    })
-                });
-
-                // إضافة المبلغ للمستلم
-                await fetch(`${API_BASE}/users/${receiverId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        "id": parseInt(receiverId),
-                        "full_name": receiver.full_name || receiver.FULL_NAME,
-                        "phone_number": receiver.phone_number || receiver.PHONE_NUMBER,
-                        "email": receiver.email || receiver.EMAIL,
-                        "password_hash": receiver.password_hash || receiver.PASSWORD_HASH,
-                        "role": receiver.role || receiver.ROLE || "USER",
-                        "kyc_status": receiver.kyc_status || receiver.KYC_STATUS || "PENDING",
-                        "is_active": receiverActive,
-                        "balance": newReceiverBal
-                    })
-                });
-
-                // تسجيل التحويل
-                await fetch(`${API_BASE}/internal_transfers/`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        "sender_id": parseInt(senderId),
-                        "receiver_id": parseInt(receiverId),
-                        "amount_usdt": amount,
-                        "status": "COMPLETED"
-                    })
-                });
-
-                alert(`✅ تم تحويل مبلغ ${amount.toFixed(2)} USDT بنجاح إلى ${receiver.full_name || receiver.FULL_NAME}!`);
-                window.location.href = 'dashboard.html';
-
-            } catch (err) {
-                console.error('Transfer Error:', err);
-                alert(`❌ حدث خطأ أثناء تنفيذ التحويل: ${err.message || err}`);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-bolt"></i> إرسال التحويل الفوري';
-            }
-        }
-
-        fetchSenderLatestData();
-    </script>
+<body data-page="transfer">
+  <div class="app-layout"><aside class="sidebar" id="sidebar"></aside><div class="main-wrap"><header class="topbar" id="topbar"></header>
+    <main class="page">
+      <div class="page-head"><div><h2>تحويل داخلي</h2><p>أرسل USDT فورًا إلى مستخدم آخر داخل PayFlow.</p></div><a class="btn btn-secondary" href="dashboard.html"><i class="fa-solid fa-arrow-right"></i> العودة للحساب</a></div>
+      <div class="form-layout">
+        <section class="card"><header class="card-head"><div><h3>بيانات المستلم</h3><p>يمكنك استخدام البريد الإلكتروني أو رقم الهاتف</p></div><span class="status status-completed">تنفيذ فوري</span></header>
+          <form class="card-body" id="transferForm" novalidate>
+            <div class="field"><label for="recipient"><span>معرّف المستلم</span><span class="muted">بريد أو هاتف</span></label><input class="input ltr" id="recipient" type="text" autocomplete="off" placeholder="name@example.com أو +967..." required><div class="field-hint">تأكد من المعرّف، وسيظهر اسم المستلم للتأكيد قبل الإرسال.</div></div>
+            <button class="btn btn-secondary btn-sm" type="button" id="checkRecipient"><i class="fa-solid fa-magnifying-glass"></i> التحقق من المستلم</button>
+            <div class="method-card hidden" id="recipientPreview" style="margin:14px 0"></div>
+            <div class="field" style="margin-top:17px"><label for="transferAmount"><span>مبلغ التحويل</span><span class="muted">الرصيد: <b class="mono" id="transferBalance">0.00 USDT</b></span></label><div class="input-wrap"><input class="input ltr mono" id="transferAmount" type="number" min="0.01" step="0.01" placeholder="0.00" required><span class="input-suffix">USDT</span></div></div>
+            <div class="field"><label for="transferNote">ملاحظة <span class="muted">اختياري</span></label><textarea class="textarea" id="transferNote" maxlength="160" placeholder="مثال: مقابل الطلب رقم 128"></textarea></div>
+            <div class="notice info"><i class="fa-solid fa-bolt"></i><div>التحويلات الداخلية تُنفّذ فورًا ولا تحتاج موافقة الإدارة. راجع اسم المستلم قبل التأكيد.</div></div>
+            <button class="btn btn-primary btn-block" style="margin-top:17px" id="transferButton" type="submit"><i class="fa-solid fa-arrow-left-long"></i> مراجعة التحويل</button>
+          </form>
+        </section>
+        <aside class="stack summary-panel">
+          <section class="card"><header class="card-head"><div><h3>ملخص التحويل</h3><p>لا توجد رسوم على التحويل الداخلي</p></div></header><div class="card-body summary-list"><div class="summary-row"><span>المبلغ</span><strong class="mono" id="transferSummary">0.00 USDT</strong></div><div class="summary-row"><span>الرسوم</span><strong class="mono">0.00 USDT</strong></div><div class="summary-row total"><span>يصل إلى المستلم</span><strong class="mono" id="transferNet">0.00 USDT</strong></div></div></section>
+          <section class="card"><div class="card-body"><div class="kyc-copy"><span class="kyc-icon"><i class="fa-solid fa-user-check"></i></span><div><strong>حساب إلى حساب</strong><span>يُسجل رقم مرجعي واحد لدى المرسل والمستلم.</span></div></div></div></section>
+        </aside>
+      </div>
+    </main>
+  </div></div>
 </body>
 </html>

@@ -1,107 +1,32 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PayFlow - تسجيل الدخول</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
-        .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
-        .input-field { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 12px; width: 100%; }
-        .input-field:focus { outline: none; border-color: #10b981; }
-        .btn-emerald { background: #10b981; color: white; font-weight: bold; padding: 14px; border-radius: 12px; width: 100%; transition: opacity 0.2s; }
-        .btn-emerald:hover { opacity: 0.9; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تسجيل الدخول | PayFlow</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="assets/config.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <script src="assets/auth.js" defer></script>
 </head>
-<body class="p-4 min-h-screen flex items-center justify-center">
-
-    <div class="glass-card w-full max-w-md p-6 md:p-8 space-y-6 shadow-2xl">
-        <div class="text-center space-y-2">
-            <h1 class="text-3xl font-extrabold text-emerald-400">PayFlow</h1>
-            <p class="text-slate-400 text-sm">تسجيل الدخول إلى حسابك</p>
-        </div>
-
-        <form onsubmit="handleLogin(event)" class="space-y-4">
-            <div>
-                <label class="block text-sm font-bold text-slate-300 mb-1.5">البريد الإلكتروني</label>
-                <input type="email" id="loginEmail" required class="input-field text-left font-mono" placeholder="example@email.com" dir="ltr">
-            </div>
-
-            <div>
-                <label class="block text-sm font-bold text-slate-300 mb-1.5">كلمة المرور</label>
-                <input type="password" id="loginPassword" required class="input-field text-left font-mono" placeholder="••••••••" dir="ltr">
-            </div>
-
-            <button type="submit" id="submitBtn" class="btn-emerald flex items-center justify-center gap-2 mt-2">
-                <i class="fa-solid fa-right-to-bracket"></i> دخول
-            </button>
+<body data-page="login">
+  <main class="auth-page">
+    <section class="auth-panel">
+      <div class="auth-box">
+        <a class="brand" href="index.html"><span class="brand-mark">P</span><span>PayFlow</span></a>
+        <h1>أهلًا بعودتك</h1>
+        <p>سجّل الدخول لمتابعة رصيدك وطلباتك من مكان واحد.</p>
+        <form id="loginForm" novalidate>
+          <div class="field"><label for="loginEmail">البريد الإلكتروني</label><input class="input ltr" id="loginEmail" type="email" autocomplete="email" placeholder="name@example.com" required></div>
+          <div class="field"><label for="loginPassword"><span>كلمة المرور</span><a href="#" id="forgotPassword" class="text-primary">نسيت كلمة المرور؟</a></label><input class="input ltr" id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••" minlength="8" required></div>
+          <button class="btn btn-primary btn-block" id="loginButton" type="submit"><i class="fa-solid fa-arrow-right-to-bracket"></i> تسجيل الدخول</button>
         </form>
-
-        <div class="text-center text-xs text-slate-400 border-t border-slate-800 pt-4">
-            ليس لديك حساب؟ <a href="register.html" class="text-emerald-400 font-bold hover:underline">إنشاء حساب جديد</a>
-        </div>
-    </div>
-
-    <script>
-        const SUPABASE_URL = 'https://dnitbzmtbedrgfkmxszp.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_5MpSpsrOXjHCSRNTllJO8g_twaTzmbf';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        async function handleLogin(e) {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-            const password = document.getElementById('loginPassword').value.trim();
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
-
-            try {
-                const { data: users, error } = await supabaseClient
-                    .from('users')
-                    .select('*')
-                    .ilike('email', email);
-
-                if (error) throw error;
-
-                if (!users || users.length === 0) {
-                    alert('❌ البريد الإلكتروني غير مسجل!');
-                    return;
-                }
-
-                const user = users[0];
-                const dbPass = user.password_hash || user.PASSWORD_HASH;
-
-                if (dbPass !== password) {
-                    alert('❌ كلمة المرور غير صحيحة!');
-                    return;
-                }
-
-                const isActive = user.is_active !== undefined ? user.is_active : user.IS_ACTIVE;
-                if (isActive === 0 || isActive === false) {
-                    alert('❌ هذا الحساب مجمد أو محظور من قبل الإدارة.');
-                    return;
-                }
-
-                sessionStorage.setItem('pf_user', JSON.stringify(user));
-
-                const role = String(user.role || user.ROLE || 'USER').toUpperCase();
-                if (role === 'ADMIN') {
-                    window.location.href = 'admin.html';
-                } else {
-                    window.location.href = 'dashboard.html';
-                }
-
-            } catch (err) {
-                alert(`❌ حدث خطأ أثناء تسجيل الدخول: ${err.message}`);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> دخول';
-            }
-        }
-    </script>
+        <div class="auth-alt">ليس لديك حساب؟ <a href="register.html">أنشئ حسابًا جديدًا</a></div>
+      </div>
+    </section>
+    <aside class="auth-visual"><div class="auth-message"><span class="eyebrow">منصة واحدة. رؤية أوضح.</span><h2>تحكم كامل في <span>عملياتك المالية.</span></h2><p>تابع كل إيداع وسحب وتحويل برقم مرجعي وحالة محدثة، واحصل على إشعار فور معالجة طلبك.</p><div class="auth-points"><div class="auth-point"><i class="fa-solid fa-clock-rotate-left"></i> سجل منظم</div><div class="auth-point"><i class="fa-solid fa-lock"></i> دخول آمن</div></div></div></aside>
+  </main>
 </body>
 </html>

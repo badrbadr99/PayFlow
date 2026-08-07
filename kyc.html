@@ -1,105 +1,34 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PayFlow - توثيق الحساب (KYC)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
-        .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
-        .input-field { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 12px; width: 100%; }
-        .input-field:focus { outline: none; border-color: #10b981; }
-        .btn-emerald { background: #10b981; color: white; font-weight: bold; padding: 14px; border-radius: 12px; width: 100%; transition: opacity 0.2s; }
-        .btn-emerald:hover { opacity: 0.9; }
-    </style>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>توثيق الحساب | PayFlow</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="stylesheet" href="assets/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script><script src="assets/config.js" defer></script><script src="assets/app.js" defer></script><script src="assets/kyc.js" defer></script>
 </head>
-<body class="p-4 max-w-xl mx-auto min-h-screen flex flex-col justify-center space-y-6">
-
-    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-        <h1 class="text-2xl font-bold text-emerald-400 flex items-center gap-2">
-            <i class="fa-solid fa-id-card"></i> توثيق الهوية (KYC)
-        </h1>
-        <a href="dashboard.html" class="text-xs text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1 transition">
-            <i class="fa-solid fa-arrow-right"></i> رجوع
-        </a>
-    </div>
-
-    <div class="glass-card p-6 md:p-8 space-y-5 shadow-2xl">
-        <div id="kycNotice" class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-xs text-slate-300">
-            يرجى إدخال بيانات الهوية الرسمية لإتمام عملية التحقق وتفعيل حسابك بالكامل.
-        </div>
-
-        <form onsubmit="submitKyc(event)" class="space-y-4">
-            <div>
-                <label class="block text-sm font-bold text-slate-200 mb-1.5">نوع وثيقة الإثبات</label>
-                <select id="docType" class="input-field font-bold text-emerald-400" required>
-                    <option value="بطاقة شخصية">بطاقة شخصية</option>
-                    <option value="جواز سفر">جواز سفر</option>
-                    <option value="رخصة قيادة">رخصة قيادة</option>
-                </select>
+<body data-page="kyc">
+  <div class="app-layout"><aside class="sidebar" id="sidebar"></aside><div class="main-wrap"><header class="topbar" id="topbar"></header>
+    <main class="page">
+      <div class="page-head"><div><h2>توثيق الحساب</h2><p>ارفع مستندات واضحة لتفعيل السحب وحماية حسابك.</p></div><a class="btn btn-secondary" href="dashboard.html"><i class="fa-solid fa-arrow-right"></i> العودة للحساب</a></div>
+      <div class="form-layout">
+        <section class="card"><header class="card-head"><div><h3>بيانات الهوية</h3><p>تُستخدم البيانات للتحقق فقط</p></div><span id="kycStatusBadge" class="status status-pending">غير مقدم</span></header>
+          <form class="card-body" id="kycForm" novalidate>
+            <div id="kycExisting" class="hidden"></div>
+            <div id="kycFields">
+              <div class="grid-2"><div class="field"><label for="documentType">نوع المستند</label><select class="select" id="documentType" required><option value="NATIONAL_ID">بطاقة شخصية</option><option value="PASSPORT">جواز سفر</option><option value="DRIVER_LICENSE">رخصة قيادة</option></select></div><div class="field"><label for="documentNumber">رقم المستند</label><input class="input ltr mono" id="documentNumber" type="text" minlength="5" maxlength="40" placeholder="أدخل الرقم كما يظهر" required></div></div>
+              <div class="grid-2"><div class="field"><label>صورة الوجه الأمامي</label><label class="file-drop" for="documentFront"><i class="fa-regular fa-id-card"></i><strong style="display:block">اختر الصورة</strong><span class="file-name" id="frontFileName">صورة واضحة بدون قص</span><input id="documentFront" type="file" accept="image/jpeg,image/png,image/webp" required></label></div><div class="field"><label>صورة الوجه الخلفي</label><label class="file-drop" for="documentBack"><i class="fa-regular fa-id-card"></i><strong style="display:block">اختر الصورة</strong><span class="file-name" id="backFileName">مطلوبة للبطاقة والرخصة</span><input id="documentBack" type="file" accept="image/jpeg,image/png,image/webp"></label></div></div>
+              <div class="field"><label>صورة شخصية مع المستند</label><label class="file-drop" for="selfieFile"><i class="fa-solid fa-camera"></i><strong style="display:block">التقط أو اختر صورة</strong><span class="file-name" id="selfieFileName">يجب أن يظهر الوجه والمستند بوضوح</span><input id="selfieFile" type="file" accept="image/jpeg,image/png,image/webp" capture="user" required></label></div>
+              <label style="display:flex;align-items:flex-start;gap:9px;color:var(--muted);font-size:11px;line-height:1.7;margin-bottom:17px"><input id="kycConsent" type="checkbox" required style="margin-top:4px"> أقر بأن المستندات تخصني وأن البيانات صحيحة، وأوافق على استخدامها للتحقق من الهوية.</label>
+              <button class="btn btn-primary btn-block" id="kycButton" type="submit"><i class="fa-solid fa-paper-plane"></i> إرسال طلب التوثيق</button>
             </div>
-
-            <div>
-                <label class="block text-sm font-bold text-slate-200 mb-1.5">رقم الوثيقة</label>
-                <input type="text" id="docNumber" required class="input-field text-left font-mono" placeholder="أدخل رقم الوثيقة" dir="ltr">
-            </div>
-
-            <div>
-                <label class="block text-sm font-bold text-slate-200 mb-1.5">صورة الوثيقة (رابط أو اسم الملف)</label>
-                <input type="text" id="docImage" required class="input-field text-left font-mono" placeholder="document.jpg" dir="ltr">
-            </div>
-
-            <button type="submit" id="submitBtn" class="btn-emerald flex items-center justify-center gap-2 mt-2">
-                <i class="fa-solid fa-shield-check"></i> تقديم طلب التوثيق
-            </button>
-        </form>
-    </div>
-
-    <script>
-        const API_BASE = 'http://localhost:8081/ords/buysell_user';
-        let currentUser = JSON.parse(sessionStorage.getItem('pf_user'));
-
-        if (!currentUser) window.location.href = 'login.html';
-
-        async function submitKyc(e) {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const type = document.getElementById('docType').value;
-            const number = document.getElementById('docNumber').value.trim();
-            const image = document.getElementById('docImage').value.trim();
-            const userId = currentUser.id || currentUser.ID;
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإرسال...';
-
-            try {
-                const res = await fetch(`${API_BASE}/kyc_verifications/`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        "user_id": parseInt(userId),
-                        "document_type": type,
-                        "document_number": number,
-                        "document_image_url": image,
-                        "status": "PENDING"
-                    })
-                });
-
-                if (res.ok) {
-                    alert('✅ تم إرسال مستندات التوثيق بنجاح وهي قيد المراجعة حالياً!');
-                    window.location.href = 'dashboard.html';
-                } else {
-                    throw new Error('فشل إرسال طلب التوثيق');
-                }
-            } catch (err) {
-                alert(`❌ حدث خطأ: ${err.message || err}`);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-shield-check"></i> تقديم طلب التوثيق';
-            }
-        }
-    </script>
+          </form>
+        </section>
+        <aside class="stack summary-panel">
+          <section class="card"><header class="card-head"><div><h3>نصائح لقبول أسرع</h3><p>راجع هذه النقاط قبل الرفع</p></div></header><div class="card-body"><div class="notification-list"><div class="notification-item"><span class="notification-dot"><i class="fa-solid fa-sun"></i></span><div><strong>إضاءة واضحة</strong><p>صوّر المستند دون انعكاس أو ظل.</p></div></div><div class="notification-item"><span class="notification-dot"><i class="fa-solid fa-expand"></i></span><div><strong>جميع الحواف ظاهرة</strong><p>لا تقص أي جزء من المستند.</p></div></div><div class="notification-item"><span class="notification-dot"><i class="fa-solid fa-fingerprint"></i></span><div><strong>بيانات مطابقة</strong><p>استخدم مستندك الحقيقي والساري.</p></div></div></div></div></section>
+          <section class="card"><div class="card-body"><div class="notice info"><i class="fa-solid fa-lock"></i><div>المستندات خاصة ولا يمكن الوصول إليها إلا من فريق المراجعة المخول.</div></div></div></section>
+        </aside>
+      </div>
+    </main>
+  </div></div>
 </body>
 </html>
