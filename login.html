@@ -6,6 +6,8 @@
     <title>PayFlow - تسجيل الدخول</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- إضافة مكتبة Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
         .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
@@ -29,7 +31,6 @@
             
             <div>
                 <label class="block text-sm font-bold text-slate-300 mb-2">البريد الإلكتروني</label>
-                <!-- الحقل نوعه text لمنع خطأ @ وبدون التنويه لـ ADMIN احترافياً وأمنياً -->
                 <input type="text" id="loginIdentifier" required class="input-field text-left font-mono" placeholder="example@email.com" dir="ltr">
             </div>
 
@@ -50,7 +51,11 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8081/ords/buysell_user';
+        // إعدادات الاتصال بقاعدة بيانات Supabase
+        const SUPABASE_URL = 'https://dnitbzmtbedrgfkmxszp.supabase.co';
+        const SUPABASE_ANON_KEY = 'استبدل_هذا_النص_بـ_ANON_KEY_الخاص_بمشروعك';
+        
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function handleLogin(e) {
             e.preventDefault();
@@ -67,47 +72,43 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
 
             try {
-                const res = await fetch(`${API_BASE}/users/`);
-                
-                if (res.ok) {
-                    const data = await res.json();
-                    const users = data.items || [];
+                // الاستعلام عن المستخدم من جدول users في Supabase
+                const { data: users, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .ilike('email', identifier.toLowerCase());
 
-                    const user = users.find(u => {
-                        const uEmail = String(u.email || u.EMAIL || '').trim().toLowerCase();
-                        const uRole = String(u.role || u.ROLE || '').trim().toUpperCase();
-                        const inputLower = identifier.toLowerCase();
+                if (error) {
+                    console.error('Supabase Error:', error);
+                    alert('❌ حدث خطأ في الاتصال بقاعدة البيانات.');
+                    return;
+                }
 
-                        return (uEmail === inputLower) || (inputLower === 'admin' && uRole === 'ADMIN');
-                    });
+                if (users && users.length > 0) {
+                    const user = users[0];
+                    const passHash = user.password_hash || user.password;
+                    const role = String(user.role || 'USER').toUpperCase();
+                    const isActive = user.is_active;
 
-                    if (user) {
-                        const passHash = user.password_hash || user.PASSWORD_HASH;
-                        const role = String(user.role || user.ROLE || 'USER').toUpperCase();
-                        const isActive = user.is_active !== undefined ? user.is_active : user.IS_ACTIVE;
+                    if (isActive === 0 || isActive === false) {
+                        alert('🔒 حسابك مجمد حالياً! يرجى التواصل مع الدعم الفني.');
+                        return;
+                    }
 
-                        if (parseInt(isActive) === 0) {
-                            alert('🔒 حسابك مجمد حالياً! يرجى التواصل مع الدعم الفني.');
-                            return;
-                        }
+                    if (passHash === password) {
+                        sessionStorage.setItem('pf_user', JSON.stringify(user));
+                        alert(`✅ أهلاً بك ${user.full_name || ''}! تم تسجيل الدخول بنجاح.`);
 
-                        if (passHash === password) {
-                            sessionStorage.setItem('pf_user', JSON.stringify(user));
-                            alert(`✅ أهلاً بك! تم تسجيل الدخول بنجاح.`);
-
-                            if (role === 'ADMIN' || identifier.toUpperCase() === 'ADMIN') {
-                                window.location.href = 'admin.html';
-                            } else {
-                                window.location.href = 'dashboard.html';
-                            }
+                        if (role === 'ADMIN' || identifier.toUpperCase() === 'ADMIN') {
+                            window.location.href = 'admin.html';
                         } else {
-                            alert('❌ كلمة المرور غير صحيحة!');
+                            window.location.href = 'dashboard.html';
                         }
                     } else {
-                        alert('❌ البيانات المدخلة غير صحيحة!');
+                        alert('❌ كلمة المرور غير صحيحة!');
                     }
                 } else {
-                    alert('❌ تعذر الاتصال بقاعدة البيانات.');
+                    alert('❌ الحساب غير موجود!');
                 }
             } catch (err) {
                 console.error('Login Error:', err);
