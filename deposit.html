@@ -69,8 +69,14 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_5MpSpsrOXjHCSRNTllJO8g_twaTzmbf';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let currentUser = JSON.parse(sessionStorage.getItem('pf_user'));
-        if (!currentUser) window.location.href = 'login.html';
+        // التحقق من تسجيل الدخول وجلب بيانات المستخدم بمرونة تامة
+        let currentUser = JSON.parse(sessionStorage.getItem('pf_user') || '{}');
+        const userId = currentUser.id || currentUser.ID || currentUser.user_id;
+
+        if (!userId) {
+            alert('⚠️ يرجى تسجيل الدخول أولاً للمتابعة.');
+            window.location.href = 'login.html';
+        }
 
         function updateFileName(input) {
             const display = document.getElementById('fileNameDisplay');
@@ -90,7 +96,13 @@
             const amount = parseFloat(document.getElementById('depositAmount').value);
             const txId = document.getElementById('txId').value.trim();
             const fileInput = document.getElementById('proofFile');
-            const userId = currentUser.id || currentUser.ID;
+
+            const activeUserId = currentUser.id || currentUser.ID || currentUser.user_id;
+            if (!activeUserId) {
+                alert('❌ خطأ: لم يتم التعرف على حسابك، يرجى تسجيل الدخول من جديد.');
+                window.location.href = 'login.html';
+                return;
+            }
 
             if (!fileInput.files || !fileInput.files[0]) {
                 alert('❌ يرجى إرفاق صورة إثبات التحويل أولاً!');
@@ -103,7 +115,7 @@
             try {
                 const file = fileInput.files[0];
                 const fileExt = file.name.split('.').pop();
-                const fileName = `${userId}_${Date.now()}.${fileExt}`;
+                const fileName = `${activeUserId}_${Date.now()}.${fileExt}`;
 
                 // 1. رفع الصورة إلى Supabase Storage
                 const { data: uploadData, error: uploadError } = await supabaseClient.storage
@@ -112,22 +124,22 @@
 
                 if (uploadError) throw uploadError;
 
-                // 2. الحصول على الرابط العام للصورة المرفوعة
+                // 2. الحصول على الرابط العام للصورة
                 const { data: publicUrlData } = supabaseClient.storage
                     .from('deposit-proofs')
                     .getPublicUrl(fileName);
 
                 const proofUrl = publicUrlData.publicUrl;
 
-                // 3. حفظ بيانات الطلب ورابط الصورة في قاعدة البيانات
+                // 3. إرسال الطلب مع معرف المستخدم ورابط الصورة إلى قاعدة البيانات
                 const { error: dbError } = await supabaseClient
                     .from('deposit_requests')
                     .insert([{
-                        user_id: parseInt(userId),
+                        user_id: parseInt(activeUserId),
                         deposit_method: method,
                         amount_usdt: amount,
                         tx_id: txId,
-                        proof_image: proofUrl, // تخزين الرابط الحقيقي للصورة
+                        proof_image: proofUrl,
                         status: 'PENDING'
                     }]);
 
@@ -137,7 +149,7 @@
                 window.location.href = 'dashboard.html';
 
             } catch (err) {
-                alert(`❌ حدث خطأ أثناء الرفع: ${err.message || err}`);
+                alert(`❌ حدث خطأ أثناء الرفع: ${err.message || JSON.stringify(err)}`);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> تأكيد طلب الإيداع';
