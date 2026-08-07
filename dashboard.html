@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayFlow - لوحة التحكم</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
+        .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
+        .btn-action { background: #1e293b; border: 1px solid #334155; padding: 18px; border-radius: 16px; text-align: center; font-weight: bold; transition: 0.2s; }
+        .btn-action:hover { background: #334155; border-color: #10b981; }
+    </style>
+</head>
+<body class="p-4 md:p-6 max-w-4xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <div class="glass-card p-4 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <h1 class="text-2xl font-extrabold text-emerald-400">PayFlow</h1>
+            <span class="bg-emerald-500/10 text-emerald-400 text-xs px-2.5 py-1 rounded-full font-bold border border-emerald-500/20">منصة الدفع الرقمي</span>
+        </div>
+        <button onclick="sessionStorage.clear(); window.location.href='login.html';" class="text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg border border-red-500/20 font-bold transition">خروج</button>
+    </div>
+
+    <!-- Balance Card -->
+    <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 rounded-2xl shadow-xl flex justify-between items-center relative overflow-hidden">
+        <div>
+            <div class="text-xs text-emerald-100 mb-1">مرحباً، <span id="userName">...</span></div>
+            <div class="text-3xl font-extrabold text-white font-mono"><span id="userBalance">0.00</span> USDT</div>
+        </div>
+        <div>
+            <span id="kycBadge" class="bg-slate-900/60 text-white text-xs px-3.5 py-2 rounded-xl border border-white/20 font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...
+            </span>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <a href="deposit.html" class="btn-action text-emerald-400"><i class="fa-solid fa-arrow-down-left mb-2 text-xl block"></i> إيداع بنكي مباشر</a>
+        <a href="withdraw.html" class="btn-action text-blue-400"><i class="fa-solid fa-arrow-up-right mb-2 text-xl block"></i> سحب أموال</a>
+        <a href="transfer.html" class="btn-action text-purple-400"><i class="fa-solid fa-paper-plane mb-2 text-xl block"></i> تحويل داخلي</a>
+        <a href="kyc.html" class="btn-action text-amber-400"><i class="fa-solid fa-id-card mb-2 text-xl block"></i> توثيق الهوية</a>
+    </div>
+
+    <!-- Transactions List -->
+    <div class="glass-card p-6 space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+            <h2 class="font-bold text-lg text-slate-200 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> سجل العمليات (إيداع / سحب / تحويل)
+            </h2>
+            <span id="txCountBadge" class="text-xs text-slate-400 font-mono">0 عملية</span>
+        </div>
+
+        <div id="txContainer" class="space-y-3">
+            <p class="text-slate-400 text-center py-4 text-xs">جاري تحميل العمليات...</p>
+        </div>
+
+        <div class="text-center pt-2">
+            <button id="loadMoreBtn" onclick="renderMoreTransactions()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-6 py-2.5 rounded-xl border border-slate-700 font-bold transition">
+                عرض المزيد من العمليات <i class="fa-solid fa-chevron-down mr-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8081/ords/buysell_user';
+        let userSession = JSON.parse(sessionStorage.getItem('pf_user'));
+        if (!userSession) window.location.href = 'login.html';
+
+        let allUserTransactions = [];
+        let visibleCount = 10;
+
+        async function initDashboard() {
+            const uid = userSession.id || userSession.ID;
+            try {
+                const uRes = await fetch(`${API_BASE}/users/${uid}?_t=${new Date().getTime()}`);
+                if (uRes.ok) {
+                    userSession = await uRes.json();
+                    sessionStorage.setItem('pf_user', JSON.stringify(userSession));
+                }
+            } catch(e) {}
+
+            document.getElementById('userName').innerText = userSession.full_name || userSession.FULL_NAME || 'العميل';
+            document.getElementById('userBalance').innerText = parseFloat(userSession.balance !== undefined ? userSession.balance : (userSession.BALANCE || 0)).toFixed(2);
+            
+            const kycSt = String(userSession.kyc_status || userSession.KYC_STATUS || 'PENDING').toUpperCase();
+            const badge = document.getElementById('kycBadge');
+            if (kycSt === 'VERIFIED' || kycSt === 'APPROVED') {
+                badge.className = "bg-emerald-500/90 text-white text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 shadow";
+                badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> حساب موثق بالكامل';
+            } else {
+                badge.className = "bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5";
+                badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> غير موثق';
+            }
+            loadTransactions();
+        }
+
+        async function loadTransactions() {
+            const uid = String(userSession.id || userSession.ID);
+            const nocache = `?_t=${new Date().getTime()}`;
+
+            try {
+                const depRes = await fetch(`${API_BASE}/deposits/${nocache}`).catch(e => null);
+                const withRes = await fetch(`${API_BASE}/withdraw_requests/${nocache}`).catch(e => null);
+                
+                let trfItems = [];
+                try {
+                    const trfRes = await fetch(`${API_BASE}/internal_transfers/${nocache}`);
+                    if (trfRes.ok) {
+                        const trfJson = await trfRes.json();
+                        trfItems = trfJson.items || [];
+                    }
+                } catch (err) {}
+
+                let list = [];
+
+                if (depRes && depRes.ok) {
+                    const depData = await depRes.json();
+                    (depData.items || []).forEach(d => {
+                        if (String(d.user_id !== undefined ? d.user_id : (d.USER_ID || '')) === uid) {
+                            list.push({ ref: `DEP-${d.request_id || d.REQUEST_ID}`, type: 'إيداع بنكي', amount: `+${parseFloat(d.net_usdt || d.NET_USDT || 0).toFixed(2)} USDT`, status: 'مكتملة', date: d.created_at || 'الآن', colorClass: 'text-emerald-400' });
+                        }
+                    });
+                }
+
+                if (withRes && withRes.ok) {
+                    const withData = await withRes.json();
+                    (withData.items || []).forEach(w => {
+                        if (String(w.user_id !== undefined ? w.user_id : (w.USER_ID || '')) === uid) {
+                            list.push({ ref: `WTH-${w.id || w.ID || w.request_id || w.REQUEST_ID}`, type: 'سحب أموال', amount: `-${parseFloat(w.amount_usdt || w.AMOUNT_USDT || 0).toFixed(2)} USDT`, status: 'مكتملة', date: w.created_at || 'الآن', colorClass: 'text-blue-400' });
+                        }
+                    });
+                }
+
+                trfItems.forEach(t => {
+                    const sId = String(t.sender_id !== undefined ? t.sender_id : (t.SENDER_ID || ''));
+                    const rId = String(t.receiver_id !== undefined ? t.receiver_id : (t.RECEIVER_ID || ''));
+                    const amt = parseFloat(t.amount_usdt !== undefined ? t.amount_usdt : (t.AMOUNT_USDT || 0));
+                    const tid = t.id !== undefined ? t.id : (t.ID || '');
+
+                    if (sId === uid) {
+                        list.push({ ref: `TRN-${tid}`, type: 'تحويل داخلي (صادر)', amount: `-${amt.toFixed(2)} USDT`, status: 'مكتملة', date: t.created_at || 'الآن', colorClass: 'text-purple-400' });
+                    } else if (rId === uid) {
+                        list.push({ ref: `TRN-${tid}`, type: 'تحويل داخلي (وارد)', amount: `+${amt.toFixed(2)} USDT`, status: 'مكتملة', date: t.created_at || 'الآن', colorClass: 'text-emerald-400' });
+                    }
+                });
+
+                allUserTransactions = list.reverse();
+                document.getElementById('txCountBadge').innerText = `${allUserTransactions.length} عملية`;
+                visibleCount = 10;
+                renderTransactions();
+
+            } catch (e) {
+                document.getElementById('txContainer').innerHTML = '<p class="text-red-400 text-center py-4 text-xs">تعذر تحميل السجل.</p>';
+            }
+        }
+
+        function renderTransactions() {
+            const container = document.getElementById('txContainer');
+            const loadBtn = document.getElementById('loadMoreBtn');
+            const slice = allUserTransactions.slice(0, visibleCount);
+
+            if (allUserTransactions.length === 0) {
+                container.innerHTML = '<p class="text-slate-400 text-center py-4 text-xs">لا توجد عمليات سابقة</p>';
+                loadBtn.classList.add('hidden');
+                return;
+            }
+
+            container.innerHTML = slice.map(t => `
+                <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                    <div>
+                        <b class="text-white text-sm">${t.type}</b>
+                        <span class="block text-[10px] text-slate-500 font-mono">المرجع: ${t.ref} | ${t.date}</span>
+                    </div>
+                    <div class="text-left">
+                        <b class="text-base font-mono ${t.colorClass}">${t.amount}</b>
+                        <div class="text-[10px] text-emerald-400 font-bold">${t.status}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            loadBtn.classList.toggle('hidden', visibleCount >= allUserTransactions.length);
+        }
+
+        function renderMoreTransactions() {
+            visibleCount += 10;
+            renderTransactions();
+        }
+
+        initDashboard();
+    </script>
+</body>
+</html>

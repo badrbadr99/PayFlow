@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayFlow - طلب سحب الأموال</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
+        .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
+        .input-field { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 12px; width: 100%; }
+        .input-field:focus { border-color: #10b981; outline: none; }
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen flex items-center justify-center">
+
+    <div class="glass-card w-full max-w-lg p-6 md:p-8 space-y-6">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+            <h1 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                <i class="fa-solid fa-arrow-up-from-bracket"></i> طلب سحب الأموال
+            </h1>
+            <button onclick="window.location.href='dashboard.html'" class="text-xs text-slate-400 hover:text-white bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                رجوع
+            </button>
+        </div>
+
+        <!-- عرض الرصيد المتاح حالياً -->
+        <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+            <span class="text-slate-400">رصيدك المتاح للسحب:</span>
+            <span id="availableBalanceDisplay" class="text-base font-bold text-emerald-400">جاري التحميل...</span>
+        </div>
+
+        <form id="withdrawForm" onsubmit="submitWithdraw(event)" class="space-y-5">
+            
+            <!-- طريقة السحب -->
+            <div>
+                <label class="block text-sm text-slate-400 mb-2">طريقة السحب</label>
+                <select id="methodSelect" onchange="handleMethodChange()" required class="input-field text-emerald-400 font-bold">
+                    <option value="BINANCE_PAY">Binance Pay ID</option>
+                    <option value="USDT_TRC20">USDT (TRC20)</option>
+                    <option value="USDT_BEP20">USDT (BEP20)</option>
+                    <optgroup id="dbWalletsGroup" label="--- المحافظ المحلية المتاحة ---">
+                        <option value="" disabled>جاري تحميل المحافظ المحلية...</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <!-- عنوان السحب / معرف Binance / رقم المحفظة -->
+            <div id="addressContainer">
+                <label id="addressLabel" class="block text-sm text-slate-400 mb-2">معرف Binance Pay ID الخاص بك</label>
+                <input type="text" id="destinationInput" placeholder="أدخل معرف Pay ID" required class="input-field font-mono">
+            </div>
+
+            <!-- المبلغ بالـ USDT -->
+            <div>
+                <label class="block text-sm text-slate-400 mb-2">المبلغ المراد سحبه (USDT)</label>
+                <input type="number" id="amountUsdtInput" step="any" placeholder="مثلاً: 50" required class="input-field text-lg font-bold">
+            </div>
+
+            <!-- معلومات سعر السحب للريال -->
+            <div id="localAmountCalc" class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center hidden">
+                <span class="text-sm text-slate-400">المبلغ المستلم بالريال (YER):</span>
+                <span id="localNetDisplay" class="text-xl font-bold text-emerald-400">YER 0.00</span>
+            </div>
+
+            <!-- زر التأكيد -->
+            <button type="submit" id="submitBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2 text-base">
+                <i class="fa-solid fa-paper-plane"></i> إرسال طلب السحب
+            </button>
+
+        </form>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8081/ords/buysell_user';
+        let currentUser = JSON.parse(sessionStorage.getItem('pf_user'));
+
+        if (!currentUser) {
+            alert('يرجى تسجيل الدخول أولاً!');
+            window.location.href = 'login.html';
+        }
+
+        let sellRate = 570;
+        let currentAvailableBalance = 0;
+
+        // 1. جلب بيانات المستخدم المحدثة لعرض وتحقق الرصيد المتاح
+        async function fetchFreshUserData() {
+            const balanceDisplay = document.getElementById('availableBalanceDisplay');
+            try {
+                const userId = currentUser.id || currentUser.ID;
+                const res = await fetch(`${API_BASE}/users/${userId}?_t=${new Date().getTime()}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    currentUser = data;
+                    sessionStorage.setItem('pf_user', JSON.stringify(data));
+                }
+            } catch (e) {
+                console.error('فشل تحديث بيانات المستخدم:', e);
+            } finally {
+                const rawBalance = parseFloat(currentUser.balance !== undefined ? currentUser.balance : (currentUser.BALANCE || 0));
+                currentAvailableBalance = rawBalance < 0 ? 0 : rawBalance;
+                balanceDisplay.textContent = `${currentAvailableBalance.toFixed(2)} USDT`;
+            }
+        }
+
+        // 2. جلب المحافظ المحلية المضافة من أوراكل
+        async function loadDbWallets() {
+            const dbGroup = document.getElementById('dbWalletsGroup');
+            try {
+                const res = await fetch(`${API_BASE}/payment_methods/`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const items = data.items || [];
+                    if (items.length === 0) {
+                        dbGroup.innerHTML = '<option value="" disabled>لا توجد محافظ محلية مسجلة</option>';
+                        return;
+                    }
+                    dbGroup.innerHTML = items.map(m => {
+                        const id = m.id || m.ID;
+                        const name = m.method_name || m.METHOD_NAME;
+                        const acc = m.account_number || m.ACCOUNT_NUMBER;
+                        return `<option value="LOCAL_${id}">سحب كاش / ${name} (${acc})</option>`;
+                    }).join('');
+                }
+            } catch (e) {
+                dbGroup.innerHTML = '<option value="" disabled>فشل تحميل المحافظ المحلية</option>';
+            }
+        }
+
+        // 3. جلب سعر السحب المعتمد من أوراكل
+        async function loadSellRate() {
+            try {
+                const res = await fetch(`${API_BASE}/exchange_rates/`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const items = data.items || [];
+                    if (items.length > 0) {
+                        const r = items[0];
+                        sellRate = parseFloat(r.sell_rate || r.SELL_RATE || 570);
+                        calculateLocalNet();
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // 4. تغيير النصوص والحقول بناءً على اختيار طريقة السحب
+        function handleMethodChange() {
+            const select = document.getElementById('methodSelect');
+            const val = select.value;
+            const label = document.getElementById('addressLabel');
+            const input = document.getElementById('destinationInput');
+            const localCalc = document.getElementById('localAmountCalc');
+
+            if (val === 'BINANCE_PAY') {
+                label.textContent = 'معرف Binance Pay ID الخاص بك';
+                input.placeholder = 'أدخل ID الحساب الخاص بك بـ Binance';
+                localCalc.classList.add('hidden');
+            } else if (val.startsWith('USDT')) {
+                label.textContent = 'عنوان محفظة USDT الرقمية الخاص بك';
+                input.placeholder = 'أدخل عنوان المحفظة (Address)';
+                localCalc.classList.add('hidden');
+            } else {
+                label.textContent = 'رقم حسابك / محفظتك المحلية لاستلام المبلغ';
+                input.placeholder = 'أدخل رقم الحساب أو الهاتف المحول إليه';
+                localCalc.classList.remove('hidden');
+                calculateLocalNet();
+            }
+        }
+
+        // 5. حساب المعادل بالريال عند اختيار محفظة محلية
+        function calculateLocalNet() {
+            const amountUsdt = parseFloat(document.getElementById('amountUsdtInput').value) || 0;
+            const display = document.getElementById('localNetDisplay');
+            if (amountUsdt > 0 && sellRate > 0) {
+                const totalYer = amountUsdt * sellRate;
+                display.textContent = `YER ${totalYer.toLocaleString()}`;
+            } else {
+                display.textContent = 'YER 0.00';
+            }
+        }
+
+        // 6. إرسال طلب السحب مع الخصم الفوري للرصيد وتوثيقه كـ PENDING
+        async function submitWithdraw(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const method = document.getElementById('methodSelect').value;
+            const destination = document.getElementById('destinationInput').value.trim();
+            const amountUsdt = parseFloat(document.getElementById('amountUsdtInput').value);
+
+            await fetchFreshUserData();
+
+            if (!method || !destination || isNaN(amountUsdt) || amountUsdt <= 0) {
+                alert('يرجى إكمال جميع الحقول وإدخال مبلغ صحيح!');
+                return;
+            }
+
+            if (currentAvailableBalance <= 0 || amountUsdt > currentAvailableBalance) {
+                alert(`❌ رصيدك غير كافٍ لتنفيذ هذه العملية!\nرصيدك المتاح حالياً هو: ${currentAvailableBalance.toFixed(2)} USDT`);
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إرسال طلب السحب...';
+
+            try {
+                const userId = currentUser.id || currentUser.ID;
+
+                // أ) إنشاء طلب السحب في جدول withdraw_requests بحالة PENDING
+                const payload = {
+                    "user_id": userId,
+                    "withdraw_method": method,
+                    "destination_address": destination,
+                    "amount_usdt": amountUsdt,
+                    "amount_local": method.startsWith('LOCAL_') ? (amountUsdt * sellRate) : 0,
+                    "status": "PENDING"
+                };
+
+                const res = await fetch(`${API_BASE}/withdraw_requests/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    // ب) خصم المبلغ المالي مؤقتاً من رصيد العميل لحين موافقة الأدمن
+                    const newBalance = currentAvailableBalance - amountUsdt;
+
+                    await fetch(`${API_BASE}/users/${userId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            "id": parseInt(userId),
+                            "full_name": currentUser.full_name || currentUser.FULL_NAME,
+                            "phone_number": currentUser.phone_number || currentUser.PHONE_NUMBER,
+                            "email": currentUser.email || currentUser.EMAIL,
+                            "password_hash": currentUser.password_hash || currentUser.PASSWORD_HASH,
+                            "role": currentUser.role || currentUser.ROLE || "USER",
+                            "kyc_status": currentUser.kyc_status || currentUser.KYC_STATUS || "PENDING",
+                            "is_active": (currentUser.is_active !== undefined ? currentUser.is_active : currentUser.IS_ACTIVE),
+                            "balance": newBalance
+                        })
+                    });
+
+                    // تحديث الجلسة محلياً
+                    currentUser.balance = newBalance;
+                    sessionStorage.setItem('pf_user', JSON.stringify(currentUser));
+
+                    alert('✅ تم إرسال طلب السحب بنجاح!\nالطلب في انتظار موافقة مدير النظام.');
+                    window.location.href = 'dashboard.html';
+                } else {
+                    const errTxt = await res.text();
+                    console.error('Oracle Error Detail:', errTxt);
+                    alert(`❌ تعذر إرسال الطلب:\n${errTxt}`);
+                }
+            } catch (err) {
+                console.error('Submit withdraw error:', err);
+                alert('حدث خطأ أثناء الاتصال بالخادم.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> إرسال طلب السحب';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchFreshUserData();
+            loadDbWallets();
+            loadSellRate();
+            document.getElementById('amountUsdtInput').addEventListener('input', calculateLocalNet);
+        });
+    </script>
+</body>
+</html>

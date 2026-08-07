@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayFlow - توثيق الهوية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
+        .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
+        .input-field { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 12px; width: 100%; }
+        .input-field:focus { outline: none; border-color: #f59e0b; }
+        .btn-amber { background: #f59e0b; color: white; font-weight: bold; padding: 14px; border-radius: 12px; width: 100%; transition: opacity 0.2s; font-size: 16px; }
+        .btn-amber:hover { opacity: 0.9; }
+        .btn-amber:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body class="p-4 max-w-xl mx-auto min-h-screen flex flex-col justify-center space-y-6">
+
+    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <h1 class="text-2xl font-bold text-amber-500 flex items-center gap-2">
+            <i class="fa-solid fa-id-card"></i> توثيق الهوية والجواز
+        </h1>
+        <a href="dashboard.html" class="text-xs text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1">
+            <i class="fa-solid fa-arrow-right"></i> رجوع
+        </a>
+    </div>
+
+    <div class="glass-card p-6 md:p-8 space-y-5 shadow-2xl">
+        <form onsubmit="submitKYC(event)" class="space-y-5">
+            
+            <div>
+                <label class="block text-sm font-bold text-slate-200 mb-2">نوع الوثيقة</label>
+                <select id="kType" class="input-field font-bold text-amber-400" required>
+                    <option value="بطاقة شخصية">بطاقة شخصية</option>
+                    <option value="جواز سفر">جواز سفر</option>
+                    <option value="رخصة قيادة">رخصة قيادة</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-200 mb-2">رقم الهوية / الجواز</label>
+                <input type="text" id="kNum" required class="input-field font-mono text-base" placeholder="أدخل رقم الوثيقة هنا">
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-200 mb-2">صورة الوجه الأمامي للوثيقة</label>
+                <input type="file" id="kFrontFile" accept="image/*" required class="input-field text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer">
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-200 mb-2">صورة الوجه الخلفي للوثيقة</label>
+                <input type="file" id="kBackFile" accept="image/*" required class="input-field text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer">
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-amber flex items-center justify-center gap-2">
+                <i class="fa-solid fa-paper-plane"></i> إرسال للتحقق
+            </button>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8081/ords/buysell_user';
+        const userSession = JSON.parse(sessionStorage.getItem('pf_user'));
+
+        if (!userSession) {
+            alert('يرجى تسجيل الدخول أولاً!');
+            window.location.href = 'login.html';
+        }
+
+        // دالة ضغط فائقة الحجم تتوافق مع قيود ORDS الصارمة
+        function compressMicro(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const targetWidth = 120; // العرض الكافي لعرض الوثيقة بوضوح وبأحجام قياسية
+                        const scale = targetWidth / img.width;
+                        canvas.width = targetWidth;
+                        canvas.height = img.height * scale;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.2));
+                    };
+                    img.onerror = err => reject(err);
+                };
+                reader.onerror = err => reject(err);
+            });
+        }
+
+        async function submitKYC(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const userId = userSession.id || userSession.ID;
+
+            const frontFile = document.getElementById('kFrontFile').files[0];
+            const backFile = document.getElementById('kBackFile').files[0];
+
+            if (!frontFile || !backFile) {
+                alert('يرجى إرفاق الصورتين أولاً!');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري معالجة الصور وإرسال الطلب...';
+
+            try {
+                const frontBase64 = await compressMicro(frontFile);
+                const backBase64 = await compressMicro(backFile);
+
+                const payload = {
+                    "user_id": parseInt(userId),
+                    "kyc_type": document.getElementById('kType').value,
+                    "kyc_number": document.getElementById('kNum').value.trim(),
+                    "front_image": frontBase64,
+                    "back_image": backBase64,
+                    "status": "PENDING"
+                };
+
+                const res = await fetch(`${API_BASE}/kyc_requests/`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert('✅ تم إرسال طلب التوثيق وحفظه في أوراكل بنجاح!');
+                    window.location.href = 'dashboard.html';
+                } else {
+                    const errTxt = await res.text();
+                    console.error('KYC Oracle Error:', errTxt);
+                    alert(`❌ فشل حفظ الطلب في أوراكل.\nرمز الخطأ: ${res.status}\nالتفاصيل: ${errTxt}`);
+                }
+
+            } catch (err) {
+                console.error('KYC Submit Error:', err);
+                alert('حدث خطأ أثناء معالجة الصور.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> إرسال للتحقق';
+            }
+        }
+    </script>
+</body>
+</html>

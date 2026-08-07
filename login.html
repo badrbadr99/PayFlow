@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayFlow - تسجيل الدخول</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
+        .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
+        .input-field { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 12px; width: 100%; transition: border-color 0.2s; }
+        .input-field:focus { outline: none; border-color: #10b981; }
+        .btn-emerald { background: #10b981; color: white; font-weight: bold; padding: 14px; border-radius: 12px; width: 100%; transition: opacity 0.2s; font-size: 16px; }
+        .btn-emerald:hover { opacity: 0.9; }
+        .btn-emerald:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body class="p-4 min-h-screen flex items-center justify-center">
+
+    <div class="glass-card w-full max-w-md p-6 md:p-8 space-y-6 shadow-2xl">
+        
+        <div class="text-center space-y-2">
+            <h1 class="text-3xl font-extrabold text-emerald-400">PayFlow</h1>
+            <p class="text-slate-400 text-sm">أدخل بيانات الحساب لتسجيل الدخول</p>
+        </div>
+
+        <form onsubmit="handleLogin(event)" class="space-y-5">
+            
+            <div>
+                <label class="block text-sm font-bold text-slate-300 mb-2">البريد الإلكتروني</label>
+                <!-- الحقل نوعه text لمنع خطأ @ وبدون التنويه لـ ADMIN احترافياً وأمنياً -->
+                <input type="text" id="loginIdentifier" required class="input-field text-left font-mono" placeholder="example@email.com" dir="ltr">
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-300 mb-2">كلمة المرور</label>
+                <input type="password" id="loginPassword" required class="input-field text-left font-mono" placeholder="••••••••" dir="ltr">
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-emerald flex items-center justify-center gap-2">
+                <i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول
+            </button>
+        </form>
+
+        <div class="text-center text-xs text-slate-400 border-t border-slate-800 pt-4">
+            ليس لديك حساب؟ <a href="register.html" class="text-emerald-400 font-bold hover:underline">أنشئ حساب جديد</a>
+        </div>
+
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8081/ords/buysell_user';
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const identifier = document.getElementById('loginIdentifier').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (!identifier || !password) {
+                alert('يرجى كتابة البريد الإلكتروني وكلمة المرور!');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
+
+            try {
+                const res = await fetch(`${API_BASE}/users/`);
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    const users = data.items || [];
+
+                    const user = users.find(u => {
+                        const uEmail = String(u.email || u.EMAIL || '').trim().toLowerCase();
+                        const uRole = String(u.role || u.ROLE || '').trim().toUpperCase();
+                        const inputLower = identifier.toLowerCase();
+
+                        return (uEmail === inputLower) || (inputLower === 'admin' && uRole === 'ADMIN');
+                    });
+
+                    if (user) {
+                        const passHash = user.password_hash || user.PASSWORD_HASH;
+                        const role = String(user.role || user.ROLE || 'USER').toUpperCase();
+                        const isActive = user.is_active !== undefined ? user.is_active : user.IS_ACTIVE;
+
+                        if (parseInt(isActive) === 0) {
+                            alert('🔒 حسابك مجمد حالياً! يرجى التواصل مع الدعم الفني.');
+                            return;
+                        }
+
+                        if (passHash === password) {
+                            sessionStorage.setItem('pf_user', JSON.stringify(user));
+                            alert(`✅ أهلاً بك! تم تسجيل الدخول بنجاح.`);
+
+                            if (role === 'ADMIN' || identifier.toUpperCase() === 'ADMIN') {
+                                window.location.href = 'admin.html';
+                            } else {
+                                window.location.href = 'dashboard.html';
+                            }
+                        } else {
+                            alert('❌ كلمة المرور غير صحيحة!');
+                        }
+                    } else {
+                        alert('❌ البيانات المدخلة غير صحيحة!');
+                    }
+                } else {
+                    alert('❌ تعذر الاتصال بقاعدة البيانات.');
+                }
+            } catch (err) {
+                console.error('Login Error:', err);
+                alert('حدث خطأ أثناء الاتصال بالخادم.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول';
+            }
+        }
+    </script>
+</body>
+</html>

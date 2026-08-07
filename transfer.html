@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayFlow - تحويل أموال داخلي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
+        .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
+        .input-field { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 12px; width: 100%; }
+    </style>
+</head>
+<body class="p-4 max-w-xl mx-auto min-h-screen flex flex-col justify-center space-y-6">
+
+    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <h1 class="text-2xl font-bold text-purple-400">تحويل أموال داخلي</h1>
+        <a href="dashboard.html" class="text-xs text-slate-300 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">رجوع</a>
+    </div>
+
+    <div class="glass-card p-6 space-y-5">
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+            <span class="text-slate-400">رصيدك المتاح:</span>
+            <b id="userBalanceText" class="text-lg text-emerald-400 font-mono">0.00 USDT</b>
+        </div>
+
+        <form onsubmit="handleTransfer(event)" class="space-y-4">
+            <div>
+                <label class="block text-sm font-bold text-slate-200 mb-1">البريد الإلكتروني للمستلم</label>
+                <input type="email" id="receiverEmail" required class="input-field text-left font-mono" dir="ltr" placeholder="user@example.com">
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-200 mb-1">المبلغ (USDT)</label>
+                <input type="number" step="0.01" min="1" id="transferAmount" required class="input-field text-left font-mono text-lg text-emerald-400" dir="ltr" placeholder="0.00">
+            </div>
+
+            <button type="submit" id="submitBtn" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold p-3.5 rounded-xl transition">
+                إرسال فوري
+            </button>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8081/ords/buysell_user';
+        let currentUser = JSON.parse(sessionStorage.getItem('pf_user'));
+        if (!currentUser) window.location.href = 'login.html';
+
+        const currentBal = parseFloat(currentUser.balance !== undefined ? currentUser.balance : (currentUser.BALANCE || 0));
+        document.getElementById('userBalanceText').innerText = currentBal.toFixed(2) + " USDT";
+
+        async function handleTransfer(e) {
+            e.preventDefault();
+            const targetEmail = document.getElementById('receiverEmail').value.trim().toLowerCase();
+            const amount = parseFloat(document.getElementById('transferAmount').value);
+            const senderId = currentUser.id || currentUser.ID;
+            const senderEmail = String(currentUser.email || currentUser.EMAIL || '').trim().toLowerCase();
+
+            if (targetEmail === senderEmail) {
+                alert('لا يمكنك التحويل لنفسك!');
+                return;
+            }
+            if (amount > currentBal) {
+                alert('رصيدك غير كافٍ!');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/users/`);
+                const data = await res.json();
+                const receiver = (data.items || []).find(u => String(u.email || u.EMAIL || '').trim().toLowerCase() === targetEmail);
+
+                if (!receiver) {
+                    alert('المستلم غير موجود!');
+                    return;
+                }
+
+                const receiverId = receiver.id || receiver.ID;
+                const receiverBal = parseFloat(receiver.balance !== undefined ? receiver.balance : (receiver.BALANCE || 0));
+
+                // حفظ في جدول التحويلات
+                await fetch(`${API_BASE}/internal_transfers/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ "sender_id": parseInt(senderId), "receiver_id": parseInt(receiverId), "amount_usdt": amount })
+                });
+
+                // خصم من المرسل
+                await fetch(`${API_BASE}/users/${senderId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...currentUser, balance: currentBal - amount })
+                });
+
+                // إضافة للمستلم
+                await fetch(`${API_BASE}/users/${receiverId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...receiver, balance: receiverBal + amount })
+                });
+
+                alert('تم التحويل بنجاح!');
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                alert('حدث خطأ في الاتصال.');
+            }
+        }
+    </script>
+</body>
+</html>
