@@ -51,14 +51,14 @@
     </div>
 
     <script>
-        // رابط وحاوية مشروع Supabase
+        // رابط مشروع Supabase
         const SUPABASE_URL = 'https://dnitbzmtbedrgfkmxszp.supabase.co';
         
-        // ⚠️ استبدل النص أدناه بـ anon / public key الخاص بك من Supabase Settings -> API
+        // المفتاح الخاص بك
         const SUPABASE_ANON_KEY = 'sb_publishable_5MpSpsrOXjHCSRNTllJO8g_twaTzmbf';
 
-        // تهيئة الاتصال بدون تعارض أسماء
-        const supabaseClient = (window.supabase && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes('ضع_مفتاح')) 
+        // تهيئة الاتصال
+        const supabaseClient = (window.supabase && SUPABASE_ANON_KEY) 
             ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
             : null;
 
@@ -69,7 +69,7 @@
             const password = document.getElementById('loginPassword').value.trim();
 
             if (!supabaseClient) {
-                alert('⚠️ يرجى إدراج مفتاح SUPABASE_ANON_KEY الصحيح في السطر 58 أولاً!');
+                alert('⚠️ تعذر الاتصال بمكتبة Supabase!');
                 return;
             }
 
@@ -82,7 +82,7 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
 
             try {
-                // البحث في جدول users عن البريد الإلكتروني
+                // البحث في جدول users
                 const { data: users, error } = await supabaseClient
                     .from('users')
                     .select('*')
@@ -105,7 +105,6 @@
                         return;
                     }
 
-                    // التحقق المباشر (يمكن تعزيزه لاحقاً بالتشفير)
                     if (!passHash || passHash === password) {
                         sessionStorage.setItem('pf_user', JSON.stringify(user));
                         alert(`✅ أهلاً بك ${user.full_name || ''}! تم تسجيل الدخول بنجاح.`);
