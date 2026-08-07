@@ -51,10 +51,8 @@
     </div>
 
     <script>
-        // رابط مشروع Supabase
+        // رابط مشروع Supabase والمفتاح
         const SUPABASE_URL = 'https://dnitbzmtbedrgfkmxszp.supabase.co';
-        
-        // المفتاح الخاص بك
         const SUPABASE_ANON_KEY = 'sb_publishable_5MpSpsrOXjHCSRNTllJO8g_twaTzmbf';
 
         // تهيئة الاتصال
@@ -82,7 +80,7 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
 
             try {
-                // البحث في جدول users
+                // الاستعلام عن بيانات الحساب
                 const { data: users, error } = await supabaseClient
                     .from('users')
                     .select('*')
@@ -100,12 +98,14 @@
                     const role = String(user.role || 'USER').toUpperCase();
                     const isActive = user.is_active;
 
+                    // التحقق من تجميد الحساب
                     if (isActive === 0 || isActive === false) {
                         alert('🔒 حسابك مجمد حالياً! يرجى التواصل مع الدعم الفني.');
                         return;
                     }
 
-                    if (!passHash || passHash === password) {
+                    // التحقق الصارم: يجب ألا تكون كلمة المرور فارغة وأن تطابق المدخل
+                    if (passHash && passHash === password) {
                         sessionStorage.setItem('pf_user', JSON.stringify(user));
                         alert(`✅ أهلاً بك ${user.full_name || ''}! تم تسجيل الدخول بنجاح.`);
 
