@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PayFlow - لوحة تحكم المشرف (Admin Panel)</title>
+    <title>PayFlow - لوحة تحكم المشرف الاحترافية</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -20,12 +20,12 @@
         <!-- شريط العنوان -->
         <div class="flex flex-col md:flex-row justify-between items-center glass-card p-5 gap-4">
             <div class="flex items-center gap-3">
-                <div class="bg-red-500/20 text-red-400 p-3 rounded-2xl border border-red-500/30 text-xl">
+                <div class="bg-emerald-500/20 text-emerald-400 p-3 rounded-2xl border border-emerald-500/30 text-xl">
                     <i class="fa-solid fa-user-shield"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl md:text-2xl font-black text-white">لوحة تحكم المشرف (Supabase Admin)</h1>
-                    <p class="text-xs text-slate-400">إدارة المستخدمين، تجميد الحسابات، مراجعة طلبات الإيداع والتوثيق (KYC)</p>
+                    <h1 class="text-xl md:text-2xl font-black text-white">لوحة تحكم المشرف الاحترافية</h1>
+                    <p class="text-xs text-slate-400">إدارة العمليات المالية، أسعار الصرف، تجميد الحسابات، ومتابعة الطلبات بدقة</p>
                 </div>
             </div>
             <div class="flex items-center gap-3">
@@ -39,7 +39,7 @@
         </div>
 
         <!-- بطاقات الإحصائيات -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="glass-card p-5 space-y-2 border-l-4 border-l-emerald-500">
                 <span class="text-xs text-slate-400 font-bold flex items-center gap-2">
                     <i class="fa-solid fa-users text-emerald-400"></i> إجمالي المستخدمين
@@ -54,13 +54,45 @@
             </div>
             <div class="glass-card p-5 space-y-2 border-l-4 border-l-blue-500">
                 <span class="text-xs text-slate-400 font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-id-card text-blue-400"></i> طلبات توثيق الهوية (KYC) المعلقة
+                    <i class="fa-solid fa-id-card text-blue-400"></i> طلبات KYC المعلقة
                 </span>
                 <div class="text-3xl font-black text-blue-400 font-mono" id="pendingKycCount">0</div>
             </div>
+            <div class="glass-card p-5 space-y-2 border-l-4 border-l-purple-500">
+                <span class="text-xs text-slate-400 font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-check-double text-purple-400"></i> إجمالي الطلبات الجاهزة
+                </span>
+                <div class="text-3xl font-black text-purple-400 font-mono" id="completedOrdersCount">0</div>
+            </div>
         </div>
 
-        <!-- التنقل بين الأقسام وحقل البحث -->
+        <!-- قسم إدارة الأسعار والعمولات -->
+        <div class="glass-card p-6 space-y-4">
+            <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+                <i class="fa-solid fa-sliders"></i> إدارة أسعار الصرف وعمولات النظام الحالية
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">سعر الشراء (Buy Rate)</label>
+                    <input type="number" id="adminBuyRate" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">سعر البيع (Sell Rate)</label>
+                    <input type="number" id="adminSellRate" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">نسبة العمولة (%)</label>
+                    <input type="number" id="adminFeePercent" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white font-mono">
+                </div>
+            </div>
+            <div class="text-left pt-1">
+                <button onclick="saveRates()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-xl text-xs font-bold transition">
+                    <i class="fa-solid fa-floppy-disk"></i> حفظ وتحديث الأسعار فوراً
+                </button>
+            </div>
+        </div>
+
+        <!-- التنقل بين الأقسام وحقل البحث الشامل -->
         <div class="glass-card p-4 space-y-4">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
@@ -70,13 +102,16 @@
                     <button onclick="switchTab('deposits')" id="tabDepositsBtn" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 transition flex items-center gap-2">
                         <i class="fa-solid fa-file-invoice-dollar"></i> طلبات الإيداع
                     </button>
+                    <button onclick="switchTab('completed')" id="tabCompletedBtn" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 transition flex items-center gap-2">
+                        <i class="fa-solid fa-list-check"></i> الطلبات الجاهزة (المكتملة)
+                    </button>
                     <button onclick="switchTab('kyc')" id="tabKycBtn" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 transition flex items-center gap-2">
-                        <i class="fa-solid id-card"></i> طلبات الكي واي سي
+                        <i class="fa-solid fa-id-card"></i> طلبات الكي واي سي
                     </button>
                 </div>
                 <div class="w-full md:w-80 relative">
                     <i class="fa-solid fa-search absolute right-3.5 top-3.5 text-slate-400 text-xs"></i>
-                    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="بحث برقم المعرف، الاسم أو البريد..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 pr-10 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
+                    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="ابحث برقم المعرف، الإيصال، أو الاسم..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 pr-10 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
                 </div>
             </div>
 
@@ -101,7 +136,7 @@
                 </table>
             </div>
 
-            <!-- جدول طلبات الإيداع -->
+            <!-- جدول طلبات الإيداع المعلقة -->
             <div id="depositsSection" class="tab-content hidden overflow-x-auto">
                 <table class="w-full text-right text-xs">
                     <thead class="bg-slate-900 text-slate-400 border-b border-slate-800">
@@ -109,7 +144,7 @@
                             <th class="p-3">رقم الطلب</th>
                             <th class="p-3">معرف المستخدم</th>
                             <th class="p-3">الطريقة</th>
-                            <th class="p-3">المبلغ (USDT)</th>
+                            <th class="p-3">المبلغ الصافي (USDT)</th>
                             <th class="p-3 font-mono">رقم الإيصال / TxID</th>
                             <th class="p-3 text-center">الإثبات</th>
                             <th class="p-3">الحالة</th>
@@ -117,6 +152,27 @@
                         </tr>
                     </thead>
                     <tbody id="depositsTableBody" class="divide-y divide-slate-800">
+                        <tr><td colspan="8" class="p-6 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- جدول الطلبات الجاهزة (المكتملة) -->
+            <div id="completedSection" class="tab-content hidden overflow-x-auto">
+                <table class="w-full text-right text-xs">
+                    <thead class="bg-slate-900 text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="p-3">رقم العملية (ID)</th>
+                            <th class="p-3">نوع الطلب</th>
+                            <th class="p-3">معرف صاحب الحساب</th>
+                            <th class="p-3">المبلغ الصافي</th>
+                            <th class="p-3 font-mono">رقم الإيصال / TxID</th>
+                            <th class="p-3">وقت المعالجة</th>
+                            <th class="p-3 text-center">الإثبات</th>
+                            <th class="p-3 text-center">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="completedTableBody" class="divide-y divide-slate-800">
                         <tr><td colspan="8" class="p-6 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...</td></tr>
                     </tbody>
                 </table>
@@ -170,7 +226,6 @@
 
         let currentUser = JSON.parse(sessionStorage.getItem('pf_user') || '{}');
 
-        // التحقق من صلاحيات المشرف
         if (!currentUser || String(currentUser.role || '').toUpperCase() !== 'ADMIN') {
             alert('❌ غير مصرح لك بالدخول إلى هذه الصفحة!');
             window.location.href = 'dashboard.html';
@@ -178,6 +233,7 @@
 
         let allUsers = [];
         let allDeposits = [];
+        let allCompletedOrders = [];
         let allKyc = [];
         let currentActiveTab = 'users';
 
@@ -192,6 +248,9 @@
             } else if (tab === 'deposits') {
                 document.getElementById('depositsSection').classList.remove('hidden');
                 document.getElementById('tabDepositsBtn').classList.add('active');
+            } else if (tab === 'completed') {
+                document.getElementById('completedSection').classList.remove('hidden');
+                document.getElementById('tabCompletedBtn').classList.add('active');
             } else if (tab === 'kyc') {
                 document.getElementById('kycSection').classList.remove('hidden');
                 document.getElementById('tabKycBtn').classList.add('active');
@@ -200,34 +259,60 @@
 
         async function loadAdminData() {
             try {
-                // 1. جلب المستخدمين من Supabase
-                const { data: usersData, error: usersErr } = await supabaseClient.from('users').select('*').order('created_at', { ascending: false });
-                if (!usersErr) {
-                    allUsers = usersData || [];
-                    document.getElementById('totalUsersCount').innerText = allUsers.length;
-                    renderUsers(allUsers);
+                // جلب أسعار الصرف الحالية
+                const { data: rateData } = await supabaseClient.from('exchange_rates').select('*').limit(1).single();
+                if (rateData) {
+                    document.getElementById('adminBuyRate').value = rateData.buy_rate || 0;
+                    document.getElementById('adminSellRate').value = rateData.sell_rate || 0;
+                    document.getElementById('adminFeePercent').value = rateData.fee_percentage || 0;
                 }
 
-                // 2. جلب طلبات الإيداع من Supabase
-                const { data: depData, error: depErr } = await supabaseClient.from('deposit_requests').select('*').order('created_at', { ascending: false });
-                if (!depErr) {
-                    allDeposits = depData || [];
-                    const pendingDep = allDeposits.filter(d => String(d.status || '').toUpperCase() === 'PENDING');
-                    document.getElementById('pendingDepositsCount').innerText = pendingDep.length;
-                    renderDeposits(allDeposits);
-                }
+                // 1. جلب المستخدمين
+                const { data: usersData } = await supabaseClient.from('users').select('*').order('created_at', { ascending: false });
+                allUsers = usersData || [];
+                document.getElementById('totalUsersCount').innerText = allUsers.length;
+                renderUsers(allUsers);
 
-                // 3. جلب طلبات التوثيق KYC من Supabase
-                const { data: kycData, error: kycErr } = await supabaseClient.from('kyc_requests').select('*').order('created_at', { ascending: false });
-                if (!kycErr) {
-                    allKyc = kycData || [];
-                    const pendingKyc = allKyc.filter(k => String(k.status || '').toUpperCase() === 'PENDING');
-                    document.getElementById('pendingKycCount').innerText = pendingKyc.length;
-                    renderKyc(allKyc);
-                }
+                // 2. جلب طلبات الإيداع
+                const { data: depData } = await supabaseClient.from('deposit_requests').select('*').order('created_at', { ascending: false });
+                allDeposits = depData || [];
+
+                const pendingDep = allDeposits.filter(d => String(d.status || '').toUpperCase() === 'PENDING');
+                document.getElementById('pendingDepositsCount').innerText = pendingDep.length;
+                renderDeposits(pendingDep);
+
+                allCompletedOrders = allDeposits.filter(d => String(d.status || '').toUpperCase() === 'APPROVED');
+                document.getElementById('completedOrdersCount').innerText = allCompletedOrders.length;
+                renderCompletedOrders(allCompletedOrders);
+
+                // 3. جلب طلبات KYC
+                const { data: kycData } = await supabaseClient.from('kyc_requests').select('*').order('created_at', { ascending: false });
+                allKyc = kycData || [];
+                const pendingKyc = allKyc.filter(k => String(k.status || '').toUpperCase() === 'PENDING');
+                document.getElementById('pendingKycCount').innerText = pendingKyc.length;
+                renderKyc(allKyc);
 
             } catch (err) {
                 console.error('Error loading admin data:', err);
+            }
+        }
+
+        async function saveRates() {
+            const buy_rate = parseFloat(document.getElementById('adminBuyRate').value);
+            const sell_rate = parseFloat(document.getElementById('adminSellRate').value);
+            const fee_percentage = parseFloat(document.getElementById('adminFeePercent').value);
+
+            try {
+                const { error } = await supabaseClient
+                    .from('exchange_rates')
+                    .update({ buy_rate, sell_rate, fee_percentage, updated_at: new Date().toISOString() })
+                    .eq('rate_id', 1);
+
+                if (error) throw error;
+                alert('✅ تم تحديث أسعار الصرف والعمولات بنجاح!');
+                loadAdminData();
+            } catch (e) {
+                alert(`❌ خطأ: ${e.message}`);
             }
         }
 
@@ -244,7 +329,7 @@
                 const email = u.email || '-';
                 const balUsdt = parseFloat(u.balance_usdt || u.balance || 0);
                 const balYer = parseFloat(u.balance_yer || 0);
-                const active = u.is_active === 1 || u.is_active === true;
+                const active = u.is_active === 1 || u.is_active === true || u.is_active === "1";
                 const kyc = u.kyc_status || 'PENDING';
 
                 let tr = document.createElement('tr');
@@ -259,7 +344,7 @@
                     <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">${active ? 'نشط' : 'مجمد'}</span></td>
                     <td class="p-3 text-center">
                         <button onclick="toggleUserStatus(${id}, ${active})" class="px-3 py-1.5 rounded-lg text-xs font-bold ${active ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20' : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'} transition">
-                            ${active ? 'تجميد' : 'تنشيط'}
+                            ${active ? 'تجميد الحساب' : 'إلغاء التجميد'}
                         </button>
                     </td>
                 `;
@@ -271,21 +356,16 @@
             const tbody = document.getElementById('depositsTableBody');
             tbody.innerHTML = '';
             if (deposits.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="p-6 text-center text-slate-500">لا توجد طلبات إيداع حالياً</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="p-6 text-center text-slate-500">لا توجد طلبات إيداع معلقة حالياً</td></tr>';
                 return;
             }
             deposits.forEach(d => {
                 const depId = d.deposit_id;
                 const userId = d.user_id;
                 const method = d.payment_method || d.deposit_method || 'USDT';
-                const amount = parseFloat(d.amount_usdt || d.gross_usdt || 0);
-                const txId = d.tx_id || '-';
+                const netAmount = parseFloat(d.net_usdt || d.amount_usdt || d.gross_usdt || 0);
+                const txId = d.tx_id || d.proof_ref || '-';
                 const proof = d.proof_image || d.proof_ref || '';
-                const status = d.status || 'PENDING';
-
-                let statusBadge = status === 'APPROVED' ? '<span class="bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full text-[10px] font-bold">مقبول</span>' :
-                                  status === 'REJECTED' ? '<span class="bg-red-500/20 text-red-400 px-2.5 py-1 rounded-full text-[10px] font-bold">مرفوض</span>' :
-                                  '<span class="bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full text-[10px] font-bold">معلق</span>';
 
                 let tr = document.createElement('tr');
                 tr.className = 'table-row-hover transition';
@@ -293,18 +373,50 @@
                     <td class="p-3 font-mono">#${depId}</td>
                     <td class="p-3 font-mono">#${userId}</td>
                     <td class="p-3 font-bold text-slate-200">${method}</td>
-                    <td class="p-3 font-mono text-emerald-400 font-bold">${amount.toFixed(2)} USDT</td>
+                    <td class="p-3 font-mono text-emerald-400 font-bold">${netAmount.toFixed(2)} USDT</td>
                     <td class="p-3 font-mono text-slate-300">${txId}</td>
                     <td class="p-3 text-center">
                         ${proof ? `<button onclick="showProof('${proof}')" class="bg-slate-800 text-emerald-400 hover:bg-slate-700 px-2.5 py-1 rounded-lg text-xs border border-slate-700"><i class="fa-solid fa-eye"></i> عرض</button>` : '<span class="text-slate-500 text-[10px]">لا توجد صورة</span>'}
                     </td>
-                    <td class="p-3">${statusBadge}</td>
+                    <td class="p-3"><span class="bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full text-[10px] font-bold">معلق</span></td>
                     <td class="p-3 text-center flex items-center justify-center gap-2">
-                        ${status === 'PENDING' ? `
-                            <button onclick="updateDepositStatus(${depId}, 'APPROVED', ${userId}, ${amount})" class="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 px-3 py-1 rounded-lg text-xs font-bold transition">قبول</button>
-                            <button onclick="updateDepositStatus(${depId}, 'REJECTED', ${userId}, ${amount})" class="bg-red-500/10 text-red-400 hover:bg-red-500/20 px-3 py-1 rounded-lg text-xs font-bold transition">رفض</button>
-                        ` : '<span class="text-slate-500 text-[11px]">مكتمل</span>'}
+                        <button onclick="updateDepositStatus(${depId}, 'APPROVED', ${userId}, ${netAmount})" class="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 px-3 py-1 rounded-lg text-xs font-bold transition">قبول وإضافة للرصيد</button>
+                        <button onclick="updateDepositStatus(${depId}, 'REJECTED', ${userId}, ${netAmount})" class="bg-red-500/10 text-red-400 hover:bg-red-500/20 px-3 py-1 rounded-lg text-xs font-bold transition">رفض</button>
                     </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderCompletedOrders(orders) {
+            const tbody = document.getElementById('completedTableBody');
+            tbody.innerHTML = '';
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="p-6 text-center text-slate-500">لا توجد طلبات جاهزة أو مكتملة حتى الآن</td></tr>';
+                return;
+            }
+            orders.forEach(o => {
+                const id = o.deposit_id;
+                const userId = o.user_id;
+                const method = o.payment_method || o.deposit_method || 'إيداع رصيد';
+                const netAmount = parseFloat(o.net_usdt || o.amount_usdt || o.gross_usdt || 0);
+                const txId = o.tx_id || o.proof_ref || '-';
+                const processedAt = o.processed_at ? new Date(o.processed_at).toLocaleString('en-US') : (o.created_at ? new Date(o.created_at).toLocaleString('en-US') : '-');
+                const proof = o.proof_image || o.proof_ref || '';
+
+                let tr = document.createElement('tr');
+                tr.className = 'table-row-hover transition';
+                tr.innerHTML = `
+                    <td class="p-3 font-mono">#${id}</td>
+                    <td class="p-3 font-bold text-emerald-400">${method}</td>
+                    <td class="p-3 font-mono">#${userId}</td>
+                    <td class="p-3 font-mono text-emerald-400 font-bold">${netAmount.toFixed(2)} USDT</td>
+                    <td class="p-3 font-mono text-slate-300">${txId}</td>
+                    <td class="p-3 font-mono text-slate-400 text-[11px]">${processedAt}</td>
+                    <td class="p-3 text-center">
+                        ${proof ? `<button onclick="showProof('${proof}')" class="bg-slate-800 text-emerald-400 hover:bg-slate-700 px-2.5 py-1 rounded-lg text-xs border border-slate-700"><i class="fa-solid fa-eye"></i> عرض</button>` : '-'}
+                    </td>
+                    <td class="p-3 text-center"><span class="bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full text-[10px] font-bold">مقبول ومكتمل</span></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -314,7 +426,7 @@
             const tbody = document.getElementById('kycTableBody');
             tbody.innerHTML = '';
             if (kycList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-500">لا توجد طلبات توثيق حالياً</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-500">لا توجد طلبات توثيق معلقة حالياً</td></tr>';
                 return;
             }
             kycList.forEach(k => {
@@ -322,11 +434,6 @@
                 const userId = k.user_id;
                 const docType = k.document_type || '-';
                 const docNum = k.document_number || '-';
-                const status = k.status || 'PENDING';
-
-                let statusBadge = status === 'APPROVED' ? '<span class="bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full text-[10px] font-bold">موثق</span>' :
-                                  status === 'REJECTED' ? '<span class="bg-red-500/20 text-red-400 px-2.5 py-1 rounded-full text-[10px] font-bold">مرفوض</span>' :
-                                  '<span class="bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full text-[10px] font-bold">معلق</span>';
 
                 let tr = document.createElement('tr');
                 tr.className = 'table-row-hover transition';
@@ -335,12 +442,10 @@
                     <td class="p-3 font-mono">#${userId}</td>
                     <td class="p-3 font-bold text-slate-200">${docType}</td>
                     <td class="p-3 font-mono text-slate-300">${docNum}</td>
-                    <td class="p-3">${statusBadge}</td>
+                    <td class="p-3"><span class="bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full text-[10px] font-bold">معلق</span></td>
                     <td class="p-3 text-center flex items-center justify-center gap-2">
-                        ${status === 'PENDING' ? `
-                            <button onclick="updateKycStatus(${kycId}, 'APPROVED', ${userId})" class="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 px-3 py-1 rounded-lg text-xs font-bold transition">قبول وتوثيق</button>
-                            <button onclick="updateKycStatus(${kycId}, 'REJECTED', ${userId})" class="bg-red-500/10 text-red-400 hover:bg-red-500/20 px-3 py-1 rounded-lg text-xs font-bold transition">رفض</button>
-                        ` : '<span class="text-slate-500 text-[11px]">مكتمل</span>'}
+                        <button onclick="updateKycStatus(${kycId}, 'APPROVED', ${userId})" class="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 px-3 py-1 rounded-lg text-xs font-bold transition">قبول وتوثيق</button>
+                        <button onclick="updateKycStatus(${kycId}, 'REJECTED', ${userId})" class="bg-red-500/10 text-red-400 hover:bg-red-500/20 px-3 py-1 rounded-lg text-xs font-bold transition">رفض</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -356,45 +461,52 @@
                     .eq('user_id', userId);
 
                 if (error) throw error;
+                alert(`✅ تم تحديث حالة المستخدم #${userId} بنجاح`);
                 loadAdminData();
             } catch (e) {
-                alert(`خطأ: ${e.message}`);
+                alert(`❌ خطأ أثناء التحديث: ${e.message}`);
             }
         }
 
-        async function updateDepositStatus(depositId, newStatus, userId, amount) {
+        async function updateDepositStatus(depositId, newStatus, userId, netAmount) {
             try {
-                // 1. تحديث حالة الإيداع
                 const { error: depError } = await supabaseClient
                     .from('deposit_requests')
-                    .update({ status: newStatus, processed_at: new Date().toISOString() })
+                    .update({ 
+                        status: newStatus, 
+                        processed_at: new Date().toISOString() 
+                    })
                     .eq('deposit_id', depositId);
 
                 if (depError) throw depError;
 
-                // 2. إذا تم القبول، إضافة المبلغ إلى رصيد المستخدم
                 if (newStatus === 'APPROVED') {
-                    const { data: userArr, error: fetchErr } = await supabaseClient
+                    const { data: userRecord, error: fetchErr } = await supabaseClient
                         .from('users')
                         .select('balance_usdt, balance')
                         .eq('user_id', userId)
                         .single();
 
-                    if (!fetchErr && userArr) {
-                        const currentUsdt = parseFloat(userArr.balance_usdt || userArr.balance || 0);
-                        const newUsdt = currentUsdt + amount;
+                    if (fetchErr) throw fetchErr;
 
-                        await supabaseClient
-                            .from('users')
-                            .update({ balance_usdt: newUsdt, balance: newUsdt })
-                            .eq('user_id', userId);
-                    }
+                    const currentUsdt = parseFloat(userRecord.balance_usdt || userRecord.balance || 0);
+                    const newUsdt = currentUsdt + netAmount;
+
+                    const { error: userUpdateErr } = await supabaseClient
+                        .from('users')
+                        .update({ 
+                            balance_usdt: newUsdt, 
+                            balance: newUsdt 
+                        })
+                        .eq('user_id', userId);
+
+                    if (userUpdateErr) throw userUpdateErr;
                 }
 
-                alert(`✅ تم تحديث طلب الإيداع بنجاح إلى (${newStatus})`);
+                alert(`✅ تم قبول الطلب وإضافته لحساب المستخدم بنجاح!`);
                 loadAdminData();
             } catch (e) {
-                alert(`خطأ أثناء التحديث: ${e.message}`);
+                alert(`❌ حدث خطأ: ${e.message}`);
             }
         }
 
@@ -414,10 +526,10 @@
                         .eq('user_id', userId);
                 }
 
-                alert(`✅ تم تحديث حالة التوثيق إلى (${newStatus})`);
+                alert(`✅ تم تحديث حالة التوثيق بنجاح`);
                 loadAdminData();
             } catch (e) {
-                alert(`خطأ: ${e.message}`);
+                alert(`❌ خطأ: ${e.message}`);
             }
         }
 
@@ -440,15 +552,27 @@
                 );
                 renderUsers(filtered);
             } else if (currentActiveTab === 'deposits') {
-                const filtered = allDeposits.filter(d => 
+                const filtered = allDeposits.filter(d => String(d.status || '').toUpperCase() === 'PENDING').filter(d => 
                     String(d.deposit_id).includes(query) ||
+                    String(d.user_id).includes(query) ||
                     String(d.tx_id || '').toLowerCase().includes(query) ||
+                    String(d.proof_ref || '').toLowerCase().includes(query) ||
                     String(d.payment_method || '').toLowerCase().includes(query)
                 );
                 renderDeposits(filtered);
+            } else if (currentActiveTab === 'completed') {
+                const filtered = allCompletedOrders.filter(o => 
+                    String(o.deposit_id).includes(query) ||
+                    String(o.user_id).includes(query) ||
+                    String(o.tx_id || '').toLowerCase().includes(query) ||
+                    String(o.proof_ref || '').toLowerCase().includes(query) ||
+                    String(o.payment_method || '').toLowerCase().includes(query)
+                );
+                renderCompletedOrders(filtered);
             } else if (currentActiveTab === 'kyc') {
                 const filtered = allKyc.filter(k => 
                     String(k.kyc_id).includes(query) ||
+                    String(k.user_id).includes(query) ||
                     String(k.document_number || '').toLowerCase().includes(query)
                 );
                 renderKyc(filtered);

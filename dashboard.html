@@ -3,113 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PayFlow - لوحة التحكم</title>
+    <title>PayFlow - لوحة التحكم الرئيسية</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
+        body { background: #0b0f19; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
         .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
     </style>
 </head>
-<body class="p-4 md:p-8 max-w-4xl mx-auto space-y-6 min-h-screen flex flex-col justify-between">
+<body class="p-4 md:p-8 max-w-6xl mx-auto space-y-6 min-h-screen flex flex-col justify-between">
 
     <div class="space-y-6">
-        <!-- Header -->
-        <div class="flex justify-between items-center glass-card p-4 md:p-6">
-            <div>
-                <h1 class="text-xl md:text-2xl font-bold text-emerald-400" id="userName">مرحباً، ...</h1>
-                <p class="text-xs text-slate-400" id="userEmail">...</p>
+        <!-- شريط الترحيب والروابط السريعة -->
+        <div class="flex flex-col md:flex-row justify-between items-center glass-card p-6 gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-emerald-500/20 text-emerald-400 p-3.5 rounded-2xl border border-emerald-500/30 text-xl">
+                    <i class="fa-solid fa-user-circle"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black text-white" id="userNameHeader">مرحباً بك</h1>
+                    <p class="text-xs text-slate-400" id="userEmailHeader">جاري تحميل بيانات الحساب...</p>
+                </div>
             </div>
-            <button onclick="logout()" class="bg-red-500/10 text-red-400 border border-red-500/20 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-500/20 transition flex items-center gap-1">
-                <i class="fa-solid fa-right-from-bracket"></i> خروج
-            </button>
-        </div>
-
-        <!-- Balance Card -->
-        <div class="glass-card p-6 md:p-8 bg-gradient-to-br from-slate-900 to-emerald-950/40 border-emerald-500/30 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div>
-                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">الرصيد المتاح</span>
-                <div class="text-4xl md:text-5xl font-black text-emerald-400 font-mono mt-1" id="userBalance">0.00 USDT</div>
-            </div>
-            <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                <a href="deposit.html" class="flex-1 md:flex-none px-5 py-3 bg-emerald-500 text-white font-bold rounded-xl text-center hover:bg-emerald-600 transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-wallet"></i> إيداع
+            <div class="flex items-center gap-3 flex-wrap">
+                <div id="adminLinkContainer"></div>
+                <a href="deposit.html" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid fa-plus-circle"></i> إيداع رصيد
                 </a>
-                <a href="withdraw.html" class="flex-1 md:flex-none px-5 py-3 bg-blue-600 text-white font-bold rounded-xl text-center hover:bg-blue-700 transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-arrow-up-right"></i> سحب
-                </a>
-                <a href="transfer.html" class="flex-1 md:flex-none px-5 py-3 bg-purple-600 text-white font-bold rounded-xl text-center hover:bg-purple-700 transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i> تحويل
-                </a>
+                <button onclick="logout()" class="bg-red-500/10 text-red-400 border border-red-500/20 px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-red-500/20 transition flex items-center gap-2">
+                    <i class="fa-solid fa-power-off"></i> خروج
+                </button>
             </div>
         </div>
 
-        <!-- Quick Links -->
+        <!-- الأرصدة الحالية -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <a href="kyc.html" class="glass-card p-5 hover:border-emerald-500 transition flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-id-card"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-sm">توثيق الحساب (KYC)</h3>
-                        <p class="text-xs text-slate-400" id="kycStatusText">الحالة: قيد المراجعة</p>
-                    </div>
-                </div>
-                <i class="fa-solid fa-chevron-left text-slate-500 text-sm"></i>
-            </a>
-            <div class="glass-card p-5 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-sm">أمان الحساب</h3>
-                        <p class="text-xs text-slate-400">الحساب محمي وآمن</p>
-                    </div>
-                </div>
-                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-bold">نشط</span>
+            <div class="glass-card p-6 space-y-2 border-l-4 border-l-emerald-500">
+                <span class="text-xs text-slate-400 font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-coins text-emerald-400"></i> رصيد USDT المتاح
+                </span>
+                <div class="text-3xl font-black text-emerald-400 font-mono" id="balanceUsdtDisplay">0.00 USDT</div>
+            </div>
+            <div class="glass-card p-6 space-y-2 border-l-4 border-l-amber-500">
+                <span class="text-xs text-slate-400 font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-money-bill-wave text-amber-400"></i> رصيد YER المتاح
+                </span>
+                <div class="text-3xl font-black text-amber-400 font-mono" id="balanceYerDisplay">0.00 YER</div>
+            </div>
+        </div>
+
+        <!-- سجل العمليات الخاصة بي (مع نظام 10 عمليات + عرض المزيد) -->
+        <div class="glass-card p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-history text-emerald-400"></i> سجل عملبات الإيداع والتحويل الخاصة بي
+                </h3>
+                <span class="text-xs text-slate-400 font-mono" id="totalTxCount">العدد الإجمالي: 0</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-xs">
+                    <thead class="bg-slate-900 text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="p-3">رقم العملية</th>
+                            <th class="p-3">نوع العملية</th>
+                            <th class="p-3">المبلغ</th>
+                            <th class="p-3 font-mono">رقم الإيصال / TxID</th>
+                            <th class="p-3">التاريخ والوقت</th>
+                            <th class="p-3 text-center">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTransactionsBody" class="divide-y divide-slate-800">
+                        <tr><td colspan="6" class="p-6 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- زر عرض المزيد -->
+            <div class="text-center pt-2" id="loadMoreContainer" style="display: none;">
+                <button onclick="loadMoreTransactions()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-6 py-2.5 rounded-xl text-xs font-bold transition">
+                    <i class="fa-solid fa-chevron-down"></i> عرض المزيد من العمليات (10 عمليات أخرى)
+                </button>
             </div>
         </div>
     </div>
 
     <footer class="text-center text-xs text-slate-500 pt-4 border-t border-slate-800">
-        PayFlow Dashboard &copy; 2026
+        PayFlow Dashboard &copy; 2026 - نظام المستخدم المالي
     </footer>
 
     <script>
-        const API_BASE = 'http://localhost:8081/ords/buysell_user';
-        let currentUser = JSON.parse(sessionStorage.getItem('pf_user'));
+        const SUPABASE_URL = 'https://dnitbzmtbedrgfkmxszp.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_5MpSpsrOXjHCSRNTllJO8g_twaTzmbf';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        if (!currentUser) {
+        let currentUser = JSON.parse(sessionStorage.getItem('pf_user') || '{}');
+        if (!currentUser || !currentUser.user_id) {
+            alert('❌ يرجى تسجيل الدخول أولاً!');
             window.location.href = 'login.html';
         }
 
-        function loadUserData() {
-            const name = currentUser.full_name || currentUser.FULL_NAME || 'مستخدم PayFlow';
-            const email = currentUser.email || currentUser.EMAIL || '';
-            const balance = parseFloat(currentUser.balance !== undefined ? currentUser.balance : (currentUser.BALANCE || 0));
-            const kyc = currentUser.kyc_status || currentUser.KYC_STATUS || 'PENDING';
+        let allUserTransactions = [];
+        let displayedCount = 10; // نعرض أول 10 عمليات افتراضياً
 
-            document.getElementById('userName').innerText = `مرحباً، ${name}`;
-            document.getElementById('userEmail').innerText = email;
-            document.getElementById('userBalance').innerText = `${balance.toFixed(2)} USDT`;
+        async function loadDashboardData() {
+            try {
+                // 1. جلب أحدث بيانات المستخدم ورصيده من القاعدة
+                const { data: userData, error: userErr } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('user_id', currentUser.user_id)
+                    .single();
 
-            const kycMap = { 'PENDING': 'قيد المراجعة', 'APPROVED': 'موثق', 'REJECTED': 'مرفوض' };
-            document.getElementById('kycStatusText').innerText = `الحالة: ${kycMap[kyc] || kyc}`;
+                if (!userErr && userData) {
+                    currentUser = userData;
+                    sessionStorage.setItem('pf_user', JSON.stringify(currentUser));
+                    
+                    document.getElementById('userNameHeader').innerText = `مرحباً، ${userData.full_name || 'مستخدم PayFlow'}`;
+                    document.getElementById('userEmailHeader').innerText = userData.email || '';
+                    document.getElementById('balanceUsdtDisplay').innerText = `${parseFloat(userData.balance_usdt || userData.balance || 0).toFixed(2)} USDT`;
+                    document.getElementById('balanceYerDisplay').innerText = `${parseFloat(userData.balance_yer || 0).toFixed(2)} YER`;
+
+                    // إذا كان المشرف هو الأدمن، نظهر له زر لوحة التحكم
+                    if (String(userData.role || '').toUpperCase() === 'ADMIN') {
+                        document.getElementById('adminLinkContainer').innerHTML = `
+                            <a href="admin.html" class="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                                <i class="fa-solid fa-user-shield"></i> لوحة الأدمن
+                            </a>
+                        `;
+                    }
+                }
+
+                // 2. جلب عمليات الإيداع الخاصة بالمستخدم فقط
+                const { data: depData, error: depErr } = await supabaseClient
+                    .from('deposit_requests')
+                    .select('*')
+                    .eq('user_id', currentUser.user_id)
+                    .order('created_at', { ascending: false });
+
+                if (!depErr) {
+                    allUserTransactions = depData || [];
+                    document.getElementById('totalTxCount').innerText = `العدد الإجمالي: ${allUserTransactions.length}`;
+                    renderTransactions();
+                }
+
+            } catch (e) {
+                console.error("Dashboard load error:", e);
+            }
         }
 
-        async function fetchLatestData() {
-            const userId = currentUser.id || currentUser.ID;
-            try {
-                const res = await fetch(`${API_BASE}/users/${userId}?_t=${new Date().getTime()}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    currentUser = data;
-                    sessionStorage.setItem('pf_user', JSON.stringify(data));
-                    loadUserData();
-                }
-            } catch (e) {}
+        function renderTransactions() {
+            const tbody = document.getElementById('myTransactionsBody');
+            tbody.innerHTML = '';
+
+            if (allUserTransactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-500">لا توجد عمليات سابقة حتى الآن</td></tr>';
+                document.getElementById('loadMoreContainer').style.display = 'none';
+                return;
+            }
+
+            // اقتطاع عدد العمليات بناءً على الـ displayedCount (10 في البداية وكل مرة نزيد 10)
+            const sliceData = allUserTransactions.slice(0, displayedCount);
+
+            sliceData.forEach(tx => {
+                const txId = tx.deposit_id;
+                const method = tx.payment_method || tx.deposit_method || 'إيداع USDT';
+                const amount = parseFloat(tx.net_usdt || tx.amount_usdt || tx.gross_usdt || 0);
+                const reference = tx.tx_id || tx.proof_ref || '-';
+                const dateStr = tx.created_at ? new Date(tx.created_at).toLocaleString('en-US') : '-';
+                const status = String(tx.status || 'PENDING').toUpperCase();
+
+                let statusBadge = status === 'APPROVED' ? '<span class="bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full text-[10px] font-bold">مقبول ومكتمل</span>' :
+                                  status === 'REJECTED' ? '<span class="bg-red-500/20 text-red-400 px-2.5 py-1 rounded-full text-[10px] font-bold">مرفوض</span>' :
+                                  '<span class="bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full text-[10px] font-bold">قيد المراجعة</span>';
+
+                let tr = document.createElement('tr');
+                tr.className = 'table-row-hover transition';
+                tr.innerHTML = `
+                    <td class="p-3 font-mono">#${txId}</td>
+                    <td class="p-3 font-bold text-slate-200">${method}</td>
+                    <td class="p-3 font-mono text-emerald-400 font-bold">${amount.toFixed(2)} USDT</td>
+                    <td class="p-3 font-mono text-slate-300">${reference}</td>
+                    <td class="p-3 font-mono text-slate-400 text-[11px]">${dateStr}</td>
+                    <td class="p-3 text-center">${statusBadge}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // إظهار أو إخفاء زر "عرض المزيد"
+            if (displayedCount < allUserTransactions.length) {
+                document.getElementById('loadMoreContainer').style.display = 'block';
+            } else {
+                document.getElementById('loadMoreContainer').style.display = 'none';
+            }
+        }
+
+        function loadMoreTransactions() {
+            displayedCount += 10; // زيادة 10 عمليات إضافية
+            renderTransactions();
         }
 
         function logout() {
@@ -117,8 +209,7 @@
             window.location.href = 'login.html';
         }
 
-        loadUserData();
-        fetchLatestData();
+        loadDashboardData();
     </script>
 </body>
 </html>

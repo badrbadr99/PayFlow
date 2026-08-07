@@ -3,65 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PayFlow - إيداع أموال</title>
+    <title>PayFlow - طلب إيداع رصيد</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
+        body { background: #0b0f19; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
         .glass-card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
-        .input-field { background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 12px; width: 100%; }
-        .input-field:focus { outline: none; border-color: #10b981; }
-        .btn-emerald { background: #10b981; color: white; font-weight: bold; padding: 14px; border-radius: 12px; width: 100%; transition: opacity 0.2s; }
-        .btn-emerald:hover { opacity: 0.9; }
     </style>
 </head>
-<body class="p-4 max-w-xl mx-auto min-h-screen flex flex-col justify-center space-y-6">
+<body class="p-4 md:p-8 max-w-2xl mx-auto space-y-6 min-h-screen flex flex-col justify-between">
 
-    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-        <h1 class="text-2xl font-bold text-emerald-400 flex items-center gap-2">
-            <i class="fa-solid fa-wallet"></i> إيداع رصيد جديد
-        </h1>
-        <a href="dashboard.html" class="text-xs text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1 transition">
-            <i class="fa-solid fa-arrow-right"></i> رجوع
-        </a>
-    </div>
+    <div class="space-y-6">
+        <!-- الهيدر -->
+        <div class="flex justify-between items-center glass-card p-5">
+            <div class="flex items-center gap-3">
+                <div class="bg-emerald-500/20 text-emerald-400 p-3 rounded-2xl border border-emerald-500/30">
+                    <i class="fa-solid fa-wallet text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-black text-white">إيداع رصيد جديد (USDT)</h1>
+                    <p class="text-xs text-slate-400">حساب آلي للعمولة وسعر الشراء الحالي</p>
+                </div>
+            </div>
+            <a href="dashboard.html" class="text-xs bg-slate-800 text-slate-300 hover:text-white px-4 py-2.5 rounded-xl border border-slate-700 transition">
+                <i class="fa-solid fa-arrow-right"></i> لوحة التحكم
+            </a>
+        </div>
 
-    <div class="glass-card p-6 md:p-8 space-y-5 shadow-2xl">
-        <form onsubmit="submitDeposit(event)" class="space-y-5">
-            <div>
-                <label class="block text-sm font-bold text-slate-200 mb-2">طريقة الإيداع</label>
-                <select id="depositMethod" class="input-field font-bold text-emerald-400" required>
-                    <option value="USDT TRC20">USDT (TRC20)</option>
-                    <option value="USDT BEP20">USDT (BEP20)</option>
+        <!-- نموذج الإيداع -->
+        <div class="glass-card p-6 space-y-5">
+            <div class="space-y-1">
+                <label class="block text-xs text-slate-400 font-bold">طريقة الدفع</label>
+                <select id="paymentMethod" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500">
                     <option value="بنك الكريمي">بنك الكريمي</option>
-                    <option value="جوالي">جوالي / صرافة محلية</option>
+                    <option value="محبي بنك">بنك القطيبي الإسلامي</option>
+                    <option value="USDT TRC20">تحويل مباشر (USDT TRC20)</option>
                 </select>
             </div>
 
-            <div>
-                <label class="block text-sm font-bold text-slate-200 mb-2">المبلغ المراد إيداعه (USDT)</label>
-                <input type="number" step="0.01" min="1" id="depositAmount" required class="input-field text-left font-mono text-lg text-emerald-400" placeholder="0.00" dir="ltr">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs text-slate-400 font-bold mb-1">المبلغ بالريال اليمني (YER)</label>
+                    <input type="number" id="inputYer" oninput="calculateDeposit()" placeholder="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white font-mono focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 font-bold mb-1">سعر الشراء الحالي</label>
+                    <input type="text" id="displayBuyRate" readonly class="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 text-xs text-emerald-400 font-mono" value="جاري التحميل...">
+                </div>
+            </div>
+
+            <!-- تفاصيل الحساب الصافي والعمولة -->
+            <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2 text-xs font-mono">
+                <div class="flex justify-between text-slate-400">
+                    <span>المبلغ الإجمالي (قبل العمولة):</span>
+                    <span id="calcGrossUsdt" class="text-white">0.00 USDT</span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                    <span>نسبة العمولة المخصومة:</span>
+                    <span id="calcFeeUsdt" class="text-red-400">0.00 USDT</span>
+                </div>
+                <div class="border-t border-slate-800 pt-2 flex justify-between font-bold text-sm">
+                    <span class="text-slate-200">الصافي المضاف لحسابك:</span>
+                    <span id="calcNetUsdt" class="text-emerald-400">0.00 USDT</span>
+                </div>
             </div>
 
             <div>
-                <label class="block text-sm font-bold text-slate-200 mb-2">رقم الحوالة أو معرف الإيصال (TxID)</label>
-                <input type="text" id="txId" required class="input-field text-left font-mono" placeholder="أدخل رقم العملية أو المعرف" dir="ltr">
+                <label class="block text-xs text-slate-400 font-bold mb-1">رقم الإيصال أو مرجع التحويل (TxID / Ref)</label>
+                <input type="text" id="txIdInput" placeholder="أدخل رقم العملية أو الإيصال هنا..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white font-mono focus:outline-none focus:border-emerald-500">
             </div>
 
             <div>
-                <label class="block text-sm font-bold text-slate-200 mb-2">إرفاق إثبات التحويل (صورة الإيصال)</label>
-                <label class="cursor-pointer bg-slate-900 border border-slate-700 hover:border-emerald-500 rounded-xl p-4 text-center text-sm text-slate-300 flex items-center justify-center gap-2 transition block">
-                    <i class="fa-solid fa-cloud-arrow-up text-emerald-400 text-lg"></i>
-                    <span id="fileNameDisplay">اختر صورة الإيصال من الهاتف أو الكمبيوتر...</span>
-                    <input type="file" id="proofFile" accept="image/*" required class="hidden" onchange="updateFileName(this)">
-                </label>
+                <label class="block text-xs text-slate-400 font-bold mb-1">رابط صورة الإيصال (اختياري أو رابط مباشر)</label>
+                <input type="text" id="proofImgInput" placeholder="https://example.com/image.jpg" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white font-mono focus:outline-none focus:border-emerald-500">
             </div>
 
-            <button type="submit" id="submitBtn" class="btn-emerald flex items-center justify-center gap-2">
-                <i class="fa-solid fa-check"></i> تأكيد طلب الإيداع
+            <button onclick="submitDeposit()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-lg shadow-emerald-500/20">
+                إرسال طلب الإيداع للمراجعة
             </button>
-        </form>
+        </div>
     </div>
 
     <script>
@@ -70,89 +91,83 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = JSON.parse(sessionStorage.getItem('pf_user') || '{}');
-        const userId = currentUser.id || currentUser.ID || currentUser.user_id;
-
-        if (!userId) {
-            alert('⚠️ يرجى تسجيل الدخول أولاً للمتابعة.');
+        if (!currentUser || !currentUser.user_id) {
+            alert('❌ يجب تسجيل الدخول أولاً!');
             window.location.href = 'login.html';
         }
 
-        function updateFileName(input) {
-            const display = document.getElementById('fileNameDisplay');
-            if (input.files && input.files[0]) {
-                display.innerText = input.files[0].name;
-                display.classList.add('text-emerald-400', 'font-bold');
-            } else {
-                display.innerText = 'اختر صورة الإيصال من الهاتف أو الكمبيوتر...';
-                display.classList.remove('text-emerald-400', 'font-bold');
+        let currentRateData = { buy_rate: 530, fee_percentage: 1 };
+
+        async function fetchActiveRates() {
+            try {
+                const { data, error } = await supabaseClient.from('exchange_rates').select('*').limit(1).single();
+                if (data && !error) {
+                    currentRateData = data;
+                    document.getElementById('displayBuyRate').value = `${data.buy_rate} YER (عمولة: ${data.fee_percentage}%)`;
+                }
+            } catch (e) {
+                console.error("Error fetching rates:", e);
             }
         }
 
-        async function submitDeposit(e) {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const method = document.getElementById('depositMethod').value;
-            const amount = parseFloat(document.getElementById('depositAmount').value);
-            const txId = document.getElementById('txId').value.trim();
-            const fileInput = document.getElementById('proofFile');
+        function calculateDeposit() {
+            const yerAmount = parseFloat(document.getElementById('inputYer').value) || 0;
+            const buyRate = parseFloat(currentRateData.buy_rate) || 1;
+            const feePercent = parseFloat(currentRateData.fee_percentage) || 0;
 
-            if (!fileInput.files || !fileInput.files[0]) {
-                alert('❌ يرجى إرفاق صورة إثبات التحويل أولاً!');
+            const grossUsdt = yerAmount / buyRate;
+            const feeUsdt = grossUsdt * (feePercent / 100);
+            const netUsdt = grossUsdt - feeUsdt;
+
+            document.getElementById('calcGrossUsdt').innerText = `${grossUsdt.toFixed(2)} USDT`;
+            document.getElementById('calcFeeUsdt').innerText = `-${feeUsdt.toFixed(2)} USDT`;
+            document.getElementById('calcNetUsdt').innerText = `${netUsdt.toFixed(2)} USDT`;
+        }
+
+        async function submitDeposit() {
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const amountYer = parseFloat(document.getElementById('inputYer').value) || 0;
+            const txId = document.getElementById('txIdInput').value.trim();
+            const proofImage = document.getElementById('proofImgInput').value.trim();
+
+            if (amountYer <= 0) {
+                alert('⚠️ يرجى إدخال مبلغ صحيح بالريال اليمني');
                 return;
             }
 
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري رفع الصورة وإرسال الطلب...';
+            const buyRate = parseFloat(currentRateData.buy_rate) || 1;
+            const feePercent = parseFloat(currentRateData.fee_percentage) || 0;
+            const grossUsdt = amountYer / buyRate;
+            const feeUsdt = grossUsdt * (feePercent / 100);
+            const netUsdt = grossUsdt - feeUsdt;
 
             try {
-                const file = fileInput.files[0];
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${userId}_${Date.now()}.${fileExt}`;
+                const { error } = await supabaseClient.from('deposit_requests').insert([{
+                    user_id: currentUser.user_id,
+                    payment_method: paymentMethod,
+                    deposit_method: paymentMethod,
+                    amount_yer: amountYer,
+                    exchange_rate: buyRate,
+                    gross_usdt: grossUsdt,
+                    fee_usdt: feeUsdt,
+                    net_usdt: netUsdt,
+                    amount_usdt: netUsdt,
+                    tx_id: txId,
+                    proof_ref: txId,
+                    proof_image: proofImage,
+                    status: 'PENDING'
+                }]);
 
-                // 1. رفع الصورة إلى Supabase Storage
-                const { error: uploadError } = await supabaseClient.storage
-                    .from('deposit-proofs')
-                    .upload(fileName, file);
+                if (error) throw error;
 
-                if (uploadError) throw uploadError;
-
-                // 2. الحصول على الرابط العام للصورة
-                const { data: publicUrlData } = supabaseClient.storage
-                    .from('deposit-proofs')
-                    .getPublicUrl(fileName);
-
-                const proofUrl = publicUrlData.publicUrl;
-
-                // 3. إرسال البيانات متوافقة تماماً مع كافة الأعمدة الإلزامية في جدول قاعدة البيانات
-                const { error: dbError } = await supabaseClient
-                    .from('deposit_requests')
-                    .insert([{
-                        user_id: parseInt(userId),
-                        payment_method: method,
-                        deposit_method: method,
-                        amount_yer: amount * 530, // قيمة افتراضية متوافقة مع عمود الـ YER الإلزامي
-                        exchange_rate: 530,       // سعر الصرف الإلزامي
-                        gross_usdt: amount,
-                        net_usdt: amount,
-                        amount_usdt: amount,
-                        tx_id: txId,
-                        proof_image: proofUrl,
-                        proof_ref: proofUrl,
-                        status: 'PENDING'
-                    }]);
-
-                if (dbError) throw dbError;
-
-                alert('✅ تم رفع الإثبات وإرسال طلب الإيداع بنجاح!');
+                alert('✅ تم إرسال طلب الإيداع بنجاح وسيتم مراجعته وإضافته لحسابك قريباً!');
                 window.location.href = 'dashboard.html';
-
-            } catch (err) {
-                alert(`❌ حدث خطأ أثناء الرفع: ${err.message || JSON.stringify(err)}`);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> تأكيد طلب الإيداع';
+            } catch (e) {
+                alert(`❌ حدث خطأ: ${e.message}`);
             }
         }
+
+        fetchActiveRates();
     </script>
 </body>
 </html>
