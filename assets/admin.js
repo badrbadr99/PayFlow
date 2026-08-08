@@ -81,19 +81,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     dataState.transactions = data || [];
     renderTransactions(dataState.transactions);
   }
-  
+
   function renderTransactions(rows) {
     const body = document.getElementById('adminTransactionsBody');
-    if (!rows.length) return body.innerHTML = '<tr><td class="table-empty" colspan="6">لا توجد نتائج.</td></tr>';
+    if (!rows.length) return body.innerHTML = '<tr><td class="table-empty" colspan="7">لا توجد نتائج.</td></tr>';
     body.innerHTML = rows.map(tx => { 
       const meta = PF.transactionType(tx.type); 
       const amount = tx.currency === 'YER' ? tx.amount_yer : tx.amount_usdt; 
-      // التعديل هنا: إضافة زر الإثبات إذا كان الطلب إيداعاً ويوجد إثبات
-      const proofBtn = (tx.type === 'DEPOSIT' && tx.proof_path) 
-        ? `<button class="btn btn-secondary btn-sm" onclick="Admin.viewProof('deposit-proofs','${PF.escapeHtml(tx.proof_path)}')"><i class="fa-regular fa-image"></i></button>` 
-        : '—';
       
-      return `<tr><td><div class="tx-type"><span class="type-icon ${meta.color}"><i class="fa-solid ${meta.icon}"></i></span><strong>${meta.label}</strong></div></td><td><strong>${PF.escapeHtml(tx.full_name || '—')}</strong><div class="muted ltr" style="font-size:10px">${PF.escapeHtml(tx.email || '')}</div></td><td><span class="ref">${PF.escapeHtml(tx.reference)}</span></td><td class="mono nowrap">${PF.money(amount, tx.currency || 'USDT')}</td><td>${proofBtn}</td><td class="nowrap">${PF.dateTime(tx.created_at)}</td><td>${PF.statusBadge(tx.status)}</td></tr>`; 
+      const proofBtn = (tx.type === 'DEPOSIT' && tx.proof_path) 
+        ? `<button class="btn btn-secondary btn-sm" onclick="Admin.viewProof('deposit-proofs','${PF.escapeHtml(tx.proof_path)}')"><i class="fa-regular fa-image"></i> عرض</button>` 
+        : '—';
+
+      return `<tr>
+        <td><div class="tx-type"><span class="type-icon ${meta.color}"><i class="fa-solid ${meta.icon}"></i></span><strong>${meta.label}</strong></div></td>
+        <td><strong>${PF.escapeHtml(tx.full_name || '—')}</strong><div class="muted ltr" style="font-size:10px">${PF.escapeHtml(tx.email || '')}</div></td>
+        <td><span class="ref">${PF.escapeHtml(tx.reference)}</span></td>
+        <td class="mono nowrap">${PF.money(amount, tx.currency || 'USDT')}</td>
+        <td>${proofBtn}</td>
+        <td class="nowrap">${PF.dateTime(tx.created_at)}</td>
+        <td>${PF.statusBadge(tx.status)}</td>
+      </tr>`; 
     }).join('');
   }
 
