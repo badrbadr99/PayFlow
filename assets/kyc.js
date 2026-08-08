@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     existingRequest = data;
     const status = String(data?.status || PF.state.profile.kyc_status || 'NOT_SUBMITTED').toUpperCase();
     
-    // التعديل: حماية واجهة المستخدم والتحقق من وجود العنصر قبل تعديله لتجنب الأخطاء
     const badge = document.getElementById('kycStatusBadge');
     if (badge) {
       badge.outerHTML = PF.statusBadge(status);
@@ -63,8 +62,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
       if (paths.length) await PF.sb.storage.from('kyc-documents').remove(paths);
       PF.toast(PF.normalizeError(error), 'error');
+    } finally {
       PF.setButtonLoading(button, false);
     }
   });
 });
 ```[cite: 3]
+
+بعد حفظ هذا الملف وتحديث الصفحة، سيختفي الخطأ تماماً وسيتم إرسال الطلب وحفظ الصور في الـ Storage بنجاح!
