@@ -67,6 +67,3 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
-```[cite: 3]
-
-بعد حفظ هذا الملف وتحديث الصفحة، سيختفي الخطأ تماماً وسيتم إرسال الطلب وحفظ الصور في الـ Storage بنجاح!
