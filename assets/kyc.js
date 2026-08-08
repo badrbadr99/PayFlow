@@ -14,8 +14,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { data } = await PF.sb.from('kyc_requests').select('*').eq('user_id', PF.state.profile.user_id).order('created_at', { ascending: false }).limit(1).maybeSingle();
     existingRequest = data;
     const status = String(data?.status || PF.state.profile.kyc_status || 'NOT_SUBMITTED').toUpperCase();
+    
+    // التعديل: حماية واجهة المستخدم والتحقق من وجود العنصر قبل تعديله لتجنب الأخطاء
     const badge = document.getElementById('kycStatusBadge');
-    badge.outerHTML = PF.statusBadge(status);
+    if (badge) {
+      badge.outerHTML = PF.statusBadge(status);
+    }
+
     if (!data || status === 'REJECTED') {
       if (status === 'REJECTED') {
         const reason = data.rejection_reason || 'راجع جودة المستندات والبيانات ثم أعد الإرسال.';
@@ -62,3 +67,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
+```[cite: 3]
