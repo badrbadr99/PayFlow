@@ -267,7 +267,6 @@ img { max-width: 100%; }
 .notification-item p { color: var(--muted); margin: 3px 0 0; font-size: 10px; line-height: 1.6; }
 
 .table-wrap { overflow-x: auto; }
-/* تم تعديل هذا القسم لحل مشكلة الجوال */
 .data-table { width: 100%; border-collapse: collapse; min-width: 600px; }
 .data-table th { color: #748ba3; font-size: 10px; text-align: right; padding: 12px 15px; background: rgba(5,16,29,.38); border-bottom: 1px solid var(--line); white-space: nowrap; }
 .data-table td { padding: 14px 15px; border-bottom: 1px solid var(--line); font-size: 12px; vertical-align: middle; }
@@ -348,7 +347,7 @@ img { max-width: 100%; }
 @keyframes shimmer { 100% { transform: translateX(-100%); } }
 
 /* ========================================================== */
-/*  إصدار الجوال - تخطيط مرن وجميل يملأ الشاشة دون تشويه       */
+/*  إصدار الجوال - تحويل الجدول لبطاقات Cards (حل نهائي)      */
 /* ========================================================== */
 
 @media (max-width: 1024px) {
@@ -373,19 +372,18 @@ img { max-width: 100%; }
   }
   .menu-toggle { display: inline-flex !important; margin-right: -8px !important; }
 
-  /* الشريط العلوي - تصغير الحجم قليلاً */
+  /* الشريط العلوي */
   .topbar { padding: 0 14px !important; height: 64px !important; }
   .topbar-title h1 { font-size: 17px !important; }
   .topbar-title p { display: none !important; }
 
-  /* إعدادات الصفحة الرئيسية - جعل العرض 100% بدون هوامش كبيرة */
+  /* إعدادات الصفحة الرئيسية */
   .page {
     width: 100% !important;
     padding: 16px 16px 60px !important;
     box-sizing: border-box !important;
   }
 
-  /* تنسيق العنوان في بداية الصفحة (مرحباً بك) */
   .page-head {
     flex-direction: column !important;
     align-items: flex-start !important;
@@ -396,31 +394,25 @@ img { max-width: 100%; }
   .page-head h2 { font-size: 22px !important; margin: 0 !important; }
   .page-head p { font-size: 13px !important; color: var(--muted); margin: 4px 0 0 !important; }
   .page-head .btn {
-    width: 100% !important; /* الزر يأخذ عرض الشاشة بالكامل */
-    justify-content: center !important;
-    min-height: 48px !important;
-    margin-top: 4px !important;
+    width: 100% !important; justify-content: center !important;
+    min-height: 48px !important; margin-top: 4px !important;
     font-size: 14px !important;
   }
 
-  /* تحويل جميع الشبكات (العمودين) إلى عمود واحد */
   .content-grid, .grid-2, .grid-3, .form-layout {
     grid-template-columns: 1fr !important;
     gap: 14px !important;
   }
 
-  /* تصغير الحواشي الداخلية للبطاقات */
   .card-body { padding: 16px !important; }
   .card-head { min-height: 54px !important; padding: 14px 16px !important; }
   .card-head h3 { font-size: 14px !important; }
   .card-head p { font-size: 11px !important; }
 
-  /* بطاقات الرصيد */
   .balance-card { min-height: auto !important; padding: 18px !important; }
   .balance-value { font-size: 26px !important; margin-top: 8px !important; }
   .balance-label { font-size: 12px !important; }
 
-  /* الأزرار السريعة - توزيعها بشكل متساوٍ */
   .action-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 12px !important;
@@ -430,36 +422,82 @@ img { max-width: 100%; }
   .action-card strong { font-size: 13px !important; }
   .action-card small { font-size: 11px !important; }
 
-  /* ********** إصلاح الجدول ومنع قص النص ********** */
+  /* ======================================================= */
+  /*  الحل الجذري للجدول في الجوال: تحويله لبطاقات (Cards)   */
+  /* ======================================================= */
   .table-wrap {
-    overflow-x: auto !important;
-    margin: 0 -10px !important;
-    padding: 0 10px !important;
+    overflow: visible !important; /* إزالة التمرير الأفقي */
+    margin: 0 !important;
+    padding: 0 !important;
   }
+  
   .data-table {
-    min-width: 700px !important; /* زيادة العرض لكي تظهر كل الكلمات */
+    min-width: unset !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  .data-table thead {
+    display: none !important; /* إخفاء رأس الجدول في الجوال */
+  }
+
+  .data-table tbody, .data-table tr, .data-table td {
+    display: block !important;
     width: 100% !important;
   }
-  .data-table th, .data-table td {
-    padding: 8px 10px !important;
-    font-size: 12px !important;
-    white-space: nowrap !important; 
-    min-width: 80px !important; /* هذه الخاصية تمنع النص من الانضغاط */
+
+  .data-table tr {
+    background: rgba(15,32,51,.74) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 12px !important;
+    padding: 12px 14px !important;
+    margin-bottom: 12px !important; /* مسافة بين كل صف */
+    box-sizing: border-box !important;
   }
-  /* تأكد من أن عمود العملية لا يضغط على نفسه */
-  .tx-type { 
-    display: flex !important; 
-    align-items: center !important; 
-    gap: 8px !important; 
-    min-width: 140px !important;
+  
+  .data-table td {
+    border: 0 !important;
+    padding: 5px 0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    font-size: 13px !important;
+    white-space: normal !important; /* السماح بالنص بالالتفاف */
+    text-align: left !important; /* محاذاة النص */
+  }
+  
+  /* إضافة عناوين للأعمدة بجانب البيانات في الجوال */
+  .data-table td::before {
+    content: attr(data-label) !important;
+    font-weight: 700 !important;
+    color: var(--muted) !important;
+    font-size: 11px !important;
+    margin-left: 10px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* تعديل عرض نوع العملية ليكون بجانب بعضه */
+  .tx-type {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-width: unset !important;
+  }
+  .type-icon {
+    width: 32px !important; height: 32px !important;
   }
   .tx-type div {
     display: flex !important;
     flex-direction: column !important;
-    overflow: visible !important; /* السماح للنص بالخروج إذا لزم الأمر */
   }
-  
-  /* لافتة التوثيق */
+
+  .ref {
+    direction: ltr !important;
+    font-size: 12px !important;
+    word-break: break-all !important;
+  }
+  /* ======================================================= */
+
   .kyc-banner {
     flex-direction: row !important;
     flex-wrap: wrap !important;
@@ -477,8 +515,8 @@ img { max-width: 100%; }
 /* إصلاح نصوص الإشعارات الطويلة */
 .notification-item div {
   overflow: hidden;
-  word-wrap: break-word; /* كسر الكلمات الطويلة إذا لزم الأمر */
+  word-wrap: break-word;
 }
 .notification-item p {
-  white-space: normal !important; /* السماح للنص بالالتفاف لعدة أسطر */
+  white-space: normal !important;
 }
