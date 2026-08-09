@@ -14,8 +14,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { data } = await PF.sb.from('kyc_requests').select('*').eq('user_id', PF.state.profile.user_id).order('created_at', { ascending: false }).limit(1).maybeSingle();
     existingRequest = data;
     const status = String(data?.status || PF.state.profile.kyc_status || 'NOT_SUBMITTED').toUpperCase();
+<<<<<<< HEAD
     const badge = document.getElementById('kycStatusBadge');
     badge.outerHTML = PF.statusBadge(status);
+=======
+    
+    const badge = document.getElementById('kycStatusBadge');
+    if (badge) {
+      badge.outerHTML = PF.statusBadge(status);
+    }
+
+>>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
     if (!data || status === 'REJECTED') {
       if (status === 'REJECTED') {
         const reason = data.rejection_reason || 'راجع جودة المستندات والبيانات ثم أعد الإرسال.';
@@ -58,7 +67,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
       if (paths.length) await PF.sb.storage.from('kyc-documents').remove(paths);
       PF.toast(PF.normalizeError(error), 'error');
+<<<<<<< HEAD
       PF.setButtonLoading(button, false);
     }
   });
 });
+=======
+    } finally {
+      PF.setButtonLoading(button, false);
+    }
+  });
+});
+>>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535

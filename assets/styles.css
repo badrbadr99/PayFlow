@@ -397,6 +397,7 @@ img { max-width: 100%; }
   .card-body { padding: 15px; }
   .auth-panel { padding: 25px 20px; }
 }
+<<<<<<< HEAD
 
 
 /* PayFlow v3: local icons, brand, themes and wallet exchange */
@@ -415,3 +416,5 @@ html[dir="ltr"] .sidebar{border-left:0;border-right:1px solid var(--line)}html[d
 
 .action-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
 @media(max-width:850px){.action-grid{grid-template-columns:1fr 1fr}}
+=======
+>>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535

@@ -68,7 +68,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     body.innerHTML = rows.map(row => {
       const deposit = row.request_type === 'DEPOSIT';
       const reference = row.reference;
+<<<<<<< HEAD
       const amount = deposit ? PF.money(row.amount_yer, 'YER', 0) : PF.money(row.amount_usdt, 'USDT');
+=======
+      const amount = deposit ? PF.money(row.net_usdt, 'USDT') : PF.money(row.amount_usdt, 'USDT');
+>>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
       const detail = deposit ? (row.payment_method || 'إيداع بالريال') : (row.payout_type === 'YER_PAYOUT' ? `${row.payment_methods?.name || 'استلام بالريال'} • ${row.beneficiary_name || ''} • ${row.destination || ''}` : `${row.network || 'TRC20'} • ${row.destination || ''}`);
       const id = deposit ? row.deposit_id : row.withdraw_id;
       return `<tr><td><div class="tx-type"><span class="type-icon ${deposit ? 'text-primary' : 'text-danger'}"><i class="fa-solid ${deposit ? 'fa-arrow-down' : 'fa-arrow-up'}"></i></span><div><strong>${deposit ? 'طلب إيداع' : 'طلب سحب'}</strong><span class="ref">${PF.escapeHtml(reference)}</span></div></div></td><td><strong>${PF.escapeHtml(row.users?.full_name || '—')}</strong><div class="muted ltr" style="font-size:10px">${PF.escapeHtml(row.users?.email || '')}</div></td><td class="mono nowrap">${amount}</td><td>${PF.escapeHtml(detail)} ${deposit && row.proof_path ? `<button class="btn btn-secondary btn-sm" onclick="Admin.viewProof('deposit-proofs','${PF.escapeHtml(row.proof_path)}')"><i class="fa-regular fa-image"></i></button>` : ''}</td><td class="nowrap">${PF.dateTime(row.created_at)}</td><td>${PF.statusBadge(row.status)}</td><td><div class="table-actions"><button class="btn btn-primary btn-sm" onclick="Admin.reviewOperation('${row.request_type}',${id},'APPROVED')">قبول</button><button class="btn btn-danger btn-sm" onclick="Admin.reviewOperation('${row.request_type}',${id},'REJECTED')">رفض</button></div></td></tr>`;
@@ -81,10 +85,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     dataState.transactions = data || [];
     renderTransactions(dataState.transactions);
   }
+<<<<<<< HEAD
   function renderTransactions(rows) {
     const body = document.getElementById('adminTransactionsBody');
     if (!rows.length) return body.innerHTML = '<tr><td class="table-empty" colspan="7">لا توجد نتائج.</td></tr>';
     body.innerHTML = rows.map(tx => { const meta = PF.transactionType(tx.type); const amount = tx.currency === 'YER' ? tx.amount_yer : tx.amount_usdt; return `<tr><td><div class="tx-type"><span class="type-icon ${meta.color}"><i class="fa-solid ${meta.icon}"></i></span><strong>${meta.label}</strong></div></td><td><strong>${PF.escapeHtml(tx.full_name || '—')}</strong><div class="muted ltr" style="font-size:10px">${PF.escapeHtml(tx.email || '')}</div></td><td><span class="ref">${PF.escapeHtml(tx.reference)}</span></td><td class="mono nowrap">${PF.money(amount, tx.currency || 'USDT')}</td><td>${tx.proof_path ? '<button class="btn btn-secondary btn-sm proof-action" onclick="Admin.viewProof(\'deposit-proofs\',\'' + PF.escapeHtml(tx.proof_path) + '\')"><i class="fa-solid fa-image"></i> عرض</button>' : '—'}</td><td class="nowrap">${PF.dateTime(tx.created_at)}</td><td>${PF.statusBadge(tx.status)}</td></tr>`; }).join('');
+=======
+
+  function renderTransactions(rows) {
+    const body = document.getElementById('adminTransactionsBody');
+    if (!rows.length) return body.innerHTML = '<tr><td class="table-empty" colspan="7">لا توجد نتائج.</td></tr>';
+    body.innerHTML = rows.map(tx => { 
+      const meta = PF.transactionType(tx.type); 
+      const amount = tx.currency === 'YER' ? tx.amount_yer : tx.amount_usdt; 
+      
+      const proofBtn = (tx.type === 'DEPOSIT' && tx.proof_path) 
+        ? `<button class="btn btn-secondary btn-sm" onclick="Admin.viewProof('deposit-proofs','${PF.escapeHtml(tx.proof_path)}')"><i class="fa-regular fa-image"></i> عرض</button>` 
+        : '—';
+
+      return `<tr>
+        <td><div class="tx-type"><span class="type-icon ${meta.color}"><i class="fa-solid ${meta.icon}"></i></span><strong>${meta.label}</strong></div></td>
+        <td><strong>${PF.escapeHtml(tx.full_name || '—')}</strong><div class="muted ltr" style="font-size:10px">${PF.escapeHtml(tx.email || '')}</div></td>
+        <td><span class="ref">${PF.escapeHtml(tx.reference)}</span></td>
+        <td class="mono nowrap">${PF.money(amount, tx.currency || 'USDT')}</td>
+        <td>${proofBtn}</td>
+        <td class="nowrap">${PF.dateTime(tx.created_at)}</td>
+        <td>${PF.statusBadge(tx.status)}</td>
+      </tr>`; 
+    }).join('');
+>>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
   }
 
   async function loadUsers() {
@@ -93,8 +122,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   function renderUsers(rows) {
     const body = document.getElementById('usersBody');
+<<<<<<< HEAD
     if (!rows.length) return body.innerHTML = '<tr><td class="table-empty" colspan="8">لا توجد حسابات.</td></tr>';
     body.innerHTML = rows.map(u => { const active = Number(u.is_active) === 1 && !u.deleted_at; return `<tr><td><strong>${PF.escapeHtml(u.full_name || '—')}</strong><div class="muted mono" style="font-size:10px">#${u.user_id} • ${PF.escapeHtml(u.role || 'USER')}</div></td><td><div class="ltr">${PF.escapeHtml(u.email || '')}</div><div class="muted ltr" style="font-size:10px">${PF.escapeHtml(u.phone_number || '')}</div></td><td class="mono text-primary">${PF.money(u.balance_usdt,'USDT')}</td><td class="mono text-amber">${PF.money(u.balance_yer,'YER',0)}</td><td>${PF.statusBadge(String(u.kyc_status).toUpperCase() === 'APPROVED' ? 'APPROVED' : 'PENDING')}</td><td>${active ? '<span class="status status-completed">نشط</span>' : '<span class="status status-rejected">مجمد/مؤرشف</span>'}</td><td class="nowrap">${PF.dateTime(u.created_at)}</td><td><div class="table-actions"><button class="btn ${active ? 'btn-warning' : 'btn-primary'} btn-sm" onclick="Admin.toggleUser(${u.user_id},${active})">${active ? 'تجميد' : 'تفعيل'}</button>${!u.deleted_at ? `<button class="btn btn-danger btn-sm" onclick="Admin.archiveUser(${u.user_id})">حذف</button>` : ''}</div></td></tr>`; }).join('');
+=======
+    if (!rows.length) return body.innerHTML = '<tr><td class="table-empty" colspan="7">لا توجد حسابات.</td></tr>';
+    body.innerHTML = rows.map(u => { const active = Number(u.is_active) === 1 && !u.deleted_at; return `<tr><td><strong>${PF.escapeHtml(u.full_name || '—')}</strong><div class="muted mono" style="font-size:10px">#${u.user_id} • ${PF.escapeHtml(u.role || 'USER')}</div></td><td><div class="ltr">${PF.escapeHtml(u.email || '')}</div><div class="muted ltr" style="font-size:10px">${PF.escapeHtml(u.phone_number || '')}</div></td><td class="mono text-primary">${PF.money(u.balance_usdt,'USDT')}</td><td>${PF.statusBadge(String(u.kyc_status).toUpperCase() === 'APPROVED' ? 'APPROVED' : 'PENDING')}</td><td>${active ? '<span class="status status-completed">نشط</span>' : '<span class="status status-rejected">مجمد/مؤرشف</span>'}</td><td class="nowrap">${PF.dateTime(u.created_at)}</td><td><div class="table-actions"><button class="btn ${active ? 'btn-warning' : 'btn-primary'} btn-sm" onclick="Admin.toggleUser(${u.user_id},${active})">${active ? 'تجميد' : 'تفعيل'}</button>${!u.deleted_at ? `<button class="btn btn-danger btn-sm" onclick="Admin.archiveUser(${u.user_id})">حذف</button>` : ''}</div></td></tr>`; }).join('');
+>>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
   }
 
   async function loadKyc() {
@@ -168,4 +202,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   function methodModal(methodId){const m=dataState.methods.find(x=>x.method_id===methodId)||{};PF.modal({title:methodId?'تعديل طريقة الدفع':'إضافة طريقة دفع',body:`<div class="field"><label>الاسم</label><input class="input" id="methodName" value="${PF.escapeHtml(m.name||'')}" required></div><div class="field"><label>الاستخدام</label><select class="select" id="methodCategory"><option value="BOTH">إيداع واستلام</option><option value="DEPOSIT">إيداع فقط</option><option value="WITHDRAW">استلام فقط</option></select></div><div class="field"><label>اسم الحساب</label><input class="input" id="methodAccountName" value="${PF.escapeHtml(m.account_name||'')}"></div><div class="field"><label>رقم الحساب/الهاتف</label><input class="input ltr" id="methodAccountNumber" value="${PF.escapeHtml(m.account_number||'')}"></div><div class="field"><label>تعليمات للعميل</label><textarea class="textarea" id="methodInstructions">${PF.escapeHtml(m.instructions||'')}</textarea></div>`,actions:'<button class="btn btn-secondary" data-close-modal>إلغاء</button><button class="btn btn-primary" id="saveMethod">حفظ</button>'});document.getElementById('methodCategory').value=m.category||'BOTH';document.getElementById('saveMethod').onclick=async()=>{const payload={name:document.getElementById('methodName').value.trim(),category:document.getElementById('methodCategory').value,account_name:document.getElementById('methodAccountName').value.trim()||null,account_number:document.getElementById('methodAccountNumber').value.trim()||null,instructions:document.getElementById('methodInstructions').value.trim()||null,is_active:m.is_active??true,sort_order:m.sort_order??dataState.methods.length+1};if(!payload.name)return PF.toast('اكتب اسم طريقة الدفع.','error');try{const query=methodId?PF.sb.from('payment_methods').update(payload).eq('method_id',methodId):PF.sb.from('payment_methods').insert(payload);const{error}=await query;if(error)throw error;PF.closeModal();PF.toast('تم حفظ طريقة الدفع.');await loadSettings();}catch(e){PF.toast(PF.normalizeError(e),'error');}};}
   async function toggleMethod(id,active){try{const{error}=await PF.sb.from('payment_methods').update({is_active:!active,updated_at:new Date().toISOString()}).eq('method_id',id);if(error)throw error;await loadSettings();}catch(e){PF.toast(PF.normalizeError(e),'error');}}
   window.Admin={reviewOperation,reviewKyc,viewProof,toggleUser,archiveUser,editMethod:methodModal,toggleMethod};
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
