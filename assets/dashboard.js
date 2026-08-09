@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const profile = PF.state.profile;
     document.getElementById('welcomeTitle').textContent = `مرحبًا، ${(profile.full_name || '').split(' ')[0] || 'بك'}`;
     document.getElementById('usdtBalance').innerHTML = `${PF.money(profile.balance_usdt, '', 2)} <small style="font-size:13px">USDT</small>`;
-    document.getElementById('yerBalance').innerHTML = `${PF.money(profile.balance_yer, '', 0)} <small style="font-size:13px">YER</small>`;
     document.getElementById('supportLink').href = `https://wa.me/${PF.config.supportWhatsApp}`;
     setKyc(profile.kyc_status);
     document.getElementById('allNotifications').onclick = () => document.getElementById('notificationButton').click();
