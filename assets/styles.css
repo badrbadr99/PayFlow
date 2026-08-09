@@ -267,7 +267,8 @@ img { max-width: 100%; }
 .notification-item p { color: var(--muted); margin: 3px 0 0; font-size: 10px; line-height: 1.6; }
 
 .table-wrap { overflow-x: auto; }
-.data-table { width: 100%; border-collapse: collapse; min-width: 760px; }
+/* تم تعديل هذا القسم لحل مشكلة الجوال */
+.data-table { width: 100%; border-collapse: collapse; min-width: 600px; }
 .data-table th { color: #748ba3; font-size: 10px; text-align: right; padding: 12px 15px; background: rgba(5,16,29,.38); border-bottom: 1px solid var(--line); white-space: nowrap; }
 .data-table td { padding: 14px 15px; border-bottom: 1px solid var(--line); font-size: 12px; vertical-align: middle; }
 .data-table tr:last-child td { border-bottom: 0; }
@@ -346,103 +347,91 @@ img { max-width: 100%; }
 .skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(100%); background: linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent); animation: shimmer 1.4s infinite; }
 @keyframes shimmer { 100% { transform: translateX(-100%); } }
 
-@media (max-width: 1020px) {
-  .hero { grid-template-columns: 1fr; gap: 10px; text-align: center; padding-top: 55px; }
-  .hero-copy, .eyebrow { margin-left: auto; margin-right: auto; }
-  .hero-actions, .hero-notes { justify-content: center; }
-  .hero-visual { width: min(600px,100%); margin: 20px auto 0; }
-  .features { grid-template-columns: 1fr 1fr; }
-  .grid-4 { grid-template-columns: 1fr 1fr; }
-  .content-grid, .form-layout { grid-template-columns: 1fr; }
-  .summary-panel { position: static; }
-}
+/* ========================================================== */
+/*  إصلاحات الجوال والتابلت - الموقع أصبح متجاوباً تماماً الآن  */
+/* ========================================================== */
 
 @media (max-width: 1024px) {
   .app-layout { grid-template-columns: 1fr !important; }
-  
-  /* تثبيت القائمة الجانبية وحجمها وتغطية الشاشة بطبقة تعتيم */
-  .sidebar { 
-    position: fixed !important; 
+
+  /* تثبيت القائمة الجانبية كـ Drawer مخفي */
+  .sidebar {
+    position: fixed !important;
     top: 0 !important;
     right: 0 !important; 
     bottom: 0 !important;
-    width: 260px !important; 
-    max-width: 80vw !important; 
+    width: 280px !important; 
+    max-width: 85vw !important; 
     transform: translateX(105%) !important; 
-    transition: transform .25s ease !important; 
-    box-shadow: -10px 0 30px rgba(0,0,0,0.5) !important; 
+    transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1) !important; 
+    box-shadow: -10px 0 40px rgba(0,0,0,0.6) !important; 
     z-index: 1000 !important; 
+    backdrop-filter: blur(25px) !important;
+    border-left: 1px solid var(--line) !important;
   }
-  .sidebar.open { 
-    transform: translateX(0) !important; 
-  }
+  .sidebar.open { transform: translateX(0) !important; }
   .sidebar.open::before {
     content: "";
     position: fixed;
     inset: 0;
-    right: 260px;
-    background: rgba(1, 8, 16, 0.75);
-    backdrop-filter: blur(4px);
+    right: 280px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(3px);
     z-index: -1;
   }
 
-  .menu-toggle { display: inline-flex !important; }
-  .topbar { padding: 0 14px !important; }
-  .topbar-title p { display: none !important; }
-  .page-head { align-items: flex-start; }
+  .menu-toggle { display: inline-flex !important; margin-right: -8px !important; }
 
-  /* ضبط صفحة نظرة عامة لتصبح عمودية ونحيفة ومتناسقة تماماً مثل النماذج */
+  .topbar { padding: 0 16px !important; height: 68px !important; }
+  .topbar-title p { display: none !important; }
+
   .page {
     width: 100% !important;
-    padding: 14px 10px 50px !important;
+    padding: 16px 12px 60px !important;
   }
-  .content-grid {
-    grid-template-columns: 1fr !important;
+  .page-head {
+    flex-direction: column !important;
+    align-items: stretch !important;
     gap: 12px !important;
+    margin-bottom: 18px !important;
   }
-  .grid-2 {
+  .page-head .btn { align-self: flex-start !important; }
+  .page-head h2 { font-size: 22px !important; }
+
+  .content-grid,
+  .grid-2,
+  .form-layout {
     grid-template-columns: 1fr !important;
-    gap: 12px !important;
+    gap: 14px !important;
   }
-  .action-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px !important;
-  }
-  .card-body { 
-    padding: 12px !important; 
-  }
-  .balance-card {
-    min-height: auto !important;
-    padding: 15px !important;
-  }
-  .balance-value {
-    font-size: 26px !important;
-    margin-top: 8px !important;
-  }
+
+  .card-body { padding: 14px !important; }
+  .balance-card { min-height: auto !important; padding: 18px !important; }
+  .balance-value { font-size: 28px !important; margin-top: 12px !important; }
+
+  .action-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+  .action-card { padding: 14px 8px !important; }
+  .action-icon { width: 38px !important; height: 38px !important; }
+
+  /* إصلاح الجدول - السبب الرئيسي للمشكلة */
+  .table-wrap { overflow-x: auto !important; margin: 0 -4px !important; padding: 0 4px !important; }
+  .data-table { min-width: 500px !important; width: 100% !important; }
+  .data-table th, .data-table td { padding: 10px 10px !important; font-size: 11px !important; white-space: nowrap !important; }
+  .data-table .ref { font-size: 10px !important; }
+  .tx-type strong { font-size: 11px !important; }
+  .type-icon { width: 30px !important; height: 30px !important; }
+
+  .rate-box { grid-template-columns: 1fr 1fr !important; }
+  
+  .kyc-banner { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
+  .kyc-copy { flex: 1 !important; }
+  .kyc-banner .btn { align-self: flex-end !important; }
 }
 
-@media (max-width: 620px) {
-  body { font-size: 14px; }
-  .public-nav { width: calc(100% - 22px); }
-  .public-actions .btn-secondary { display: none; }
-  .hero { width: calc(100% - 28px); min-height: auto; }
-  .hero h1 { font-size: 42px; letter-spacing: -1px; }
-  .hero-copy { font-size: 15px; }
-  .hero-visual { min-height: 375px; }
-  .wallet-card { inset: 20px 0 auto; padding: 21px; }
-  .wallet-balance strong { font-size: 31px; }
-  .float-one { right: 0; }
-  .float-two { left: 0; }
-  .features, .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
-  .feature-section { width: calc(100% - 28px); }
-  .page-head { display: block; }
-  .page-head .btn { margin-top: 13px; }
-  .topbar-title h1 { font-size: 15px; }
-  .topbar-actions .user-short { display: none; }
-  .balance-card { min-height: 145px; }
-  .action-grid { grid-template-columns: 1fr 1fr; }
-  .kyc-banner { align-items: flex-start; flex-direction: column; }
-  .admin-toolbar { grid-template-columns: 1fr; }
-  .card-body { padding: 15px; }
-  .auth-panel { padding: 25px 20px; }
+@media (max-width: 480px) {
+  .page-head h2 { font-size: 20px !important; }
+  .data-table { min-width: 420px !important; }
+  .data-table th, .data-table td { padding: 8px 6px !important; font-size: 10px !important; }
+  .balance-value { font-size: 24px !important; }
+  .action-grid { gap: 8px !important; }
 }
