@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>لوحة الحساب | PayFlow</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="manifest" href="assets/site.webmanifest">
+  <meta name="theme-color" content="#0daa76">
+  <script src="assets/preferences.js"></script>
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="assets/config.js" defer></script><script src="assets/app.js" defer></script><script src="assets/dashboard.js" defer></script>
+  <script src="assets/icons.js" defer></script>
+  <script src="assets/i18n.js" defer></script>
+</head>
+<body data-page="dashboard">
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-wrap">
+      <header class="topbar" id="topbar"></header>
+      <main class="page">
+        <div class="page-head"><div><h2 id="welcomeTitle">مرحبًا بك</h2><p>هذه نظرة سريعة على حسابك وآخر عملياتك.</p></div><a class="btn btn-secondary" href="deposit.html"><i class="fa-solid fa-plus"></i> عملية جديدة</a></div>
+
+        <section class="balance-overview"><div class="wallet-pair"><article class="card balance-card" style="color:var(--primary)"><div class="balance-label"><i class="fa-solid fa-coins"></i> رصيد USDT المتاح</div><div class="balance-value mono" id="usdtBalance">0.00 <small style="font-size:13px">USDT</small></div><div class="balance-foot"><span>متاح للتحويل والسحب</span><i class="fa-solid fa-wallet"></i></div></article><button class="wallet-swap-button" id="walletSwapButton" type="button" aria-label="مصارفة بين الرصيدين" title="مصارفة بين YER وUSDT"><i class="fa-solid fa-right-left"></i></button><article class="card balance-card" style="color:var(--amber)"><div class="balance-label"><i class="fa-solid fa-money-bill-wave"></i> رصيد الريال اليمني</div><div class="balance-value mono" id="yerBalance">0 <small style="font-size:13px">YER</small></div><div class="balance-foot"><span>رصيد محفظتك المحلية</span><i class="fa-solid fa-building-columns"></i></div></article></div><article class="card balance-card" style="color:var(--blue)"><div class="balance-label"><i class="fa-solid fa-hourglass-half"></i> عمليات قيد المعالجة</div><div class="balance-value mono" id="pendingCount">0</div><div class="balance-foot"><span>إيداع أو سحب بانتظار المراجعة</span><i class="fa-solid fa-clock"></i></div></article></section>
+
+        <section class="kyc-banner" id="kycBanner" style="margin-bottom:17px">
+          <div class="kyc-copy"><span class="kyc-icon"><i class="fa-solid fa-id-card"></i></span><div><strong id="kycTitle">أكمل توثيق حسابك</strong><span id="kycDescription">التوثيق مطلوب للسحب ويحمي حسابك.</span></div></div>
+          <a class="btn btn-secondary btn-sm" id="kycAction" href="kyc.html">بدء التوثيق</a>
+        </section>
+
+        <div class="content-grid">
+          <div class="stack">
+            <section class="card">
+              <header class="card-head"><div><h3>إجراءات سريعة</h3><p>اختر العملية التي تريد تنفيذها</p></div></header>
+              <div class="card-body action-grid">
+                <a class="action-card" href="deposit.html"><span class="action-icon"><i class="fa-solid fa-arrow-down"></i></span><strong>إيداع</strong><small>شراء USDT</small></a>
+                <a class="action-card" href="withdraw.html"><span class="action-icon" style="color:var(--danger);background:rgba(255,107,114,.1)"><i class="fa-solid fa-arrow-up"></i></span><strong>سحب</strong><small>إلى محفظة أخرى</small></a>
+                <a class="action-card" href="transfer.html"><span class="action-icon" style="color:var(--purple);background:rgba(168,139,255,.1)"><i class="fa-solid fa-right-left"></i></span><strong>تحويل</strong><small>داخل PayFlow</small></a><button class="action-card" type="button" id="quickExchange" style="color:inherit"><span class="action-icon" style="color:var(--amber);background:rgba(248,184,78,.1)"><i class="fa-solid fa-right-left"></i></span><strong>مصارفة</strong><small>بين YER وUSDT</small></button>
+                <a class="action-card" href="kyc.html"><span class="action-icon" style="color:var(--blue);background:rgba(94,166,255,.1)"><i class="fa-solid fa-shield-halved"></i></span><strong>توثيق</strong><small>اعرف عميلك</small></a>
+              </div>
+            </section>
+
+            <section class="card">
+              <header class="card-head"><div><h3>سجل العمليات</h3><p>آخر معاملاتك مرتبة من الأحدث</p></div><span class="muted" id="transactionTotal" style="font-size:11px">0 عملية</span></header>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead><tr><th>العملية</th><th>الرقم المرجعي</th><th>المبلغ</th><th>التاريخ والوقت</th><th>الحالة</th></tr></thead>
+                  <tbody id="transactionsBody"><tr><td class="table-empty" colspan="5"><i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...</td></tr></tbody>
+                </table>
+              </div>
+              <div class="card-body" id="loadMoreWrap" style="padding-top:10px;text-align:center;display:none"><button class="btn btn-secondary btn-sm" id="loadMoreButton"><i class="fa-solid fa-chevron-down"></i> عرض 10 عمليات أخرى</button></div>
+            </section>
+          </div>
+
+          <aside class="stack">
+            <section class="card"><header class="card-head"><div><h3>سعر الصرف اليوم</h3><p>آخر تحديث <span id="rateUpdated">—</span></p></div><i class="fa-solid fa-chart-line text-primary"></i></header><div class="card-body"><div class="rate-box"><div class="rate-item"><span>نشتري منك USDT</span><strong class="mono" id="buyRate">— YER</strong></div><div class="rate-item"><span>نبيع لك USDT</span><strong class="mono" id="sellRate">— YER</strong></div></div><div class="field-hint" style="margin-top:12px">الأسعار قابلة للتحديث حسب السوق.</div></div></section>
+            <section class="card"><header class="card-head"><div><h3>آخر الإشعارات</h3><p>تحديثات الطلبات والحساب</p></div><button class="btn btn-secondary btn-sm" id="allNotifications">عرض الكل</button></header><div class="card-body notification-list" id="dashboardNotifications"><div class="table-empty">جاري التحميل...</div></div></section>
+            <section class="card"><div class="card-body"><div class="notice info"><i class="fa-solid fa-headset"></i><div><strong style="display:block;color:var(--text);margin-bottom:3px">تحتاج مساعدة؟</strong>فريق خدمة العملاء جاهز لمساعدتك في متابعة أي طلب.</div></div><a class="btn btn-secondary btn-block" style="margin-top:11px" target="_blank" id="supportLink"><i class="fa-brands fa-whatsapp text-primary"></i> تواصل عبر واتساب</a></div></section>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

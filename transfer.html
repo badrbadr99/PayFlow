@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تحويل داخلي | PayFlow</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="manifest" href="assets/site.webmanifest">
+  <meta name="theme-color" content="#0daa76">
+  <script src="assets/preferences.js"></script><link rel="stylesheet" href="assets/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script><script src="assets/config.js" defer></script><script src="assets/app.js" defer></script><script src="assets/transfer.js" defer></script>
+  <script src="assets/icons.js" defer></script>
+  <script src="assets/i18n.js" defer></script>
+</head>
+<body data-page="transfer">
+  <div class="app-layout"><aside class="sidebar" id="sidebar"></aside><div class="main-wrap"><header class="topbar" id="topbar"></header>
+    <main class="page">
+      <div class="page-head"><div><h2>تحويل داخلي</h2><p>أرسل USDT فورًا إلى مستخدم آخر داخل PayFlow.</p></div><a class="btn btn-secondary" href="dashboard.html"><i class="fa-solid fa-arrow-right"></i> العودة للحساب</a></div>
+      <div class="form-layout">
+        <section class="card"><header class="card-head"><div><h3>بيانات المستلم</h3><p>يمكنك استخدام البريد الإلكتروني أو رقم الهاتف</p></div><span class="status status-completed">تنفيذ فوري</span></header>
+          <form class="card-body" id="transferForm" novalidate>
+            <div class="field"><label for="recipient"><span>معرّف المستلم</span><span class="muted">بريد أو هاتف</span></label><input class="input ltr" id="recipient" type="text" autocomplete="off" placeholder="name@example.com أو +967..." required><div class="field-hint">تأكد من المعرّف، وسيظهر اسم المستلم للتأكيد قبل الإرسال.</div></div>
+            <button class="btn btn-secondary btn-sm" type="button" id="checkRecipient"><i class="fa-solid fa-magnifying-glass"></i> التحقق من المستلم</button>
+            <div class="method-card hidden" id="recipientPreview" style="margin:14px 0"></div>
+            <div class="field" style="margin-top:17px"><label for="transferAmount"><span>مبلغ التحويل</span><span class="muted">الرصيد: <b class="mono" id="transferBalance">0.00 USDT</b></span></label><div class="input-wrap"><input class="input ltr mono" id="transferAmount" type="number" min="0.01" step="0.01" placeholder="0.00" required><span class="input-suffix">USDT</span></div></div>
+            <div class="field"><label for="transferNote">ملاحظة <span class="muted">اختياري</span></label><textarea class="textarea" id="transferNote" maxlength="160" placeholder="مثال: مقابل الطلب رقم 128"></textarea></div>
+            <div class="notice info"><i class="fa-solid fa-bolt"></i><div>التحويلات الداخلية تُنفّذ فورًا ولا تحتاج موافقة الإدارة. راجع اسم المستلم قبل التأكيد.</div></div>
+            <button class="btn btn-primary btn-block" style="margin-top:17px" id="transferButton" type="submit"><i class="fa-solid fa-arrow-left-long"></i> مراجعة التحويل</button>
+          </form>
+        </section>
+        <aside class="stack summary-panel">
+          <section class="card"><header class="card-head"><div><h3>ملخص التحويل</h3><p>لا توجد رسوم على التحويل الداخلي</p></div></header><div class="card-body summary-list"><div class="summary-row"><span>المبلغ</span><strong class="mono" id="transferSummary">0.00 USDT</strong></div><div class="summary-row"><span>الرسوم</span><strong class="mono">0.00 USDT</strong></div><div class="summary-row total"><span>يصل إلى المستلم</span><strong class="mono" id="transferNet">0.00 USDT</strong></div></div></section>
+          <section class="card"><div class="card-body"><div class="kyc-copy"><span class="kyc-icon"><i class="fa-solid fa-user-check"></i></span><div><strong>حساب إلى حساب</strong><span>يُسجل رقم مرجعي واحد لدى المرسل والمستلم.</span></div></div></div></section>
+        </aside>
+      </div>
+    </main>
+  </div></div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "PayFlow",
+  "short_name": "PayFlow",
+  "description": "محفظة رقمية لإدارة وتحويل USDT والريال اليمني",
+  "start_url": "../index.html",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#0daa76",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

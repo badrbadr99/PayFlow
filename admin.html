@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>إدارة المنصة | PayFlow</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="manifest" href="assets/site.webmanifest">
+  <meta name="theme-color" content="#0daa76">
+  <script src="assets/preferences.js"></script><link rel="stylesheet" href="assets/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script><script src="assets/config.js" defer></script><script src="assets/app.js" defer></script><script src="assets/admin.js" defer></script>
+  <script src="assets/icons.js" defer></script>
+  <script src="assets/i18n.js" defer></script>
+</head>
+<body data-page="admin">
+  <div class="app-layout"><aside class="sidebar" id="sidebar"></aside><div class="main-wrap"><header class="topbar" id="topbar"></header>
+    <main class="page">
+      <div class="page-head"><div><h2>مركز إدارة PayFlow</h2><p>مراجعة الطلبات والعملاء والأسعار من لوحة واحدة.</p></div><button class="btn btn-secondary" id="refreshAdmin"><i class="fa-solid fa-rotate"></i> تحديث البيانات</button></div>
+
+      <section class="grid-4" style="margin-bottom:17px">
+        <article class="card mini-stat"><div class="mini-stat-top"><span>طلبات بانتظار المراجعة</span><span class="mini-stat-icon"><i class="fa-solid fa-hourglass-half"></i></span></div><strong class="mono" id="pendingStat">0</strong></article>
+        <article class="card mini-stat"><div class="mini-stat-top"><span>إجمالي المستخدمين</span><span class="mini-stat-icon" style="color:var(--blue);background:rgba(94,166,255,.1)"><i class="fa-solid fa-users"></i></span></div><strong class="mono" id="usersStat">0</strong></article>
+        <article class="card mini-stat"><div class="mini-stat-top"><span>عمليات اليوم</span><span class="mini-stat-icon" style="color:var(--amber);background:rgba(248,184,78,.1)"><i class="fa-solid fa-chart-column"></i></span></div><strong class="mono" id="todayStat">0</strong></article>
+        <article class="card mini-stat"><div class="mini-stat-top"><span>طلبات توثيق معلقة</span><span class="mini-stat-icon" style="color:var(--purple);background:rgba(168,139,255,.1)"><i class="fa-solid fa-id-card"></i></span></div><strong class="mono" id="kycStat">0</strong></article>
+      </section>
+
+      <section class="card">
+        <header class="card-head" style="display:block">
+          <div class="admin-toolbar"><div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input class="input" id="adminSearch" placeholder="ابحث بالبريد الإلكتروني أو الرقم المرجعي أو الهاتف..."></div><button class="btn btn-primary" id="adminSearchButton"><i class="fa-solid fa-filter"></i> بحث</button></div>
+          <nav class="admin-tabs">
+            <button class="tab admin-tab active" data-admin-tab="operations"><i class="fa-solid fa-list-check"></i> الطلبات المعلقة</button>
+            <button class="tab admin-tab" data-admin-tab="transactions"><i class="fa-solid fa-receipt"></i> جميع العمليات</button>
+            <button class="tab admin-tab" data-admin-tab="users"><i class="fa-solid fa-users"></i> الحسابات</button>
+            <button class="tab admin-tab" data-admin-tab="kyc"><i class="fa-solid fa-user-check"></i> التوثيق</button>
+            <button class="tab admin-tab" data-admin-tab="settings"><i class="fa-solid fa-sliders"></i> الأسعار وطرق الدفع</button>
+          </nav>
+        </header>
+
+        <div class="admin-section active" id="section-operations">
+          <div class="table-wrap"><table class="data-table"><thead><tr><th>الطلب</th><th>العميل</th><th>المبلغ</th><th>التفاصيل</th><th>التاريخ</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="operationsBody"><tr><td class="table-empty" colspan="7">جاري التحميل...</td></tr></tbody></table></div>
+        </div>
+        <div class="admin-section" id="section-transactions">
+          <div class="table-wrap"><table class="data-table"><thead><tr><th>العملية</th><th>العميل</th><th>المرجع</th><th>المبلغ</th><th>الإثبات</th><th>التاريخ</th><th>الحالة</th></tr></thead><tbody id="adminTransactionsBody"></tbody></table></div>
+        </div>
+        <div class="admin-section" id="section-users">
+          <div class="table-wrap"><table class="data-table"><thead><tr><th>الحساب</th><th>التواصل</th><th>رصيد USDT</th><th>رصيد YER</th><th>التوثيق</th><th>الحالة</th><th>تاريخ التسجيل</th><th>الإجراء</th></tr></thead><tbody id="usersBody"></tbody></table></div>
+        </div>
+        <div class="admin-section" id="section-kyc">
+          <div class="table-wrap"><table class="data-table"><thead><tr><th>المرجع</th><th>العميل</th><th>المستند</th><th>الملفات</th><th>التاريخ</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="kycBody"></tbody></table></div>
+        </div>
+        <div class="admin-section" id="section-settings">
+          <div class="card-body grid-2">
+            <section class="card"><header class="card-head"><div><h3>أسعار الصرف والعمولات</h3><p>تظهر للمستخدمين فور الحفظ</p></div></header><form class="card-body" id="ratesForm"><div class="grid-2"><div class="field"><label for="adminBuyRate">سعر شراء USDT</label><div class="input-wrap"><input class="input ltr mono" id="adminBuyRate" type="number" step="0.01" min="1" required><span class="input-suffix">YER</span></div></div><div class="field"><label for="adminSellRate">سعر بيع USDT</label><div class="input-wrap"><input class="input ltr mono" id="adminSellRate" type="number" step="0.01" min="1" required><span class="input-suffix">YER</span></div></div></div><div class="grid-2"><div class="field"><label for="adminFee">عمولة التداول</label><div class="input-wrap"><input class="input ltr mono" id="adminFee" type="number" step="0.01" min="0" max="20" required><span class="input-suffix">%</span></div></div><div class="field"><label for="adminWithdrawFee">رسوم السحب الخارجي</label><div class="input-wrap"><input class="input ltr mono" id="adminWithdrawFee" type="number" step="0.01" min="0" required><span class="input-suffix">USDT</span></div></div></div><button class="btn btn-primary btn-block" id="saveRates" type="submit"><i class="fa-solid fa-floppy-disk"></i> حفظ الأسعار</button></form></section>
+            <section class="card"><header class="card-head"><div><h3>طرق الدفع والاستلام</h3><p>إضافة وتجميد الحسابات التي تظهر للعملاء</p></div><button class="btn btn-primary btn-sm" id="addMethod"><i class="fa-solid fa-plus"></i> إضافة</button></header><div class="card-body method-list" id="paymentMethodsList"></div></section>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div></div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تسجيل الدخول | PayFlow</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="manifest" href="assets/site.webmanifest">
+  <meta name="theme-color" content="#0daa76">
+  <script src="assets/preferences.js"></script>
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="assets/config.js" defer></script>
+  <script src="assets/app.js" defer></script>
+  <script src="assets/auth.js" defer></script>
+  <script src="assets/icons.js" defer></script>
+  <script src="assets/i18n.js" defer></script>
+</head>
+<body data-page="login">
+  <main class="auth-page">
+    <section class="auth-panel">
+      <div class="auth-box">
+        <a class="brand" href="index.html"><span class="brand-mark"><img src="assets/logo-mark.svg" alt="" aria-hidden="true"></span><span>PayFlow</span></a>
+        <h1>أهلًا بعودتك</h1>
+        <p>سجّل الدخول لمتابعة رصيدك وطلباتك من مكان واحد.</p>
+        <form id="loginForm" novalidate>
+          <div class="field"><label for="loginEmail">البريد الإلكتروني</label><input class="input ltr" id="loginEmail" type="email" autocomplete="email" placeholder="name@example.com" required></div>
+          <div class="field"><label for="loginPassword"><span>كلمة المرور</span><a href="#" id="forgotPassword" class="text-primary">نسيت كلمة المرور؟</a></label><input class="input ltr" id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••" minlength="8" required></div>
+          <button class="btn btn-primary btn-block" id="loginButton" type="submit"><i class="fa-solid fa-arrow-right-to-bracket"></i> تسجيل الدخول</button>
+        </form>
+        <div class="auth-alt">ليس لديك حساب؟ <a href="register.html">أنشئ حسابًا جديدًا</a></div>
+      </div>
+    </section>
+    <aside class="auth-visual"><div class="auth-message"><span class="eyebrow">منصة واحدة. رؤية أوضح.</span><h2>تحكم كامل في <span>عملياتك المالية.</span></h2><p>تابع كل إيداع وسحب وتحويل برقم مرجعي وحالة محدثة، واحصل على إشعار فور معالجة طلبك.</p><div class="auth-points"><div class="auth-point"><i class="fa-solid fa-clock-rotate-left"></i> سجل منظم</div><div class="auth-point"><i class="fa-solid fa-lock"></i> دخول آمن</div></div></div></aside>
+  </main>
+</body>
+</html>
