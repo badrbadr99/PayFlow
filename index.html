@@ -2,7 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- تم تحسين الـ viewport للجوال -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="PayFlow — منصة يمنية آمنة لشراء وبيع وتحويل USDT.">
   <title>PayFlow | تحويل USDT بثقة</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -36,24 +37,57 @@
 
       <div class="hero-visual" aria-hidden="true">
         <div class="wallet-card">
-          <div class="wallet-top"><span class="brand"><span class="brand-mark">P</span> PayFlow</span><i class="fa-solid fa-wifi"></i></div>
-          <div class="wallet-balance"><span class="muted">رصيدك المتاح</span><strong class="mono">2,450.00 <small style="font-size:15px">USDT</small></strong></div>
+          <div class="wallet-top">
+            <span class="brand"><span class="brand-mark">P</span> PayFlow</span>
+            <i class="fa-solid fa-wifi"></i>
+          </div>
+          <div class="wallet-balance">
+            <span class="muted">رصيدك المتاح</span>
+            <strong class="mono">2,450.00 <small style="font-size:15px">USDT</small></strong>
+          </div>
           <div class="wallet-grid">
             <div class="wallet-stat"><span class="muted">سعر الشراء</span><strong class="mono">542 YER</strong></div>
             <div class="wallet-stat"><span class="muted">حالة الحساب</span><strong style="color:var(--primary)">موثّق</strong></div>
           </div>
         </div>
-        <div class="float-card float-one"><small>آخر عملية</small><i class="fa-solid fa-circle-check" style="color:#10b981;margin-left:6px"></i> تم استلام 125 USDT</div>
-        <div class="float-card float-two"><small>وقت التنفيذ</small><i class="fa-solid fa-bolt" style="color:#f59e0b;margin-left:6px"></i> تحويل داخلي فوري</div>
+        
+        <!-- تم وضعها داخل حاوية لضمان عدم تداخلها في الجوال -->
+        <div style="position:relative; margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+          <div class="float-card float-one" style="position:relative; width:100%; left:auto; right:auto; bottom:auto;">
+            <small>آخر عملية</small><br>
+            <i class="fa-solid fa-circle-check" style="color:#10b981;margin-left:6px"></i> تم استلام 125 USDT
+          </div>
+          <div class="float-card float-two" style="position:relative; width:100%; top:auto; left:auto;">
+            <small>وقت التنفيذ</small><br>
+            <i class="fa-solid fa-bolt" style="color:#f59e0b;margin-left:6px"></i> تحويل داخلي فوري
+          </div>
+        </div>
+
       </div>
     </section>
 
     <section class="feature-section">
-      <div class="section-heading"><span class="eyebrow">كل ما تحتاجه في مكان واحد</span><h2>تجربة مالية مصممة لليمن</h2><p>واجهة سهلة على الهاتف والكمبيوتر، مع متابعة واضحة لكل طلب منذ إنشائه وحتى اعتماده.</p></div>
+      <div class="section-heading">
+        <span class="eyebrow">كل ما تحتاجه في مكان واحد</span>
+        <h2>تجربة مالية مصممة لليمن</h2>
+        <p>واجهة سهلة على الهاتف والكمبيوتر، مع متابعة واضحة لكل طلب منذ إنشائه وحتى اعتماده.</p>
+      </div>
       <div class="features">
-        <article class="feature-card"><span class="feature-icon"><i class="fa-solid fa-wallet"></i></span><h3>إيداع مرن</h3><p>اختر طريقة الدفع، ارفع إثبات التحويل، وتابع حالة الطلب من سجل عملياتك.</p></article>
-        <article class="feature-card"><span class="feature-icon"><i class="fa-solid fa-right-left"></i></span><h3>تحويلات واضحة</h3><p>تحويل داخلي عبر البريد أو الهاتف، وسحب خارجي إلى محافظ USDT مع رقم مرجعي.</p></article>
-        <article class="feature-card"><span class="feature-icon"><i class="fa-solid fa-bell"></i></span><h3>متابعة لحظية</h3><p>إشعارات عند إنشاء الطلب وعند الموافقة أو الرفض مع حفظ التاريخ والوقت.</p></article>
+        <article class="feature-card">
+          <span class="feature-icon"><i class="fa-solid fa-wallet"></i></span>
+          <h3>إيداع مرن</h3>
+          <p>اختر طريقة الدفع، ارفع إثبات التحويل، وتابع حالة الطلب من سجل عملياتك.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-icon"><i class="fa-solid fa-right-left"></i></span>
+          <h3>تحويلات واضحة</h3>
+          <p>تحويل داخلي عبر البريد أو الهاتف، وسحب خارجي إلى محافظ USDT مع رقم مرجعي.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-icon"><i class="fa-solid fa-bell"></i></span>
+          <h3>متابعة لحظية</h3>
+          <p>إشعارات عند إنشاء الطلب وعند الموافقة أو الرفض مع حفظ التاريخ والوقت.</p>
+        </article>
       </div>
     </section>
   </main>
