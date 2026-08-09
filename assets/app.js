@@ -46,7 +46,7 @@
       ['account_inactive', 'الحساب مجمد. تواصل مع خدمة العملاء.'],
       ['recipient_not_found', 'لم يتم العثور على المستلم.'],
       ['cannot_transfer_to_self', 'لا يمكنك التحويل إلى حسابك نفسه.'],
-      ['request_already_reviewed', 'تمت معالجة هذا الطلب مسبقًا.'],
+      ['request_already_reviewed', 'تمت معالجة هذا الطلب مسبقاً.'],
       ['not_authorized', 'ليس لديك صلاحية لتنفيذ هذا الإجراء.']
     ];
     return map.find(([key]) => text.includes(key))?.[1] || text;
@@ -217,12 +217,28 @@
         <span class="muted user-short" style="font-size:11px">مرحبًا، ${escapeHtml((state.profile.full_name || '').split(' ')[0])}</span>
         <button class="btn icon-btn btn-secondary" id="notificationButton" type="button" aria-label="الإشعارات"><i class="fa-regular fa-bell"></i><span class="count-badge hidden" id="notificationCount">0</span></button>
       </div>`;
+    
     document.getElementById('sidebarLogout').onclick = logout;
-    document.getElementById('menuToggle')?.addEventListener('click', () => sidebar.classList.toggle('open'));
-    document.getElementById('notificationButton').onclick = showNotifications;
-    document.addEventListener('click', (event) => {
-      if (innerWidth <= 850 && sidebar.classList.contains('open') && !sidebar.contains(event.target) && !event.target.closest('#menuToggle')) sidebar.classList.remove('open');
+    
+    const menuToggle = document.getElementById('menuToggle');
+    menuToggle?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('open');
     });
+
+    // إغلاق القائمة تلقائياً عند النقر على أي رابط أو شعار داخلها
+    sidebar.querySelectorAll('.nav-link, .brand').forEach(link => {
+      link.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      if (sidebar.classList.contains('open') && !sidebar.contains(event.target) && !event.target.closest('#menuToggle')) {
+        sidebar.classList.remove('open');
+      }
+    });
+    
     loadNotificationCount();
   }
 
