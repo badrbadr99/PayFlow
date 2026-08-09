@@ -2,7 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- تم تحديث الـ viewport لضمان عدم التشويه في الجوال -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>تسجيل الدخول | PayFlow</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="assets/styles.css">
@@ -24,9 +25,34 @@
           <button class="btn btn-primary btn-block" id="loginButton" type="submit"><i class="fa-solid fa-arrow-right-to-bracket"></i> تسجيل الدخول</button>
         </form>
         <div class="auth-alt">ليس لديك حساب؟ <a href="register.html">أنشئ حسابًا جديدًا</a></div>
+
+        <!-- ✅ زر واتساب لخدمة العملاء (تم تحديث الرقم) -->
+        <div class="card" style="border-color: rgba(23,198,139,0.2); margin-top: 18px; border-radius: 14px;">
+          <div class="card-body" style="padding: 15px;">
+            <div class="notice info" style="margin-bottom: 10px;">
+              <i class="fa-solid fa-headset"></i>
+              <div><strong style="display:block;color:var(--text);margin-bottom:3px">تحتاج مساعدة؟</strong>فريق خدمة العملاء جاهز لمساعدتك في أي استفسار.</div>
+            </div>
+            <!-- تم تغيير الرقم إلى رقمك الجديد -->
+            <a class="btn btn-secondary btn-block" target="_blank" id="supportLink" href="https://wa.me/967774837354">
+              <i class="fa-brands fa-whatsapp text-primary"></i> تواصل عبر واتساب
+            </a>
+          </div>
+        </div>
+
       </div>
     </section>
-    <aside class="auth-visual"><div class="auth-message"><span class="eyebrow">منصة واحدة. رؤية أوضح.</span><h2>تحكم كامل في <span>عملياتك المالية.</span></h2><p>تابع كل إيداع وسحب وتحويل برقم مرجعي وحالة محدثة، واحصل على إشعار فور معالجة طلبك.</p><div class="auth-points"><div class="auth-point"><i class="fa-solid fa-clock-rotate-left"></i> سجل منظم</div><div class="auth-point"><i class="fa-solid fa-lock"></i> دخول آمن</div></div></div></aside>
+    <aside class="auth-visual">
+      <div class="auth-message">
+        <span class="eyebrow">منصة واحدة. رؤية أوضح.</span>
+        <h2>تحكم كامل في <span>عملياتك المالية.</span></h2>
+        <p>تابع كل إيداع وسحب وتحويل برقم مرجعي وحالة محدثة، واحصل على إشعار فور معالجة طلبك.</p>
+        <div class="auth-points">
+          <div class="auth-point"><i class="fa-solid fa-clock-rotate-left"></i> سجل منظم</div>
+          <div class="auth-point"><i class="fa-solid fa-lock"></i> دخول آمن</div>
+        </div>
+      </div>
+    </aside>
   </main>
 </body>
 </html>
