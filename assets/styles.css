@@ -348,90 +348,115 @@ img { max-width: 100%; }
 @keyframes shimmer { 100% { transform: translateX(-100%); } }
 
 /* ========================================================== */
-/*  إصلاحات الجوال والتابلت - الموقع أصبح متجاوباً تماماً الآن  */
+/*  إصدار الجوال - تخطيط مرن وجميل يملأ الشاشة دون تشويه       */
 /* ========================================================== */
 
 @media (max-width: 1024px) {
+  /* تحويل الهيكل الأساسي لعمود واحد */
   .app-layout { grid-template-columns: 1fr !important; }
 
-  /* تثبيت القائمة الجانبية كـ Drawer مخفي */
+  /* إصلاح القائمة الجانبية */
   .sidebar {
-    position: fixed !important;
-    top: 0 !important;
-    right: 0 !important; 
-    bottom: 0 !important;
-    width: 280px !important; 
-    max-width: 85vw !important; 
-    transform: translateX(105%) !important; 
-    transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1) !important; 
-    box-shadow: -10px 0 40px rgba(0,0,0,0.6) !important; 
-    z-index: 1000 !important; 
+    position: fixed !important; top: 0 !important; right: 0 !important; bottom: 0 !important;
+    width: 280px !important; max-width: 85vw !important;
+    transform: translateX(105%) !important;
+    transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: -10px 0 40px rgba(0,0,0,0.6) !important;
+    z-index: 1000 !important;
     backdrop-filter: blur(25px) !important;
     border-left: 1px solid var(--line) !important;
   }
   .sidebar.open { transform: translateX(0) !important; }
   .sidebar.open::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    right: 280px;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(3px);
-    z-index: -1;
+    content: ""; position: fixed; inset: 0; right: 280px;
+    background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(3px); z-index: -1;
   }
-
   .menu-toggle { display: inline-flex !important; margin-right: -8px !important; }
 
-  .topbar { padding: 0 16px !important; height: 68px !important; }
+  /* الشريط العلوي - تصغير الحجم قليلاً */
+  .topbar { padding: 0 14px !important; height: 64px !important; }
+  .topbar-title h1 { font-size: 17px !important; }
   .topbar-title p { display: none !important; }
 
+  /* إعدادات الصفحة الرئيسية - جعل العرض 100% بدون هوامش كبيرة */
   .page {
     width: 100% !important;
-    padding: 16px 12px 60px !important;
+    padding: 16px 16px 60px !important;
+    box-sizing: border-box !important;
   }
+
+  /* تنسيق العنوان في بداية الصفحة (مرحباً بك) */
   .page-head {
     flex-direction: column !important;
-    align-items: stretch !important;
+    align-items: flex-start !important;
     gap: 12px !important;
-    margin-bottom: 18px !important;
+    margin-bottom: 20px !important;
+    padding: 0 !important;
   }
-  .page-head .btn { align-self: flex-start !important; }
-  .page-head h2 { font-size: 22px !important; }
+  .page-head h2 { font-size: 22px !important; margin: 0 !important; }
+  .page-head p { font-size: 13px !important; color: var(--muted); margin: 4px 0 0 !important; }
+  .page-head .btn {
+    width: 100% !important; /* الزر يأخذ عرض الشاشة بالكامل */
+    justify-content: center !important;
+    min-height: 48px !important;
+    margin-top: 4px !important;
+    font-size: 14px !important;
+  }
 
-  .content-grid,
-  .grid-2,
-  .form-layout {
+  /* تحويل جميع الشبكات (العمودين) إلى عمود واحد */
+  .content-grid, .grid-2, .grid-3, .form-layout {
     grid-template-columns: 1fr !important;
     gap: 14px !important;
   }
 
-  .card-body { padding: 14px !important; }
+  /* تصغير الحواشي الداخلية للبطاقات */
+  .card-body { padding: 16px !important; }
+  .card-head { min-height: 54px !important; padding: 14px 16px !important; }
+  .card-head h3 { font-size: 14px !important; }
+  .card-head p { font-size: 11px !important; }
+
+  /* بطاقات الرصيد */
   .balance-card { min-height: auto !important; padding: 18px !important; }
-  .balance-value { font-size: 28px !important; margin-top: 12px !important; }
+  .balance-value { font-size: 26px !important; margin-top: 8px !important; }
+  .balance-label { font-size: 12px !important; }
 
-  .action-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-  .action-card { padding: 14px 8px !important; }
-  .action-icon { width: 38px !important; height: 38px !important; }
+  /* الأزرار السريعة - توزيعها بشكل متساوٍ */
+  .action-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  .action-card { padding: 16px 8px !important; }
+  .action-icon { width: 40px !important; height: 40px !important; margin-bottom: 8px !important; }
+  .action-card strong { font-size: 13px !important; }
+  .action-card small { font-size: 11px !important; }
 
-  /* إصلاح الجدول - السبب الرئيسي للمشكلة */
-  .table-wrap { overflow-x: auto !important; margin: 0 -4px !important; padding: 0 4px !important; }
-  .data-table { min-width: 500px !important; width: 100% !important; }
-  .data-table th, .data-table td { padding: 10px 10px !important; font-size: 11px !important; white-space: nowrap !important; }
-  .data-table .ref { font-size: 10px !important; }
-  .tx-type strong { font-size: 11px !important; }
-  .type-icon { width: 30px !important; height: 30px !important; }
-
-  .rate-box { grid-template-columns: 1fr 1fr !important; }
+  /* الجدول - السماح بالتمرير الأفقي فقط داخل الجدول */
+  .table-wrap {
+    overflow-x: auto !important;
+    margin: 0 -10px !important; /* لتعويض الحواشي */
+    padding: 0 10px !important;
+  }
+  .data-table {
+    min-width: 600px !important; /* عرض ثابت لكي تظهر الأعمدة كاملة */
+    width: auto !important;
+  }
+  .data-table th, .data-table td {
+    padding: 10px 12px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important; /* عدم كسر النص في الجدول */
+  }
   
-  .kyc-banner { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
-  .kyc-copy { flex: 1 !important; }
-  .kyc-banner .btn { align-self: flex-end !important; }
-}
-
-@media (max-width: 480px) {
-  .page-head h2 { font-size: 20px !important; }
-  .data-table { min-width: 420px !important; }
-  .data-table th, .data-table td { padding: 8px 6px !important; font-size: 10px !important; }
-  .balance-value { font-size: 24px !important; }
-  .action-grid { gap: 8px !important; }
+  /* لافتة التوثيق */
+  .kyc-banner {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 14px 16px !important;
+  }
+  .kyc-copy { flex: 1 !important; min-width: 150px !important; }
+  .kyc-icon { width: 36px !important; height: 36px !important; }
+  .kyc-copy strong { font-size: 13px !important; }
+  .kyc-copy span { font-size: 11px !important; }
+  .kyc-banner .btn { min-height: 36px !important; }
 }
