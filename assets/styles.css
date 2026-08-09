@@ -512,6 +512,24 @@ img { max-width: 100%; }
   .kyc-banner .btn { min-height: 36px !important; }
 }
 
+/* ========================================================== */
+/*  إصلاح صفحة تسجيل الدخول والاشتراك في الجوال              */
+/* ========================================================== */
+@media (max-width: 820px) {
+  .auth-page {
+    grid-template-columns: 1fr !important;
+    min-height: auto !important;
+  }
+  .auth-panel {
+    padding: 40px 25px !important;
+    order: 1 !important; /* النموذج في الأعلى */
+    background: transparent !important;
+  }
+  .auth-visual {
+    display: none !important; /* إخفاء الرسم الجانبي في الجوال */
+  }
+}
+
 /* إصلاح نصوص الإشعارات الطويلة */
 .notification-item div {
   overflow: hidden;
