@@ -362,7 +362,15 @@ img { max-width: 100%; }
   .auth-visual { display: none; }
   .auth-panel { min-height: 100vh; }
   .app-layout { grid-template-columns: 1fr; }
-  .sidebar { position: fixed; right: 0; width: 270px; transform: translateX(105%); transition: transform .2s ease; box-shadow: var(--shadow); }
+  .sidebar { 
+    position: fixed; 
+    right: 0; 
+    width: 240px !important; 
+    max-width: 75vw !important; 
+    transform: translateX(105%); 
+    transition: transform .2s ease; 
+    box-shadow: var(--shadow); 
+  }
   .sidebar.open { transform: translateX(0); }
   .menu-toggle { display: inline-flex; }
   .topbar { padding: 0 16px; }
