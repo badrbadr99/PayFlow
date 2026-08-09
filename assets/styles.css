@@ -363,7 +363,7 @@ img { max-width: 100%; }
   .auth-panel { min-height: 100vh; }
   .app-layout { grid-template-columns: 1fr; }
   
-  /* تصغير حجم القائمة الجانبية على الجوال لتكون مرتبة ولا تغطي الشاشة بالكامل */
+  /* تصغير حجم وقائمة الجوال لتكون مرتبة ولا تغطي الشاشة بالكامل */
   .sidebar { 
     position: fixed; 
     right: 0; 
@@ -377,11 +377,13 @@ img { max-width: 100%; }
   .menu-toggle { display: inline-flex; }
   .topbar { padding: 0 16px; }
   .topbar-title p { display: none; }
-  .page { padding: 15px 12px 50px !important; }
-  .action-grid { grid-template-columns: repeat(2, 1fr) !important; }
   .page-head { align-items: flex-start; }
 
-  /* ضبط شبكات صفحة نظرة عامة لتصبح عمودية ونحيفة ومتناسقة تماماً مثل صفحات النماذج */
+  /* ضبط صفحة نظرة عامة لتصبح نحيفة ومتناسقة تماماً مثل صفحات النماذج على الموبايل */
+  .page {
+    width: 100% !important;
+    padding: 14px 10px 50px !important;
+  }
   .content-grid {
     grid-template-columns: 1fr !important;
     gap: 12px !important;
@@ -390,14 +392,20 @@ img { max-width: 100%; }
     grid-template-columns: 1fr !important;
     gap: 12px !important;
   }
-  .card-body { padding: 14px !important; }
+  .action-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+  .card-body { 
+    padding: 12px !important; 
+  }
   .balance-card {
     min-height: auto !important;
-    padding: 16px !important;
+    padding: 15px !important;
   }
   .balance-value {
-    font-size: 28px !important;
-    margin-top: 10px !important;
+    font-size: 26px !important;
+    margin-top: 8px !important;
   }
 }
 
