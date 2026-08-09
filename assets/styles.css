@@ -430,20 +430,33 @@ img { max-width: 100%; }
   .action-card strong { font-size: 13px !important; }
   .action-card small { font-size: 11px !important; }
 
-  /* الجدول - السماح بالتمرير الأفقي فقط داخل الجدول */
+  /* ********** إصلاح الجدول ومنع قص النص ********** */
   .table-wrap {
     overflow-x: auto !important;
-    margin: 0 -10px !important; /* لتعويض الحواشي */
+    margin: 0 -10px !important;
     padding: 0 10px !important;
   }
   .data-table {
-    min-width: 600px !important; /* عرض ثابت لكي تظهر الأعمدة كاملة */
-    width: auto !important;
+    min-width: 700px !important; /* زيادة العرض لكي تظهر كل الكلمات */
+    width: 100% !important;
   }
   .data-table th, .data-table td {
-    padding: 10px 12px !important;
+    padding: 8px 10px !important;
     font-size: 12px !important;
-    white-space: nowrap !important; /* عدم كسر النص في الجدول */
+    white-space: nowrap !important; 
+    min-width: 80px !important; /* هذه الخاصية تمنع النص من الانضغاط */
+  }
+  /* تأكد من أن عمود العملية لا يضغط على نفسه */
+  .tx-type { 
+    display: flex !important; 
+    align-items: center !important; 
+    gap: 8px !important; 
+    min-width: 140px !important;
+  }
+  .tx-type div {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important; /* السماح للنص بالخروج إذا لزم الأمر */
   }
   
   /* لافتة التوثيق */
@@ -459,4 +472,13 @@ img { max-width: 100%; }
   .kyc-copy strong { font-size: 13px !important; }
   .kyc-copy span { font-size: 11px !important; }
   .kyc-banner .btn { min-height: 36px !important; }
+}
+
+/* إصلاح نصوص الإشعارات الطويلة */
+.notification-item div {
+  overflow: hidden;
+  word-wrap: break-word; /* كسر الكلمات الطويلة إذا لزم الأمر */
+}
+.notification-item p {
+  white-space: normal !important; /* السماح للنص بالالتفاف لعدة أسطر */
 }
