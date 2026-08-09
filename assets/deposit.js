@@ -38,20 +38,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const yer = Number(document.getElementById('depositAmount').value || 0);
     const rate = Number(rates.sell_rate || 0);
     const gross = rate > 0 ? yer / rate : 0;
-<<<<<<< HEAD
-    const equivalentUsdt = gross;
-    document.getElementById('summaryYer').textContent = PF.money(yer, 'YER', 0);
-    document.getElementById('summaryRate').textContent = rate ? PF.money(rate, 'YER', 0) : '—';
-    document.getElementById('summaryFee').textContent = PF.money(equivalentUsdt, 'USDT');
-    document.getElementById('summaryNet').textContent = PF.money(yer, 'YER', 0);
-=======
     const fee = gross * Number(rates.fee_percentage || 0) / 100;
     const net = Math.max(0, gross - fee);
     document.getElementById('summaryYer').textContent = PF.money(yer, 'YER', 0);
     document.getElementById('summaryRate').textContent = rate ? PF.money(rate, 'YER', 0) : '—';
     document.getElementById('summaryFee').textContent = PF.money(fee, 'USDT');
     document.getElementById('summaryNet').textContent = PF.money(net, 'USDT');
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
   }
 
   document.getElementById('paymentMethod')?.addEventListener('change', showMethod);
@@ -78,11 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
       if (error) throw error;
       const row = PF.parseRpcRow(data);
-<<<<<<< HEAD
-      PF.modal({ title: 'تم إرسال طلب الإيداع', body: `<div style="text-align:center;padding:10px"><span class="feature-icon" style="margin:0 auto 14px"><i class="fa-solid fa-clock"></i></span><h3>طلبك بانتظار المراجعة</h3><p class="muted" style="line-height:1.8">سيصلك إشعار فور المعالجة، وعند القبول سيضاف المبلغ إلى رصيد YER.</p><div class="method-card"><span class="muted">الرقم المرجعي</span><strong class="ref" style="display:block;margin-top:7px;font-size:14px">${PF.escapeHtml(row?.reference || '')}</strong></div></div>`, actions: '<a class="btn btn-primary" href="dashboard.html">العودة إلى الحساب</a>' });
-=======
       PF.modal({ title: 'تم إرسال طلب الإيداع', body: `<div style="text-align:center;padding:10px"><span class="feature-icon" style="margin:0 auto 14px"><i class="fa-solid fa-clock"></i></span><h3>طلبك بانتظار المراجعة</h3><p class="muted" style="line-height:1.8">سيصلك إشعار فور معالجة الطلب.</p><div class="method-card"><span class="muted">الرقم المرجعي</span><strong class="ref" style="display:block;margin-top:7px;font-size:14px">${PF.escapeHtml(row?.reference || '')}</strong></div></div>`, actions: '<a class="btn btn-primary" href="dashboard.html">العودة إلى الحساب</a>' });
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
       form.reset(); calculate(); showMethod();
     } catch (error) {
       if (uploadedPath) await PF.sb.storage.from('deposit-proofs').remove([uploadedPath]);

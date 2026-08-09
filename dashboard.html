@@ -4,22 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>لوحة الحساب | PayFlow</title>
-<<<<<<< HEAD
-  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-  <link rel="manifest" href="assets/site.webmanifest">
-  <meta name="theme-color" content="#0daa76">
-  <script src="assets/preferences.js"></script>
-  <link rel="stylesheet" href="assets/styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="assets/config.js" defer></script><script src="assets/app.js" defer></script><script src="assets/dashboard.js" defer></script>
-  <script src="assets/icons.js" defer></script>
-  <script src="assets/i18n.js" defer></script>
-=======
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="assets/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="assets/config.js" defer></script><script src="assets/app.js" defer></script><script src="assets/dashboard.js" defer></script>
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
 </head>
 <body data-page="dashboard">
   <div class="app-layout">
@@ -29,15 +17,11 @@
       <main class="page">
         <div class="page-head"><div><h2 id="welcomeTitle">مرحبًا بك</h2><p>هذه نظرة سريعة على حسابك وآخر عملياتك.</p></div><a class="btn btn-secondary" href="deposit.html"><i class="fa-solid fa-plus"></i> عملية جديدة</a></div>
 
-<<<<<<< HEAD
-        <section class="balance-overview"><div class="wallet-pair"><article class="card balance-card" style="color:var(--primary)"><div class="balance-label"><i class="fa-solid fa-coins"></i> رصيد USDT المتاح</div><div class="balance-value mono" id="usdtBalance">0.00 <small style="font-size:13px">USDT</small></div><div class="balance-foot"><span>متاح للتحويل والسحب</span><i class="fa-solid fa-wallet"></i></div></article><button class="wallet-swap-button" id="walletSwapButton" type="button" aria-label="مصارفة بين الرصيدين" title="مصارفة بين YER وUSDT"><i class="fa-solid fa-right-left"></i></button><article class="card balance-card" style="color:var(--amber)"><div class="balance-label"><i class="fa-solid fa-money-bill-wave"></i> رصيد الريال اليمني</div><div class="balance-value mono" id="yerBalance">0 <small style="font-size:13px">YER</small></div><div class="balance-foot"><span>رصيد محفظتك المحلية</span><i class="fa-solid fa-building-columns"></i></div></article></div><article class="card balance-card" style="color:var(--blue)"><div class="balance-label"><i class="fa-solid fa-hourglass-half"></i> عمليات قيد المعالجة</div><div class="balance-value mono" id="pendingCount">0</div><div class="balance-foot"><span>إيداع أو سحب بانتظار المراجعة</span><i class="fa-solid fa-clock"></i></div></article></section>
-=======
         <section class="grid-3" style="margin-bottom:17px">
           <article class="card balance-card" style="color:var(--primary)"><div class="balance-label"><i class="fa-solid fa-coins"></i> رصيد USDT المتاح</div><div class="balance-value mono" id="usdtBalance">0.00 <small style="font-size:13px">USDT</small></div><div class="balance-foot"><span>متاح للتحويل والسحب</span><i class="fa-brands fa-hive"></i></div></article>
           <article class="card balance-card" style="color:var(--amber)"><div class="balance-label"><i class="fa-solid fa-money-bill-wave"></i> رصيد الريال اليمني</div><div class="balance-value mono" id="yerBalance">0 <small style="font-size:13px">YER</small></div><div class="balance-foot"><span>رصيد محفظتك المحلية</span><i class="fa-solid fa-wallet"></i></div></article>
           <article class="card balance-card" style="color:var(--blue)"><div class="balance-label"><i class="fa-solid fa-hourglass-half"></i> عمليات قيد المعالجة</div><div class="balance-value mono" id="pendingCount">0</div><div class="balance-foot"><span>إيداع أو سحب بانتظار المراجعة</span><i class="fa-regular fa-clock"></i></div></article>
         </section>
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
 
         <section class="kyc-banner" id="kycBanner" style="margin-bottom:17px">
           <div class="kyc-copy"><span class="kyc-icon"><i class="fa-solid fa-id-card"></i></span><div><strong id="kycTitle">أكمل توثيق حسابك</strong><span id="kycDescription">التوثيق مطلوب للسحب ويحمي حسابك.</span></div></div>
@@ -51,11 +35,7 @@
               <div class="card-body action-grid">
                 <a class="action-card" href="deposit.html"><span class="action-icon"><i class="fa-solid fa-arrow-down"></i></span><strong>إيداع</strong><small>شراء USDT</small></a>
                 <a class="action-card" href="withdraw.html"><span class="action-icon" style="color:var(--danger);background:rgba(255,107,114,.1)"><i class="fa-solid fa-arrow-up"></i></span><strong>سحب</strong><small>إلى محفظة أخرى</small></a>
-<<<<<<< HEAD
-                <a class="action-card" href="transfer.html"><span class="action-icon" style="color:var(--purple);background:rgba(168,139,255,.1)"><i class="fa-solid fa-right-left"></i></span><strong>تحويل</strong><small>داخل PayFlow</small></a><button class="action-card" type="button" id="quickExchange" style="color:inherit"><span class="action-icon" style="color:var(--amber);background:rgba(248,184,78,.1)"><i class="fa-solid fa-right-left"></i></span><strong>مصارفة</strong><small>بين YER وUSDT</small></button>
-=======
                 <a class="action-card" href="transfer.html"><span class="action-icon" style="color:var(--purple);background:rgba(168,139,255,.1)"><i class="fa-solid fa-right-left"></i></span><strong>تحويل</strong><small>داخل PayFlow</small></a>
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
                 <a class="action-card" href="kyc.html"><span class="action-icon" style="color:var(--blue);background:rgba(94,166,255,.1)"><i class="fa-solid fa-shield-halved"></i></span><strong>توثيق</strong><small>اعرف عميلك</small></a>
               </div>
             </section>

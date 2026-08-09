@@ -4,20 +4,11 @@
   const sb = window.payflow;
   const config = window.PAYFLOW_CONFIG;
   const state = { session: null, profile: null, notifications: [] };
-<<<<<<< HEAD
-  const t = value => window.PayFlowI18n?.t(value) || value;
-=======
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
 
   const TYPE_META = {
     DEPOSIT: ['إيداع رصيد', 'fa-arrow-down', 'text-primary'],
     WITHDRAW: ['سحب USDT', 'fa-arrow-up', 'text-danger'],
     YER_PAYOUT: ['بيع USDT', 'fa-money-bill-transfer', 'text-amber'],
-<<<<<<< HEAD
-    EXCHANGE_YER_TO_USDT: ['مصارفة YER إلى USDT', 'fa-right-left', 'text-primary'],
-    EXCHANGE_USDT_TO_YER: ['مصارفة USDT إلى YER', 'fa-right-left', 'text-amber'],
-=======
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
     TRANSFER_OUT: ['تحويل صادر', 'fa-arrow-left', 'text-danger'],
     TRANSFER_IN: ['تحويل وارد', 'fa-arrow-right', 'text-primary'],
     ADJUSTMENT: ['تسوية رصيد', 'fa-sliders', 'text-amber']
@@ -52,11 +43,6 @@
       ['Password should be at least', 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.'],
       ['kyc_required', 'يلزم توثيق الحساب قبل تنفيذ هذه العملية.'],
       ['insufficient_balance', 'رصيدك الحالي غير كافٍ لتنفيذ العملية.'],
-<<<<<<< HEAD
-      ['insufficient_yer_balance', 'رصيد الريال اليمني غير كافٍ.'],
-      ['insufficient_usdt_balance', 'رصيد USDT غير كافٍ.'],
-=======
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
       ['account_inactive', 'الحساب مجمد. تواصل مع خدمة العملاء.'],
       ['recipient_not_found', 'لم يتم العثور على المستلم.'],
       ['cannot_transfer_to_self', 'لا يمكنك التحويل إلى حسابك نفسه.'],
@@ -99,20 +85,12 @@
   function money(value, currency = 'USDT', decimals) {
     const amount = Number(value || 0);
     const digits = decimals ?? (currency === 'YER' ? 0 : 2);
-<<<<<<< HEAD
-    return `${new Intl.NumberFormat(window.PayFlowPreferences?.language === 'ar' ? 'ar-YE' : 'en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(amount)} ${currency}`;
-=======
     return `${new Intl.NumberFormat('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(amount)} ${currency}`;
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
   }
 
   function dateTime(value) {
     if (!value) return '—';
-<<<<<<< HEAD
-    return new Intl.DateTimeFormat(window.PayFlowPreferences?.language === 'en' ? 'en-US' : 'ar-YE', {
-=======
     return new Intl.DateTimeFormat('ar-YE', {
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
       dateStyle: 'medium', timeStyle: 'short', hour12: true
     }).format(new Date(value));
   }
@@ -120,21 +98,13 @@
   function statusBadge(status) {
     const normalized = String(status || 'PENDING').toUpperCase();
     const styleStatus = normalized === 'NOT_SUBMITTED' ? 'cancelled' : normalized.toLowerCase();
-<<<<<<< HEAD
-    return `<span class="status status-${styleStatus}">${escapeHtml(t(STATUS_LABELS[normalized] || normalized))}</span>`;
-=======
     return `<span class="status status-${styleStatus}">${STATUS_LABELS[normalized] || escapeHtml(normalized)}</span>`;
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
   }
 
   function transactionType(type) {
     const normalized = String(type || 'ADJUSTMENT').toUpperCase();
     const meta = TYPE_META[normalized] || [normalized, 'fa-receipt', 'text-primary'];
-<<<<<<< HEAD
-    return { label: t(meta[0]), icon: meta[1], color: meta[2] };
-=======
     return { label: meta[0], icon: meta[1], color: meta[2] };
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
   }
 
   function randomFileName(file) {
@@ -166,11 +136,7 @@
   async function getProfile(session) {
     const { data, error } = await sb
       .from('users')
-<<<<<<< HEAD
-      .select('user_id,auth_user_id,full_name,email,phone_number,balance_usdt,balance_yer,kyc_status,is_active,role,created_at,deleted_at,preferred_language,theme_preference')
-=======
       .select('user_id,auth_user_id,full_name,email,phone_number,balance_usdt,balance_yer,kyc_status,is_active,role,created_at,deleted_at')
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
       .eq('auth_user_id', session.user.id)
       .single();
     if (error) throw error;
@@ -186,16 +152,6 @@
     state.session = session;
     try {
       state.profile = await getProfile(session);
-<<<<<<< HEAD
-      if (!localStorage.getItem('pf_theme') && state.profile.theme_preference) {
-        window.PayFlowPreferences?.setTheme(state.profile.theme_preference);
-      }
-      if (!localStorage.getItem('pf_language') && state.profile.preferred_language) {
-        window.PayFlowPreferences?.setLanguage(state.profile.preferred_language);
-        window.PayFlowI18n?.scan(document);
-      }
-=======
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
     } catch (profileError) {
       await sb.auth.signOut();
       location.replace('login.html?profile=missing');
@@ -228,22 +184,13 @@
       ['deposit.html', 'fa-arrow-down-to-line', 'إيداع رصيد', 'deposit'],
       ['withdraw.html', 'fa-arrow-up-from-bracket', 'سحب وتحويل خارجي', 'withdraw'],
       ['transfer.html', 'fa-right-left', 'تحويل داخلي', 'transfer'],
-<<<<<<< HEAD
-      ['kyc.html', 'fa-id-card', 'توثيق الحساب', 'kyc'],
-      ['profile.html', 'fa-user', 'الملف الشخصي', 'profile']
-=======
       ['kyc.html', 'fa-id-card', 'توثيق الحساب', 'kyc']
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
     ];
     if (admin) base.push(['admin.html', 'fa-shield-halved', 'إدارة المنصة', 'admin']);
     const page = document.body.dataset.page;
     return base.map(([href, icon, label, key]) => `
       <a class="nav-link ${page === key ? 'active' : ''}" href="${href}">
-<<<<<<< HEAD
-        <i class="fa-solid ${icon}"></i><span>${t(label)}</span>
-=======
         <i class="fa-solid ${icon}"></i><span>${label}</span>
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
       </a>`).join('');
   }
 
@@ -253,37 +200,21 @@
     const sidebar = document.getElementById('sidebar');
     const topbar = document.getElementById('topbar');
     sidebar.innerHTML = `
-<<<<<<< HEAD
-      <a href="dashboard.html" class="brand"><span class="brand-mark"><img src="assets/logo-mark.svg" alt="" aria-hidden="true"></span><span>PayFlow</span></a>
-      <div class="nav-label">${t('القائمة الرئيسية')}</div>
-      <nav class="nav-menu">${appNavigation(admin)}</nav>
-      <div class="sidebar-account">
-        <span class="avatar">${escapeHtml(initials)}</span>
-        <a class="account-copy" href="profile.html"><strong>${escapeHtml(state.profile.full_name)}</strong><span>${escapeHtml(state.profile.email)}</span></a>
-=======
       <a href="dashboard.html" class="brand"><span class="brand-mark">P</span><span>PayFlow</span></a>
       <div class="nav-label">القائمة الرئيسية</div>
       <nav class="nav-menu">${appNavigation(admin)}</nav>
       <div class="sidebar-account">
         <span class="avatar">${escapeHtml(initials)}</span>
         <div class="account-copy"><strong>${escapeHtml(state.profile.full_name)}</strong><span>${escapeHtml(state.profile.email)}</span></div>
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
         <button class="btn icon-btn btn-secondary btn-sm" type="button" id="sidebarLogout" aria-label="تسجيل الخروج"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
       </div>`;
     topbar.innerHTML = `
       <div style="display:flex;align-items:center;gap:11px">
         <button class="btn icon-btn btn-secondary menu-toggle" id="menuToggle" aria-label="فتح القائمة"><i class="fa-solid fa-bars"></i></button>
-<<<<<<< HEAD
-        <div class="topbar-title"><h1>${escapeHtml(t(title))}</h1><p>${escapeHtml(t(subtitle || 'إدارة أموالك بكل سهولة وأمان'))}</p></div>
-      </div>
-      <div class="topbar-actions">
-        <span class="muted user-short" style="font-size:11px">${t('مرحبًا،')} ${escapeHtml((state.profile.full_name || '').split(' ')[0])}</span>
-=======
         <div class="topbar-title"><h1>${escapeHtml(title)}</h1><p>${escapeHtml(subtitle || 'إدارة أموالك بكل سهولة وأمان')}</p></div>
       </div>
       <div class="topbar-actions">
         <span class="muted user-short" style="font-size:11px">مرحبًا، ${escapeHtml((state.profile.full_name || '').split(' ')[0])}</span>
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
         <button class="btn icon-btn btn-secondary" id="notificationButton" type="button" aria-label="الإشعارات"><i class="fa-regular fa-bell"></i><span class="count-badge hidden" id="notificationCount">0</span></button>
       </div>`;
     document.getElementById('sidebarLogout').onclick = logout;
@@ -379,11 +310,7 @@
   }
 
   window.PayFlow = {
-<<<<<<< HEAD
-    sb, config, state, t, escapeHtml, normalizeError, toast, setButtonLoading, money, dateTime,
-=======
     sb, config, state, escapeHtml, normalizeError, toast, setButtonLoading, money, dateTime,
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
     statusBadge, transactionType, uploadFile, signedFileUrl, requireAuth, redirectIfSignedIn,
     initShell, logout, modal, closeModal, closeDrawer, bindFileLabel, parseRpcRow, loadNotificationCount
   };

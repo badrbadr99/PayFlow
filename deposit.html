@@ -3,27 +3,13 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>إيداع رصيد | PayFlow</title>
-<<<<<<< HEAD
-  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-  <link rel="manifest" href="assets/site.webmanifest">
-  <meta name="theme-color" content="#0daa76">
-  <script src="assets/preferences.js"></script><link rel="stylesheet" href="assets/styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script><script src="assets/config.js" defer></script><script src="assets/app.js" defer></script><script src="assets/deposit.js" defer></script>
-  <script src="assets/icons.js" defer></script>
-  <script src="assets/i18n.js" defer></script>
-=======
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="stylesheet" href="assets/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script><script src="assets/config.js" defer></script><script src="assets/app.js" defer></script><script src="assets/deposit.js" defer></script>
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
 </head>
 <body data-page="deposit">
   <div class="app-layout"><aside class="sidebar" id="sidebar"></aside><div class="main-wrap"><header class="topbar" id="topbar"></header>
     <main class="page">
-<<<<<<< HEAD
-      <div class="page-head"><div><h2>إيداع رصيد</h2><p>حوّل بالريال اليمني وارفع إثبات الدفع؛ بعد الموافقة سيضاف المبلغ إلى رصيد YER.</p></div><a class="btn btn-secondary" href="dashboard.html"><i class="fa-solid fa-arrow-right"></i> العودة للحساب</a></div>
-=======
       <div class="page-head"><div><h2>إيداع رصيد</h2><p>حوّل بالريال اليمني وارفع إثبات الدفع لمراجعة طلبك.</p></div><a class="btn btn-secondary" href="dashboard.html"><i class="fa-solid fa-arrow-right"></i> العودة للحساب</a></div>
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
       <div class="form-layout">
         <section class="card"><header class="card-head"><div><h3>بيانات طلب الإيداع</h3><p>تأكد من صحة البيانات قبل الإرسال</p></div><span class="status status-pending">مراجعة إدارية</span></header>
           <form class="card-body" id="depositForm" novalidate>
@@ -33,20 +19,12 @@
             <div class="field"><label for="depositAmount"><span>المبلغ المحوّل</span><span class="muted">الحد الأدنى 1,000 YER</span></label><div class="input-wrap"><input class="input ltr mono" id="depositAmount" type="number" min="1000" step="100" placeholder="0" required><span class="input-suffix">YER</span></div></div>
             <div class="grid-2"><div class="field"><label for="senderName">اسم المرسل</label><input class="input" id="senderName" type="text" placeholder="كما يظهر في التحويل" required></div><div class="field"><label for="senderPhone">رقم هاتف المرسل</label><input class="input ltr" id="senderPhone" type="tel" placeholder="77XXXXXXX" required></div></div>
             <div class="field"><label>إثبات التحويل <span class="text-danger">مطلوب</span></label><label class="file-drop" for="depositProof"><i class="fa-solid fa-cloud-arrow-up"></i><strong style="display:block">اختر صورة الإثبات</strong><span class="file-name" id="proofFileName">JPG أو PNG أو WEBP أو PDF — بحد أقصى 7MB</span><input id="depositProof" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" required></label></div>
-<<<<<<< HEAD
-            <div class="notice"><i class="fa-solid fa-circle-info"></i><div>سيظهر الطلب بحالة «بانتظار الموافقة»، وبعد قبول الإدارة سيضاف المبلغ كاملًا إلى رصيدك بالريال اليمني، ويمكنك مصارفته لاحقًا إلى USDT.</div></div>
-=======
             <div class="notice"><i class="fa-solid fa-circle-info"></i><div>سيظهر الطلب في سجل عملياتك بحالة «بانتظار الموافقة»، وسيضاف الرصيد بعد مراجعة الإثبات من الإدارة.</div></div>
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
             <button class="btn btn-primary btn-block" style="margin-top:17px" id="depositButton" type="submit"><i class="fa-solid fa-paper-plane"></i> إرسال طلب الإيداع</button>
           </form>
         </section>
         <aside class="stack summary-panel">
-<<<<<<< HEAD
-          <section class="card"><header class="card-head"><div><h3>ملخص العملية</h3><p>احتساب تلقائي حسب السعر الحالي</p></div></header><div class="card-body summary-list"><div class="summary-row"><span>المبلغ بالريال</span><strong class="mono" id="summaryYer">0 YER</strong></div><div class="summary-row"><span>سعر البيع</span><strong class="mono" id="summaryRate">—</strong></div><div class="summary-row"><span>القيمة التقريبية بعد المصارفة</span><strong class="mono" id="summaryFee">0.00 USDT</strong></div><div class="summary-row total"><span>سيضاف إلى رصيد YER</span><strong class="mono" id="summaryNet">0 YER</strong></div></div></section>
-=======
           <section class="card"><header class="card-head"><div><h3>ملخص العملية</h3><p>احتساب تلقائي حسب السعر الحالي</p></div></header><div class="card-body summary-list"><div class="summary-row"><span>المبلغ بالريال</span><strong class="mono" id="summaryYer">0 YER</strong></div><div class="summary-row"><span>سعر البيع</span><strong class="mono" id="summaryRate">—</strong></div><div class="summary-row"><span>العمولة</span><strong class="mono" id="summaryFee">0.00 USDT</strong></div><div class="summary-row total"><span>سيضاف إلى حسابك</span><strong class="mono" id="summaryNet">0.00 USDT</strong></div></div></section>
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
           <section class="card"><div class="card-body"><div class="kyc-copy"><span class="kyc-icon"><i class="fa-solid fa-shield-halved"></i></span><div><strong>إثباتك محفوظ بأمان</strong><span>لا يستطيع الاطلاع عليه سوى فريق المراجعة.</span></div></div></div></section>
         </aside>
       </div>

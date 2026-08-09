@@ -3,18 +3,8 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>السحب والتحويل الخارجي | PayFlow</title>
-<<<<<<< HEAD
-  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-  <link rel="manifest" href="assets/site.webmanifest">
-  <meta name="theme-color" content="#0daa76">
-  <script src="assets/preferences.js"></script><link rel="stylesheet" href="assets/styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script><script src="assets/config.js" defer></script><script src="assets/app.js" defer></script><script src="assets/withdraw.js" defer></script>
-  <script src="assets/icons.js" defer></script>
-  <script src="assets/i18n.js" defer></script>
-=======
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="stylesheet" href="assets/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script><script src="assets/config.js" defer></script><script src="assets/app.js" defer></script><script src="assets/withdraw.js" defer></script>
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
 </head>
 <body data-page="withdraw">
   <div class="app-layout"><aside class="sidebar" id="sidebar"></aside><div class="main-wrap"><header class="topbar" id="topbar"></header>
@@ -23,15 +13,9 @@
       <div class="form-layout">
         <section class="card"><header class="card-head"><div><h3>إنشاء طلب سحب</h3><p>سيُحجز المبلغ حتى تراجع الإدارة الطلب</p></div><span class="status status-pending">مراجعة إدارية</span></header>
           <div class="card-body">
-<<<<<<< HEAD
-            <div class="tabs" style="margin-bottom:18px"><button class="tab active" type="button" data-mode="EXTERNAL_USDT"><i class="fa-solid fa-wallet"></i> محفظة USDT خارجية</button><button class="tab" type="button" data-mode="YER_PAYOUT"><i class="fa-solid fa-money-bill-transfer"></i> استلام بالريال اليمني</button></div><div class="field" id="fundingSourceField"><label>مصدر الخصم</label><div class="choice-grid"><label class="choice-card"><input type="radio" name="fundingCurrency" value="USDT" checked><span class="choice-icon"><i class="fa-solid fa-coins"></i></span><div><strong>خصم من USDT</strong><span class="muted mono" id="fundingUsdtBalance" style="display:block;font-size:10px"></span></div></label><label class="choice-card"><input type="radio" name="fundingCurrency" value="YER"><span class="choice-icon"><i class="fa-solid fa-money-bill-wave"></i></span><div><strong>خصم من YER</strong><span class="muted mono" id="fundingYerBalance" style="display:block;font-size:10px"></span></div></label></div><div class="field-hint">عند اختيار YER تتم المصارفة تلقائيًا حسب سعر بيع USDT الحالي.</div></div>
-            <form id="withdrawForm" novalidate>
-              <div class="field"><label for="withdrawAmount"><span>مبلغ السحب</span><span class="muted">الرصيد: <b class="mono" id="availableBalance">0.00 USDT</b></span></label><div class="input-wrap"><input class="input ltr mono" id="withdrawAmount" type="number" min="1" step="0.01" placeholder="0.00" required><span class="input-suffix" id="withdrawCurrency">USDT</span></div></div>
-=======
             <div class="tabs" style="margin-bottom:18px"><button class="tab active" type="button" data-mode="EXTERNAL_USDT"><i class="fa-solid fa-wallet"></i> محفظة USDT خارجية</button><button class="tab" type="button" data-mode="YER_PAYOUT"><i class="fa-solid fa-money-bill-transfer"></i> استلام بالريال اليمني</button></div>
             <form id="withdrawForm" novalidate>
               <div class="field"><label for="withdrawAmount"><span>مبلغ السحب</span><span class="muted">الرصيد: <b class="mono" id="availableBalance">0.00 USDT</b></span></label><div class="input-wrap"><input class="input ltr mono" id="withdrawAmount" type="number" min="1" step="0.01" placeholder="0.00" required><span class="input-suffix">USDT</span></div></div>
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
               <div id="externalFields">
                 <div class="field"><label for="network">الشبكة</label><select class="select" id="network"><option value="TRC20">TRON (TRC20)</option><option value="BEP20">BNB Smart Chain (BEP20)</option></select></div>
                 <div class="field"><label for="walletAddress">عنوان المحفظة</label><input class="input ltr mono" id="walletAddress" type="text" autocomplete="off" placeholder="أدخل العنوان بدقة"></div>
@@ -47,11 +31,7 @@
           </div>
         </section>
         <aside class="stack summary-panel">
-<<<<<<< HEAD
-          <section class="card"><header class="card-head"><div><h3>ملخص السحب</h3><p id="summaryMode">إلى محفظة USDT خارجية</p></div></header><div class="card-body summary-list"><div class="summary-row"><span>المبلغ المطلوب</span><strong class="mono" id="summaryGross">0.00 USDT</strong></div><div class="summary-row"><span>رسوم السحب</span><strong class="mono" id="summaryFee">0.00 USDT</strong></div><div class="summary-row hidden" id="rateRow"><span>سعر الشراء</span><strong class="mono" id="summaryRate">—</strong></div><div class="summary-row hidden" id="fundingCostRow"><span>التكلفة من رصيد YER</span><strong class="mono" id="summaryFundingCost">0 YER</strong></div><div class="summary-row total"><span id="netLabel">المبلغ المرسل</span><strong class="mono" id="summaryNet">0.00 USDT</strong></div></div></section>
-=======
           <section class="card"><header class="card-head"><div><h3>ملخص السحب</h3><p id="summaryMode">إلى محفظة USDT خارجية</p></div></header><div class="card-body summary-list"><div class="summary-row"><span>المبلغ المطلوب</span><strong class="mono" id="summaryGross">0.00 USDT</strong></div><div class="summary-row"><span>رسوم السحب</span><strong class="mono" id="summaryFee">0.00 USDT</strong></div><div class="summary-row hidden" id="rateRow"><span>سعر الشراء</span><strong class="mono" id="summaryRate">—</strong></div><div class="summary-row total"><span id="netLabel">المبلغ المرسل</span><strong class="mono" id="summaryNet">0.00 USDT</strong></div></div></section>
->>>>>>> 23e8d4937bb2a1d3c1270af7990383fd6112a535
           <section class="card"><div class="card-body"><div class="kyc-copy"><span class="kyc-icon"><i class="fa-solid fa-user-shield"></i></span><div><strong>السحب للحسابات الموثقة</strong><span id="kycHint">جاري التحقق من حالة توثيقك...</span></div></div></div></section>
         </aside>
       </div>
