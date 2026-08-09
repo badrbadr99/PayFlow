@@ -68,12 +68,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('loadMoreWrap').style.display = offset < (count || 0) ? 'block' : 'none';
   }
 
+  // ==========================================
+  // دالة txRow المعدلة لحل مشكلة قص النصوص في الجوال
+  // ==========================================
   function txRow(tx) {
     const meta = PF.transactionType(tx.type);
     const currency = tx.currency || 'USDT';
     const amount = currency === 'YER' ? tx.amount_yer : tx.amount_usdt;
     const sign = ['DEPOSIT', 'TRANSFER_IN'].includes(String(tx.type).toUpperCase()) ? '+' : ['WITHDRAW','YER_PAYOUT','TRANSFER_OUT'].includes(String(tx.type).toUpperCase()) ? '−' : '';
-    return `<tr><td><div class="tx-type"><span class="type-icon ${meta.color}"><i class="fa-solid ${meta.icon}"></i></span><div><strong>${meta.label}</strong><span>${PF.escapeHtml(tx.description || '')}</span></div></div></td><td><span class="ref">${PF.escapeHtml(tx.reference)}</span></td><td class="mono nowrap ${sign === '+' ? 'text-primary' : ''}">${sign}${PF.money(amount, currency)}</td><td class="nowrap">${PF.dateTime(tx.created_at)}</td><td>${PF.statusBadge(tx.status)}</td></tr>`;
+    
+    // تنظيف النصوص وتأمينها
+    const safeDesc = PF.escapeHtml(tx.description || '');
+    const safeRef = PF.escapeHtml(tx.reference || '');
+
+    // إرجاع صف الجدول مع إضافة min-widths واختصار النصوص الطويلة مع title
+    return `<tr>
+      <td>
+        <div class="tx-type" style="min-width:140px;">
+          <span class="type-icon ${meta.color}"><i class="fa-solid ${meta.icon}"></i></span>
+          <div>
+            <strong>${meta.label}</strong>
+            <span title="${safeDesc}">${safeDesc.length > 28 ? safeDesc.substring(0, 28) + '...' : safeDesc}</span>
+          </div>
+        </div>
+      </td>
+      <td><span class="ref" title="${safeRef}">${safeRef.length > 16 ? safeRef.substring(0, 16) + '...' : safeRef}</span></td>
+      <td class="mono nowrap ${sign === '+' ? 'text-primary' : ''}" style="min-width:70px;">${sign}${PF.money(amount, currency)}</td>
+      <td class="nowrap" style="min-width:80px;">${PF.dateTime(tx.created_at)}</td>
+      <td style="min-width:60px;">${PF.statusBadge(tx.status)}</td>
+    </tr>`;
   }
 
   document.getElementById('loadMoreButton')?.addEventListener('click', () => loadTransactions(false));
